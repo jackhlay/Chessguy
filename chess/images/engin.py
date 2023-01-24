@@ -138,7 +138,7 @@ class GameState():
                 print(sqr)
 
 brd = GameState()
-brd.parfen("4b3/P2k3B/2p1R1p1/PP1r4/5prb/4B3/p5RK/8")
+brd.parfen("1q6/1k1r2K1/1NP3pp/1P3N1Q/3Q2b1/nP6/4NR2/1P5B00")
 
 for i in range(64):
     print(board[i].piece)
