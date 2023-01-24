@@ -59,16 +59,16 @@ class GameState():
                     color = white
                 pygame.draw.rect(screen, color, (i*100, j*100, 100, 100))
                 pos += 1
-        pygame.display.flip()
+        #pygame.display.flip()
         running = True
-
         for it in range(64):
+
             if board[it].piece:
                 if board[it].color=="Black":
-                    screen.blit(bPiecesDict[board[it].piece], ((it%8)*100+20, (7-it//8)*100+20))
+                    screen.blit(bPiecesDict[board[it].piece], ((it%8)*100+20, (it//8)*100+20))
                     pygame.display.update()
                 else:
-                    screen.blit(wPiecesDict[board[it].piece], ((it%8)*100+20, (7-it//8)*100+20))
+                    screen.blit(wPiecesDict[board[it].piece], ((it%8)*100+20, (it//8)*100+20))
                     pygame.display.update()
 
         while running:
@@ -138,7 +138,7 @@ class GameState():
                 print(sqr)
 
 brd = GameState()
-brd.parfen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
+brd.parfen("4b3/P2k3B/2p1R1p1/PP1r4/5prb/4B3/p5RK/8")
 
 for i in range(64):
     print(board[i].piece)
