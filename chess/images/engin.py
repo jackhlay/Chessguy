@@ -76,7 +76,6 @@ class GameState():
                 if event.type == pygame.QUIT:
                     running = False
         pygame.quit()
-        print(board)
 
 
     def parfen(self, String):
@@ -135,12 +134,8 @@ class GameState():
             else:
                 sqr += int(char)
                 i+=int(char)
-                print(sqr)
 
 brd = GameState()
 brd.parfen("1q6/1k1r2K1/1NP3pp/1P3N1Q/3Q2b1/nP6/4NR2/1P5B00")
-
-for i in range(64):
-    print(board[i].piece)
 
 brd.draw()
