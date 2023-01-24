@@ -1,7 +1,7 @@
 Hello!
 
 Thank you for your interest in my Chess Engine.
-This projext is written in python.
+This project is written in python.
 
 Here are the milestones:
 
@@ -19,7 +19,7 @@ Write rules for move legality
 Allow the computer to explore depths without affecting the real board
 Using this, LET HIM (the computer) COOK and find the best move.
 
-Streatch milestones:
+Stretch milestones:
 Build in network capabilities that allow for two people to play each other
 Maybe integrate into my website
 
