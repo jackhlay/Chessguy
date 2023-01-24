@@ -2,25 +2,54 @@
 # Handles gamestate info, and valid moves, writes gamelog.
 import pygame
 
+#images
+#Black Pieces
+bB = pygame.image.load("bB.png")
+bK = pygame.image.load("bK.png")
+bN = pygame.image.load("bN.png")
+bp = pygame.image.load("bp.png")
+bQ = pygame.image.load("bQ.png")
+bR = pygame.image.load("bR.png")
+#White Pieces
+wB = pygame.image.load("wB.png")
+wK = pygame.image.load("wK.png")
+wN = pygame.image.load("wN.png")
+wp = pygame.image.load("wp.png")
+wQ = pygame.image.load("wQ.png")
+wR = pygame.image.load("wR.png")
+
+wPiecesDict = {'KING': pygame.transform.scale(wK, (int(60*1.03), int(60*1.03))),
+               'QUEEN': pygame.transform.scale(wQ, (int(60*1.03), int(60*1.03))),
+               'BISHOP': pygame.transform.scale(wB, (int(60*1.03), int(60*1.03))),
+               'KNIGHT': pygame.transform.scale(wN, (int(60*1.03), int(60*1.03))),
+               'ROOK': pygame.transform.scale(wR, (int(60*1.03), int(60*1.03))),
+               'PAWN': pygame.transform.scale(wp, (int(60*1.03), int(60*1.03)))}
+
+bPiecesDict = {'KING': pygame.transform.scale(bK, (int(60*1.03), int(60*1.03))),
+               'QUEEN': pygame.transform.scale(bQ, (int(60*1.03), int(60*1.03))),
+               'BISHOP': pygame.transform.scale(bB, (int(60*1.03), int(60*1.03))),
+               'KNIGHT': pygame.transform.scale(bN, (int(60*1.03), int(60*1.03))),
+               'ROOK': pygame.transform.scale(bR, (int(60*1.03), int(60*1.03))),
+               'PAWN': pygame.transform.scale(bp, (int(60*1.03), int(60*1.03)))}
+
 class Space():
-    def __init__(self, clr, piece, occupied):
-        self.color = clr
-        self.status = occupied
-        if occupied:
-            self.piece = piece
-        else:
-            self.piece = None
+    occupied = False
+    piece = None
+    color = "White"
+
+board = []
+for i in range(64):
+    board.append(Space())
+    if i > 48:
+        board[i].color="Black"
 
 class GameState():
     def draw(self):
         pygame.init()
-        board = [Space]*64
         board_size = (800, 800)
         screen = pygame.display.set_mode(board_size)
-        for i in range(64):
-            board[i] = i
-        white = (15, 17, 17)
-        black = (0,0,0)
+        white = (21, 17, 19)
+        black = (11,12,10)
         pos = 0
         for i in range(8):
             for j in range(8):
@@ -32,6 +61,16 @@ class GameState():
                 pos += 1
         pygame.display.flip()
         running = True
+
+        for it in range(64):
+            if board[it].piece:
+                if board[it].color=="Black":
+                    screen.blit(bPiecesDict[board[it].piece], ((it%8)*100+20, (7-it//8)*100+20))
+                    pygame.display.update()
+                else:
+                    screen.blit(wPiecesDict[board[it].piece], ((it%8)*100+20, (7-it//8)*100+20))
+                    pygame.display.update()
+
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -39,32 +78,69 @@ class GameState():
         pygame.quit()
         print(board)
 
+
     def parfen(self, String):
-        sqr = 0;
+        sqr = 0
         for i, char in enumerate(String):
-            if char == "K" or char == "k":
+            if char == "K":
+                board[sqr].piece = "KING"
+                board[sqr].color = "White"
                 sqr+=1
-                print("KING\n")
-            elif char == "Q" or char == "q":
+            elif char == "k":
+                board[sqr].piece = "KING"
+                board[sqr].color = "Black"
                 sqr+=1
-                print("QUEEN\n")
-            elif char == "B" or char == "b":
+            elif char == "Q":
+                board[sqr].piece = "QUEEN"
+                board[sqr].color = "White"
                 sqr+=1
-                print("BISHOP\n")
-            elif char == "N" or char == "n":
+            elif char == "q":
+                board[sqr].piece = "QUEEN"
+                board[sqr].color = "Black"
                 sqr+=1
-                print("KNIGHT\n")
-            elif char == "R" or char == "r":
+            elif char == "B":
+                board[sqr].piece = "BISHOP"
+                board[sqr].color = "White"
                 sqr+=1
-                print("ROOK\n")
-            elif char == "P" or char == "p":
+            elif char == "b":
+                board[sqr].piece = "BISHOP"
+                board[sqr].color = "Black"
                 sqr+=1
-                print("PAWN\n")
+            elif char == "N":
+                board[sqr].piece = "KNIGHT"
+                board[sqr].color = "White"
+                sqr+=1
+            elif char == "n":
+                board[sqr].piece = "KNIGHT"
+                board[sqr].color = "Black"
+                sqr+=1
+            elif char == "R":
+                board[sqr].piece = "ROOK"
+                board[sqr].color = "White"
+                sqr+=1
+            elif char == "r":
+                board[sqr].piece = "ROOK"
+                board[sqr].color = "Black"
+                sqr+=1
+            elif char == "P":
+                board[sqr].piece = "PAWN"
+                board[sqr].color = "White"
+                sqr+=1
+            elif char == "p":
+                board[sqr].piece = "PAWN"
+                board[sqr].color = "Black"
+                sqr+=1
             elif char == "/":
                 continue
             else:
-                sqr+=ord(char)
+                sqr += int(char)
+                i+=int(char)
                 print(sqr)
 
-board = GameState()
-board.draw()
+brd = GameState()
+brd.parfen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
+
+for i in range(64):
+    print(board[i].piece)
+
+brd.draw()
