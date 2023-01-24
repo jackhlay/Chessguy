@@ -1,6 +1,6 @@
 Hello!
 
-Thank you for your interest in my Chess Engine.
+Thank you for your interest in my Chess Engine. This is the main branch so it will be more sparse than current, all progress is on the branch "Progress Tube". Have a look there for the most recent updates.
 This project is written in python.
 
 Here are the milestones:
