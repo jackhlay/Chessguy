@@ -18,6 +18,8 @@ wp = pygame.image.load("wp.png")
 wQ = pygame.image.load("wQ.png")
 wR = pygame.image.load("wR.png")
 
+selected_square = None
+
 wPiecesDict = {'KING': pygame.transform.scale(wK, (int(60*1.03), int(60*1.03))),
                'QUEEN': pygame.transform.scale(wQ, (int(60*1.03), int(60*1.03))),
                'BISHOP': pygame.transform.scale(wB, (int(60*1.03), int(60*1.03))),
@@ -73,6 +75,11 @@ class GameState():
 
         while running:
             for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    x, y = event.pos
+                    square_x, square_y = x // 100, y // 100
+                    square_num = (square_y * 8) + square_x
+                    takein(square_num)
                 if event.type == pygame.QUIT:
                     running = False
         pygame.quit()
@@ -134,6 +141,20 @@ class GameState():
             else:
                 sqr += int(char)
                 i+=int(char)
+
+def takein(ind):
+    if board[ind].piece == "KING":
+        print("single squares only")
+    elif board[ind].piece == "QUEEN":
+        print("UNTETHERED")
+    elif board[ind].piece == "ROOK":
+        print("slide moves NESW")
+    elif board[ind].piece == "BISHOP":
+        print("DIAGS ONLY")
+    elif board[ind].piece == "KNIGHT":
+        print("HORSEY")
+    elif board[ind].piece == "PAWN":
+        print("salt of the earth")
 
 brd = GameState()
 brd.parfen("1q6/1k1r2K1/1NP3pp/1P3N1Q/3Q2b1/nP6/4NR2/1P5B00")
