@@ -5,7 +5,9 @@ This project is written in python.
 
 Here are the milestones:
 
-Suroassed:
+
+Surpassed:
+
 Display a board
 Display and center pieces
 Write a function to parse the FEN
@@ -16,6 +18,8 @@ Working on now:
 Allow the ability to make moves
 
 Working on next:
+
+Allow the ability to make moves
 Let the computer make moves
 Write rules for how each piece moves
 Write rules for move legality
@@ -25,5 +29,6 @@ Using this, LET HIM (the computer) COOK and find the best move.
 Stretch milestones:
 Build in network capabilities that allow for two people to play each other
 Maybe integrate into my website
+
 
 As alawys contact info is at jackhlay.com
