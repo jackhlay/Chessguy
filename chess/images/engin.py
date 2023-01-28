@@ -60,7 +60,7 @@ for i in range(64):
         board[i].color="Black"
 
 
-
+#Functions Block
 def parfen(String):
     sqr = 0
     for i in range(64):
@@ -137,16 +137,15 @@ def draw():
                 color = light
             pygame.draw.rect(screen, color, (i*100, j*100, 100, 100))
             pos += 1
-    #pygame.display.flip()
-    running = True
-    for it in range(64):
 
-        if board[it].piece:
-            if board[it].color=="Black":
-                screen.blit(bPiecesDict[board[it].piece], ((it%8)*100+20, (it//8)*100+20))
+    running = True
+    for i in range(64):
+        if board[i].piece:
+            if board[i].color=="Black":
+                screen.blit(bPiecesDict[board[i].piece], ((i%8)*100+20, (i//8)*100+20))
                 pygame.display.update()
             else:
-                screen.blit(wPiecesDict[board[it].piece], ((it%8)*100+20, (it//8)*100+20))
+                screen.blit(wPiecesDict[board[i].piece], ((i%8)*100+20, (i//8)*100+20))
                 pygame.display.update()
 
     while running:
@@ -154,6 +153,11 @@ def draw():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
                 takein(x,y)
+
+            if event.type== pygame.MOUSEBUTTONUP:
+                x, y = event.pos
+                takein(x,y)
+
 
             if event.type == pygame.QUIT:
                 running = False
@@ -165,45 +169,52 @@ def takein(x,y):
     spot = board[ind]
 
     print('{}{}'.format(spot.place[0],spot.place[1]))
+    print(spot.color)
 
     for i in board:
         i.active=False
     spot.active=True
-
-    if spot.piece == "KING":
-        print("you, sir")
-    elif spot.piece == "QUEEN":
-        print("my freakin wife")
-    elif spot.piece == "ROOK":
-        print("slide moves NESW")
-    elif spot.piece == "BISHOP":
-        print("diags only")
-    elif spot.piece == "KNIGHT":
-        print("HORSEY")
-    elif spot.piece == "PAWN":
-        print("7 Spares")
-    else:
-        print("empty")
+    # if spot.piece == "KING":
+    #     print("you, sir")
+    # elif spot.piece == "QUEEN":
+    #     print("my freakin wife")
+    # elif spot.piece == "ROOK":
+    #     print("slide moves NESW")
+    # elif spot.piece == "BISHOP":
+    #     print("diags only")
+    # elif spot.piece == "KNIGHT":
+    #     print("HORSEY")
+    # elif spot.piece == "PAWN":
+    #     print("7 Spares")
+    # else:
+    #     print("empty")
 
 
 def movegen(ind):
-    if board[ind].piece == "KING":
-        moves=[ind+8, ind-8, ind+7, ind+9, ]
-    elif board[ind].piece == "QUEEN":
-        moves = []
-    elif board[ind].piece == "ROOK":
-        moves=rook(ind)
-    elif board[ind].piece == "BISHOP":
-        moves = []
-    elif board[ind].piece == "KNIGHT":
-        moves = [ind-17, ind-15, ind-10, ind-6, ind+6, ind+10, ind+15, ind+17]
-    elif board[ind].piece == "PAWN":
-        if board[ind].color == "White":
-            moves = [ind-8]
-        elif board[ind].color == "Black":
-            moves = [ind+8]
-    else:
-        print("empty")
+    spot = board[ind]
+    if spot.piece == "KING":
+        pos=[ind-9, ind-8, ind-7, ind-1, ind+1, ind+7, ind+8, ind+9]
+        #moves=isLegal(pos)
+    elif spot.piece == "QUEEN":
+        pos = []
+        #moves=isLegal(pos)
+    elif spot.piece == "ROOK":
+        pos=rook(ind)
+        #moves=isLegal(pos)
+    elif spot.piece == "BISHOP":
+        pos = []
+        #moves=isLegal(pos)
+    elif spot.piece == "KNIGHT":
+        pos = [ind-17, ind-15, ind-10, ind-6, ind+6, ind+10, ind+15, ind+17]
+        #moves=isLegal(pos)
+    elif spot.piece == "PAWN":
+        if spot.color == "White":
+            pos = [ind-8]
+            #moves=isLegal(pos)
+        elif spot.color == "Black":
+            pos = [ind+8]
+            #moves=isLegal(pos)
+    #return moves
 
 def rook(ind):
     moves=[]
@@ -220,6 +231,9 @@ def rook(ind):
     return moves
 
 def start(string):
+    for i in board:
+        i.piece=None
     parfen(string)
 
 start("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
+start("3KQ3/6p1/p7/7N/6qp/k4BP1/N3p1P1/8")
