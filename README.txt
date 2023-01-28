@@ -1,16 +1,23 @@
 Hello!
 
-Thank you for your interest in my Chess Engine. This is the experimental / progress branch! You can view all progress, current or previous on here. Stay tuned!
+Thank you for your interest in my Chess Engine. This is the main branch so it will be more sparse than current, all progress is on the branch "Progress Tube". Have a look there for the most recent updates.
 This project is written in python.
 
 Here are the milestones:
+
+
+Surpassed:
 
 Display a board
 Display and center pieces
 Write a function to parse the FEN
 Once parced translate the space's info to the space
-
 Be able to correctly output any FEN string
+
+Working on now:
+Allow the ability to make moves
+
+Working on next:
 
 Allow the ability to make moves
 Let the computer make moves
@@ -23,4 +30,5 @@ Stretch milestones:
 Build in network capabilities that allow for two people to play each other
 Maybe integrate into my website
 
-As alawys contact info @ jackhlay.com
+
+As alawys contact info is at jackhlay.com
