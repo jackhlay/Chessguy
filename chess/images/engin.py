@@ -141,6 +141,7 @@ def draw():
     running = True
     for i in range(64):
         if board[i].piece:
+            board[i].active=True
             if board[i].color=="Black":
                 screen.blit(bPiecesDict[board[i].piece], ((i%8)*100+20, (i//8)*100+20))
                 pygame.display.update()
@@ -168,8 +169,8 @@ def takein(x,y):
     ind = (square_y * 8) + square_x
     spot = board[ind]
 
-    print('{}{}'.format(spot.place[0],spot.place[1]))
-    print(spot.color)
+    print('Active: {}'.format(spot.active))
+    print(spot.piece)
 
     for i in board:
         i.active=False
@@ -190,45 +191,45 @@ def takein(x,y):
     #     print("empty")
 
 
-def movegen(ind):
-    spot = board[ind]
-    if spot.piece == "KING":
-        pos=[ind-9, ind-8, ind-7, ind-1, ind+1, ind+7, ind+8, ind+9]
-        #moves=isLegal(pos)
-    elif spot.piece == "QUEEN":
-        pos = []
-        #moves=isLegal(pos)
-    elif spot.piece == "ROOK":
-        pos=rook(ind)
-        #moves=isLegal(pos)
-    elif spot.piece == "BISHOP":
-        pos = []
-        #moves=isLegal(pos)
-    elif spot.piece == "KNIGHT":
-        pos = [ind-17, ind-15, ind-10, ind-6, ind+6, ind+10, ind+15, ind+17]
-        #moves=isLegal(pos)
-    elif spot.piece == "PAWN":
-        if spot.color == "White":
-            pos = [ind-8]
-            #moves=isLegal(pos)
-        elif spot.color == "Black":
-            pos = [ind+8]
-            #moves=isLegal(pos)
-    #return moves
-
-def rook(ind):
-    moves=[]
-    for i in range(-8,8):
-        if board[i].occupied:
-            if board[i].color==board[ind].color:
-                break
-            else:
-                moves.append(i)
-        else:
-            moves.append(i)
-    for i in range(moves.size()):
-        moves[i]=board[moves[i].place]
-    return moves
+# def movegen(ind):
+#     spot = board[ind]
+#     if spot.piece == "KING":
+#         pos=[ind-9, ind-8, ind-7, ind-1, ind+1, ind+7, ind+8, ind+9]
+#         #moves=isLegal(pos)
+#     elif spot.piece == "QUEEN":
+#         pos = []
+#         #moves=isLegal(pos)
+#     elif spot.piece == "ROOK":
+#         pos=rook(ind)
+#         #moves=isLegal(pos)
+#     elif spot.piece == "BISHOP":
+#         pos = []
+#         #moves=isLegal(pos)
+#     elif spot.piece == "KNIGHT":
+#         pos = [ind-17, ind-15, ind-10, ind-6, ind+6, ind+10, ind+15, ind+17]
+#         #moves=isLegal(pos)
+#     elif spot.piece == "PAWN":
+#         if spot.color == "White":
+#             pos = [ind-8]
+#             #moves=isLegal(pos)
+#         elif spot.color == "Black":
+#             pos = [ind+8]
+#             #moves=isLegal(pos)
+#     #return moves
+#
+# def rook(ind):
+#     moves=[]
+#     for i in range(-8,8):
+#         if board[i].occupied:
+#             if board[i].color==board[ind].color:
+#                 break
+#             else:
+#                 moves.append(i)
+#         else:
+#             moves.append(i)
+#     for i in range(moves.size()):
+#         moves[i]=board[moves[i].place]
+#     return moves
 
 def start(string):
     for i in board:
