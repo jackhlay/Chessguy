@@ -1,3 +1,5 @@
+import sys
+
 import pygame
 # ENGINE
 # Handles gamestate info, and valid moves, writes gamelog.
@@ -172,9 +174,9 @@ def draw():
 
 
 
-        if event.type == pygame.QUIT:
-            running = False
-            pygame.quit()
+            if event.type == pygame.QUIT:
+                running = False
+                sys.exit()
 
 def takein(x,y):
     square_x, square_y = x // 100, y // 100
