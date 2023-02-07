@@ -150,6 +150,7 @@ def draw():
                 pygame.display.update()
 
     while running:
+        pygame.init()
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
@@ -172,8 +173,8 @@ def draw():
 
 
         if event.type == pygame.QUIT:
-                running = False
-    pygame.quit()
+            running = False
+            pygame.quit()
 
 def takein(x,y):
     square_x, square_y = x // 100, y // 100
