@@ -24,7 +24,7 @@ Let the computer make moves
 Write rules for how each piece moves
 Write rules for move legality
 Allow the computer to explore depths without affecting the real board
-Using this, LET HIM COOK and find the best move.
+Using this, LET HIM (the computer) COOK and find the best move.
 
 Stretch milestones:
 Build in network capabilities that allow for two people to play each other
