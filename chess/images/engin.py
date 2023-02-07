@@ -153,14 +153,25 @@ def draw():
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
-                takein(x,y)
+                orig = takein(x,y)
 
             if event.type== pygame.MOUSEBUTTONUP:
                 x, y = event.pos
-                takein(x,y)
+                fin = takein(x,y)
+                if fin == orig:
+                    continue
+                else:
+                    fin.piece = orig.piece
+                    fin.color=orig.color
+                    fin.active=True
+                    orig.piece=None
+                    orig.color=None
+                    orig.active=False
+                    draw()
 
 
-            if event.type == pygame.QUIT:
+
+        if event.type == pygame.QUIT:
                 running = False
     pygame.quit()
 
@@ -172,9 +183,8 @@ def takein(x,y):
     print('Active: {}'.format(spot.active))
     print(spot.piece)
 
-    for i in board:
-        i.active=False
-    spot.active=True
+    return spot;
+
     # if spot.piece == "KING":
     #     print("you, sir")
     # elif spot.piece == "QUEEN":
@@ -237,4 +247,3 @@ def start(string):
     parfen(string)
 
 start("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
-start("3KQ3/6p1/p7/7N/6qp/k4BP1/N3p1P1/8")
