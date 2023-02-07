@@ -3,9 +3,6 @@ Hello!
 Thank you for your interest in my Chess Engine. This is the main branch so it will be more sparse than current, all progress is on the branch "Progress Tube". Have a look there for the most recent updates.
 This project is written in python.
 
-There's also a twitter thread if you want to follow there:
-https://twitter.com/jackhlay/status/1617719005355335681
-
 Here are the milestones:
 Surpassed:
 
