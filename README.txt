@@ -1,27 +1,30 @@
 Hello!
 
-Thank you for your interest in my Chess Engine. 
+Thank you for your interest in my Chess Engine. This is the main branch so it will be more sparse than current, all progress is on the branch "Progress Tube". Have a look there for the most recent updates.
 This project is written in python.
 
+There's also a twitter thread if you want to follow there:
+https://twitter.com/jackhlay/status/1617719005355335681
+
 Here are the milestones:
-
-
 Surpassed:
+
 Display a board
 Display and center pieces
 Write a function to parse the FEN
 Once parced translate the space's info to the space
 Be able to correctly output any FEN string
+Allow the ability to make moves
 
 Working on now:
-Allow the ability to make moves
+Move Legality, Turn ordering
 
 Working on next:
 Let the computer make moves
 Write rules for how each piece moves
 Write rules for move legality
 Allow the computer to explore depths without affecting the real board
-Using this, LET HIM (the computer) COOK and find the best move.
+Using this, LET HIM COOK and find the best move.
 
 Stretch milestones:
 Build in network capabilities that allow for two people to play each other
