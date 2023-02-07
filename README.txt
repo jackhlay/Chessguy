@@ -17,11 +17,9 @@ Be able to correctly output any FEN string
 Allow the ability to make moves
 
 Working on now:
-
 Move Legality, Turn ordering
 
 Working on next:
-
 Let the computer make moves
 Write rules for how each piece moves
 Write rules for move legality
