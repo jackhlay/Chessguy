@@ -2,9 +2,11 @@ import sys
 
 import pygame
 
-turn ="White"
+
 # ENGINE
 # Handles gamestate info, and valid moves, writes gamelog.
+pygame.display.set_caption('Chessguy V0.06')
+turn ="White"
 
 #Black Pieces
 bB = pygame.image.load("bB.png")
@@ -158,7 +160,6 @@ def draw():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
                 orig = takein(x,y)
-                print(orig.piece)
 
             if event.type== pygame.MOUSEBUTTONUP:
                 x, y = event.pos
