@@ -1,10 +1,10 @@
 import sys
 
 import pygame
+
+turn ="White"
 # ENGINE
 # Handles gamestate info, and valid moves, writes gamelog.
-
-#images block
 
 #Black Pieces
 bB = pygame.image.load("bB.png")
@@ -45,9 +45,8 @@ class Space():
     place = None
 
 
-
-
 #Gamestate Variables block
+
 spots = [("a", 8), ("b", 8), ("c", 8), ("d", 8), ("e", 8), ("f", 8), ("g", 8), ("h", 8), ("a", 7), ("b", 7), ("c", 7),
          ("d", 7), ("e", 7), ("f", 7), ("g", 7), ("h", 7), ("a", 6), ("b", 6), ("c", 6), ("d", 6), ("e", 6), ("f", 6),
          ("g", 6), ("h", 6), ("a", 5), ("b", 5), ("c", 5), ("d", 5), ("e", 5), ("f", 5), ("g", 5), ("h", 5), ("a", 4),
@@ -125,6 +124,7 @@ def parfen(String):
     draw()
 
 def draw():
+    global turn
     pygame.init()
     board_size = (800, 800)
     screen = pygame.display.set_mode(board_size)
@@ -152,16 +152,20 @@ def draw():
                 pygame.display.update()
 
     while running:
+
         pygame.init()
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
                 orig = takein(x,y)
+                print("TURN:",turn)
+                if turn != orig.color:
+                    continue
 
             if event.type== pygame.MOUSEBUTTONUP:
                 x, y = event.pos
                 fin = takein(x,y)
-                if fin == orig:
+                if fin == orig or turn != orig.color:
                     continue
                 else:
                     fin.piece = orig.piece
@@ -170,6 +174,10 @@ def draw():
                     orig.piece=None
                     orig.color=None
                     orig.active=False
+                    if turn == "White":
+                        turn = "Black"
+                    else:
+                        turn="White"
                     draw()
 
 
@@ -183,8 +191,8 @@ def takein(x,y):
     ind = (square_y * 8) + square_x
     spot = board[ind]
 
-    print('Active: {}'.format(spot.active))
-    print(spot.piece)
+    #print('Active: {}'.format(spot.active))
+    print(spot.color)
 
     return spot;
 
