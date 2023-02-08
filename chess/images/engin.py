@@ -158,9 +158,7 @@ def draw():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
                 orig = takein(x,y)
-                print("TURN:",turn)
-                if turn != orig.color:
-                    continue
+                print(orig.piece)
 
             if event.type== pygame.MOUSEBUTTONUP:
                 x, y = event.pos
@@ -192,9 +190,9 @@ def takein(x,y):
     spot = board[ind]
 
     #print('Active: {}'.format(spot.active))
-    print(spot.color)
+    #print(spot.color)
 
-    return spot;
+    return spot
 
     # if spot.piece == "KING":
     #     print("you, sir")
