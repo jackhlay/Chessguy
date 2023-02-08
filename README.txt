@@ -12,9 +12,10 @@ Write a function to parse the FEN
 Once parced translate the space's info to the space
 Be able to correctly output any FEN string
 Allow the ability to make moves
+Turn Ordering
 
 Working on now:
-Move Legality, Turn ordering
+Move Legality
 
 Working on next:
 Let the computer make moves
