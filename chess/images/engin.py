@@ -1,11 +1,10 @@
 import sys
-
 import pygame
-
 
 # ENGINE
 # Handles gamestate info, and valid moves, writes gamelog.
-pygame.display.set_caption('Chessguy V0.06')
+pygame.init()
+pygame.display.set_caption('boby V0.22')
 turn ="White"
 
 #Black Pieces
@@ -142,16 +141,22 @@ def draw():
             pygame.draw.rect(screen, color, (i*100, j*100, 100, 100))
             pos += 1
 
+    dragging_piece=None
     running = True
     for i in range(64):
         if board[i].piece:
             board[i].active=True
             if board[i].color=="Black":
                 screen.blit(bPiecesDict[board[i].piece], ((i%8)*100+20, (i//8)*100+20))
-                pygame.display.update()
+                pygame.display.flip()
             else:
                 screen.blit(wPiecesDict[board[i].piece], ((i%8)*100+20, (i//8)*100+20))
-                pygame.display.update()
+                pygame.display.flip()
+
+
+    dragging=False
+    offset_x, offset_y = 0, 0
+    clock = pygame.time.Clock()
 
     while running:
 
@@ -160,8 +165,15 @@ def draw():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
                 orig = takein(x,y)
+                if orig.active:
+                    dragging=True
+                    if orig.color=="White":
+                        img = wPiecesDict[orig.piece]
+                    else:
+                        img = bPiecesDict[orig.piece]
 
             if event.type== pygame.MOUSEBUTTONUP:
+                dragging = False
                 x, y = event.pos
                 fin = takein(x,y)
                 if fin == orig or turn != orig.color:
@@ -179,7 +191,14 @@ def draw():
                         turn="White"
                     draw()
 
-
+            if event.type == pygame.MOUSEMOTION:
+                if dragging:
+                    clock.tick(1000)
+                    x, y = event.pos
+                    imgx = x + offset_x
+                    imgy = y + offset_y
+                    screen.blit(img, (x,y))
+                    pygame.display.update()
 
             if event.type == pygame.QUIT:
                 running = False
@@ -190,8 +209,8 @@ def takein(x,y):
     ind = (square_y * 8) + square_x
     spot = board[ind]
 
-    #print('Active: {}'.format(spot.active))
-    #print(spot.color)
+    # print('Active: {}'.format(spot.active))
+    # print(spot.color)
 
     return spot
 
