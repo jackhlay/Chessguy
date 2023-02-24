@@ -177,7 +177,7 @@ def draw():
                         turn = "Black"
                     else:
                         turn="White"
-                    draw()
+                    pygame.display.flip()
 
 
 
