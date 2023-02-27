@@ -205,8 +205,6 @@ def go(screen):
             if event.type== pygame.MOUSEBUTTONUP:
                 dragging = False
                 x, y = event.pos
-                square_x, square_y = x // 100, y // 100
-                ind = (square_y * 8) + square_x
                 fin = takein(x,y)
                 if fin == orig or turn != orig.color:
                     continue
@@ -218,12 +216,15 @@ def go(screen):
                     orig.piece=None
                     orig.color=None
                     orig.active=False
-                    orig.moved = True
+                    orig.moved=None
+                    drawit(screen)
                     if turn == "White":
                         turn = "Black"
                     else:
                         turn="White"
-                    pygame.display.flip()
+
+                else:
+                    continue
 
             if event.type == pygame.MOUSEMOTION:
                 if dragging:
@@ -264,6 +265,7 @@ def takein(x,y):
 
 def movegen(ind):
     spot = board[ind]
+    moves = []
 
     if spot.piece == "PAWN":
 
