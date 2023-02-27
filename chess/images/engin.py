@@ -44,6 +44,7 @@ class Space():
     piece = None
     color = "White"
     place = None
+    moved = False
 
 
 #Gamestate Variables block
@@ -141,8 +142,31 @@ def draw():
             pygame.draw.rect(screen, color, (i*100, j*100, 100, 100))
             pos += 1
 
-    dragging_piece=None
-    running = True
+    for i in range(64):
+        if board[i].piece:
+            board[i].active=True
+            if board[i].color=="Black":
+                screen.blit(bPiecesDict[board[i].piece], ((i%8)*100+20, (i//8)*100+20))
+                pygame.display.flip()
+            else:
+                screen.blit(wPiecesDict[board[i].piece], ((i%8)*100+20, (i//8)*100+20))
+                pygame.display.flip()
+    go(screen)
+
+def drawit(screen):
+    global turn
+    light = (42, 34, 38)
+    dark = (22,24,20)
+    pos = 0
+    for i in range(8):
+        for j in range(8):
+            if (i+j) % 2 == 0:
+                color = dark
+            else:
+                color = light
+            pygame.draw.rect(screen, color, (i*100, j*100, 100, 100))
+            pos += 1
+
     for i in range(64):
         if board[i].piece:
             board[i].active=True
@@ -153,7 +177,9 @@ def draw():
                 screen.blit(wPiecesDict[board[i].piece], ((i%8)*100+20, (i//8)*100+20))
                 pygame.display.flip()
 
-
+def go(screen):
+    global turn
+    running = True
     dragging=False
     offset_x, offset_y = 0, 0
     clock = pygame.time.Clock()
@@ -164,7 +190,11 @@ def draw():
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
+                square_x, square_y = x // 100, y // 100
+                ind = (square_y * 8) + square_x
                 orig = takein(x,y)
+                moves = movegen(ind)
+                print(moves)
                 if orig.active:
                     dragging=True
                     if orig.color=="White":
@@ -175,16 +205,20 @@ def draw():
             if event.type== pygame.MOUSEBUTTONUP:
                 dragging = False
                 x, y = event.pos
+                square_x, square_y = x // 100, y // 100
+                ind = (square_y * 8) + square_x
                 fin = takein(x,y)
                 if fin == orig or turn != orig.color:
                     continue
-                else:
+                elif fin.place in moves:
                     fin.piece = orig.piece
                     fin.color=orig.color
                     fin.active=True
+                    fin.moved=True
                     orig.piece=None
                     orig.color=None
                     orig.active=False
+                    orig.moved = True
                     if turn == "White":
                         turn = "Black"
                     else:
@@ -193,10 +227,11 @@ def draw():
 
             if event.type == pygame.MOUSEMOTION:
                 if dragging:
-                    clock.tick(1000)
+                    clock.tick(24)
                     x, y = event.pos
                     imgx = x + offset_x
                     imgy = y + offset_y
+                    drawit(screen)
                     screen.blit(img, (x,y))
                     pygame.display.update()
 
@@ -208,11 +243,8 @@ def takein(x,y):
     square_x, square_y = x // 100, y // 100
     ind = (square_y * 8) + square_x
     spot = board[ind]
-
     # print('Active: {}'.format(spot.active))
     # print(spot.color)
-
-    return spot
 
     # if spot.piece == "KING":
     #     print("you, sir")
@@ -228,33 +260,24 @@ def takein(x,y):
     #     print("7 Spares")
     # else:
     #     print("empty")
+    return spot
 
+def movegen(ind):
+    spot = board[ind]
 
-# def movegen(ind):
-#     spot = board[ind]
-#     if spot.piece == "KING":
-#         pos=[ind-9, ind-8, ind-7, ind-1, ind+1, ind+7, ind+8, ind+9]
-#         #moves=isLegal(pos)
-#     elif spot.piece == "QUEEN":
-#         pos = []
-#         #moves=isLegal(pos)
-#     elif spot.piece == "ROOK":
-#         pos=rook(ind)
-#         #moves=isLegal(pos)
-#     elif spot.piece == "BISHOP":
-#         pos = []
-#         #moves=isLegal(pos)
-#     elif spot.piece == "KNIGHT":
-#         pos = [ind-17, ind-15, ind-10, ind-6, ind+6, ind+10, ind+15, ind+17]
-#         #moves=isLegal(pos)
-#     elif spot.piece == "PAWN":
-#         if spot.color == "White":
-#             pos = [ind-8]
-#             #moves=isLegal(pos)
-#         elif spot.color == "Black":
-#             pos = [ind+8]
-#             #moves=isLegal(pos)
-#     #return moves
+    if spot.piece == "PAWN":
+
+        if spot.color == "White":
+            if not spot.moved:
+                moves = [board[ind-8].place, board[ind-16].place]
+            else:
+                moves = [board[ind-8].place]
+        elif spot.color == "Black":
+            if not spot.moved:
+                moves = [board[ind+8].place, board[ind+16].place]
+            else:
+                moves = [board[ind+8].place]
+    return moves
 #
 # def rook(ind):
 #     moves=[]
