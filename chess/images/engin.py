@@ -194,7 +194,6 @@ def go(screen):
                 ind = (square_y * 8) + square_x
                 orig = takein(x,y)
                 moves = movegen(ind)
-                print(moves)
                 if orig.active:
                     dragging=True
                     if orig.color=="White":
@@ -228,7 +227,7 @@ def go(screen):
 
             if event.type == pygame.MOUSEMOTION:
                 if dragging:
-                    clock.tick(24)
+                    clock.tick(13)
                     x, y = event.pos
                     imgx = x + offset_x
                     imgy = y + offset_y
@@ -265,7 +264,6 @@ def takein(x,y):
 
 def movegen(ind):
     spot = board[ind]
-    print(spot.piece)
     moves = []
 
     if spot.piece == "PAWN":
@@ -307,9 +305,9 @@ def movegen(ind):
 #         moves[i]=board[moves[i].place]
 #     return moves
 
-def start(string):
+def start(string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
     for i in board:
         i.piece=None
     parfen(string)
 
-start("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
+start()
