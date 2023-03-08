@@ -265,6 +265,7 @@ def takein(x,y):
 
 def movegen(ind):
     spot = board[ind]
+    print(spot.piece)
     moves = []
 
     if spot.piece == "PAWN":
@@ -279,6 +280,13 @@ def movegen(ind):
                 moves = [board[ind+8].place, board[ind+16].place]
             else:
                 moves = [board[ind+8].place]
+
+    if spot.piece == "KNIGHT":
+        moves = [board[ind-10].place, board[ind-17].place, board[ind-15].place, board[ind -6].place, board[ind+10].place, board[ind+17].place, board[ind+15].place, board[ind+6].place ]
+        for m in moves:
+                moves.remove(m)
+            else:
+                pass
     return moves
 #
 # def rook(ind):
