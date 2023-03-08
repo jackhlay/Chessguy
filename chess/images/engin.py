@@ -282,11 +282,15 @@ def movegen(ind):
                 moves = [board[ind+8].place]
 
     if spot.piece == "KNIGHT":
-        moves = [board[ind-10].place, board[ind-17].place, board[ind-15].place, board[ind -6].place, board[ind+10].place, board[ind+17].place, board[ind+15].place, board[ind+6].place ]
+        nMoves = []
+        moves = [ind-17, ind-15, ind-10, ind-6, ind+17, ind+15, ind+10, ind+6]
         for m in moves:
-                moves.remove(m)
+            if m in range(len(board)):
+                nMoves.append(board[m].place)
             else:
-                pass
+                continue
+        return nMoves
+        
     return moves
 #
 # def rook(ind):
