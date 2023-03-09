@@ -194,6 +194,7 @@ def go(screen):
                 ind = (square_y * 8) + square_x
                 orig = takein(x,y)
                 moves = movegen(ind)
+                print(moves)
                 if orig.active:
                     dragging=True
                     if orig.color=="White":
@@ -283,12 +284,19 @@ def movegen(ind):
         nMoves = []
         moves = [ind-17, ind-15, ind-10, ind-6, ind+17, ind+15, ind+10, ind+6]
         for m in moves:
-            if m in range(len(board)):
+            if m in range(len(board)) and abs(ord(board[m].place[0]) - ord(board[ind].place[0])) <= 2 and board[m].color != board[ind].color:
                 nMoves.append(board[m].place)
-            else:
-                continue
         return nMoves
-        
+    
+    if spot.piece == "ROOK":
+        nmoves = []
+        moves = [ind+8, ind+16, ind+24, ind+32, ind+40, ind+48, ind+56, ind-8, ind-16, ind-24, ind-32, ind-40, ind-48, ind-56, ind+1, ind+2, ind+3, ind+4, ind+5, ind+6, ind+7, ind-1, ind-3, ind-4, ind-5, ind-6, ind-7]
+        for m in moves:
+            if m in range(len(board)) and board[m].color != board[ind].color:
+                nmoves.append(board[m].place)
+        return nmoves
+
+
     return moves
 #
 # def rook(ind):
