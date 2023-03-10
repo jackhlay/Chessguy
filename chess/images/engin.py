@@ -289,15 +289,51 @@ def movegen(ind):
         return nMoves
     
     if spot.piece == "ROOK":
-        nmoves = []
-        moves = [ind+8, ind+16, ind+24, ind+32, ind+40, ind+48, ind+56, ind-8, ind-16, ind-24, ind-32, ind-40, ind-48, ind-56, ind+1, ind+2, ind+3, ind+4, ind+5, ind+6, ind+7, ind-1, ind-3, ind-4, ind-5, ind-6, ind-7]
-        for m in moves:
-            if m in range(len(board)) and board[m].color != board[ind].color:
-                nmoves.append(board[m].place)
-        return nmoves
+        down = [ind+8, ind+16, ind+24, ind+32, ind+40, ind+48, ind+56]
+        up = [ind-8, ind-16, ind-24, ind-32, ind-40, ind-48, ind-56]
+        right = [ind+1, ind+2, ind+3, ind+4, ind+5, ind+6, ind+7]
+        left = [ind-1, ind-3, ind-4, ind-5, ind-6, ind-7]
+        moves = []
+        for d in down:
+            if d in range(len(board)):
+                 if board[d].color == board[ind].color or board[d].place[0] != board[ind].place[0]:
+                     break
+                 moves.append(board[d].place)
+                 if board[d].occupied:
+                     break
+                 
 
+        for u in up:
+            if u in range(len(board)):
+                 if board[u].color == board[ind].color or board[u].place[0] != board[ind].place[0]:
+                     break
+                 moves.append(board[u].place)
+                 if board[u].occupied:
+                    break
+
+                     
+        for l in left:
+            if l in range(len(board)):
+                if board[l].color == board[ind].color or board[l].place[1] != board[ind].place[1]:
+                     break
+                moves.append(board[l].place)
+                if board[l].occupied:
+                    break
+
+                    
+        for r in right:
+            if r in range(len(board)):
+                if board[r].color == board[ind].color or board[r].place[1] != board[ind].place[1]:
+                    return moves
+                moves.append(board[r].place)
+                if board[r].occupied:
+                    return moves
 
     return moves
+
+
+
+
 #
 # def rook(ind):
 #     moves=[]
