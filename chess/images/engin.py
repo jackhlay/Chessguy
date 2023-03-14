@@ -345,7 +345,7 @@ def movegen(ind):
                 if board[j].color == board[ind].color:
                     break
                 moves.append(board[j].place)
-                if board[j].occupied:
+                if board[j].occupied or board[j].place[0] == 'a':
                     break
         
         for k in upR:
@@ -353,7 +353,7 @@ def movegen(ind):
                 if board[k].color == board[ind].color:
                     break
                 moves.append(board[k].place)
-                if board[k].occupied:
+                if board[k].occupied or board[k].place[0] == 'h':
                     break
 
         for l in downR:
@@ -361,16 +361,16 @@ def movegen(ind):
                 if board[l].color == board[ind].color:
                     break
                 moves.append(board[l].place)
-                if board[l].occupied:
+                if board[l].occupied or board[l].place[0] == 'h':
                     break
 
         for m in downL:
             if m in range(len(board)):
                 if board[m].color == board[ind].color:
-                    break
+                    return moves
                 moves.append(board[m].place)
-                if board[m].occupied:
-                    break
+                if board[m].occupied or board[m].place[0] == 'a':
+                    return moves
     
     return moves
 
