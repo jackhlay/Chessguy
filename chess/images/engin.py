@@ -179,6 +179,7 @@ def drawit(screen):
                 foreground.blit(bPiecesDict[board[i].piece], ((i%8)*100+20, (i//8)*100+20))
             else:
                 foreground.blit(wPiecesDict[board[i].piece], ((i%8)*100+20, (i//8)*100+20))
+    
     background.blit(foreground, (0, 0))
     screen.blit(background, (0, 0))
     pygame.display.flip()
@@ -331,7 +332,46 @@ def movegen(ind):
                 moves.append(board[r].place)
                 if board[r].occupied:
                     return moves
+    
+    if spot.piece == "BISHOP":
+        moves = []
+        upL = [ind-9, ind-18, ind-27, ind-36, ind-45, ind-54, ind-63] 
+        upR=[ind-7, ind-14, ind-21, ind-28, ind-35, ind-42, ind-49] 
+        downR=[ind+9, ind+18, ind+27, ind+36, ind+45, ind+54, ind+63] 
+        downL=[ind+7, ind+14, ind+21, ind+28, ind+35, ind+42, ind+49]
+        
+        for j in upL:
+            if j in range(len(board)):
+                if board[j].color == board[ind].color:
+                    break
+                moves.append(board[j].place)
+                if board[j].occupied:
+                    break
+        
+        for k in upR:
+            if k in range(len(board)):
+                if board[k].color == board[ind].color:
+                    break
+                moves.append(board[k].place)
+                if board[k].occupied:
+                    break
 
+        for l in downR:
+            if l in range(len(board)):    
+                if board[l].color == board[ind].color:
+                    break
+                moves.append(board[l].place)
+                if board[l].occupied:
+                    break
+
+        for m in downL:
+            if m in range(len(board)):
+                if board[m].color == board[ind].color:
+                    break
+                moves.append(board[m].place)
+                if board[m].occupied:
+                    break
+    
     return moves
 
 
