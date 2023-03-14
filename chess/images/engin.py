@@ -158,24 +158,30 @@ def drawit(screen):
     light = (42, 34, 38)
     dark = (22,24,20)
     pos = 0
+
+    foreground = pygame.Surface(screen.get_size())
+    background = pygame.Surface(screen.get_size())
+    background.blit(screen, (0, 0))
+
     for i in range(8):
         for j in range(8):
             if (i+j) % 2 == 0:
                 color = dark
             else:
                 color = light
-            pygame.draw.rect(screen, color, (i*100, j*100, 100, 100))
+            pygame.draw.rect(foreground, color, (i*100, j*100, 100, 100))
             pos += 1
 
     for i in range(64):
         if board[i].piece:
             board[i].active=True
             if board[i].color=="Black":
-                screen.blit(bPiecesDict[board[i].piece], ((i%8)*100+20, (i//8)*100+20))
-                pygame.display.flip()
+                foreground.blit(bPiecesDict[board[i].piece], ((i%8)*100+20, (i//8)*100+20))
             else:
-                screen.blit(wPiecesDict[board[i].piece], ((i%8)*100+20, (i//8)*100+20))
-                pygame.display.flip()
+                foreground.blit(wPiecesDict[board[i].piece], ((i%8)*100+20, (i//8)*100+20))
+    background.blit(foreground, (0, 0))
+    screen.blit(background, (0, 0))
+    pygame.display.flip()
 
 def go(screen):
     global turn
@@ -302,7 +308,6 @@ def movegen(ind):
                  if board[d].occupied:
                      break
                  
-
         for u in up:
             if u in range(len(board)):
                  if board[u].color == board[ind].color or board[u].place[0] != board[ind].place[0]:
@@ -310,8 +315,7 @@ def movegen(ind):
                  moves.append(board[u].place)
                  if board[u].occupied:
                     break
-
-                     
+    
         for l in left:
             if l in range(len(board)):
                 if board[l].color == board[ind].color or board[l].place[1] != board[ind].place[1]:
@@ -319,8 +323,7 @@ def movegen(ind):
                 moves.append(board[l].place)
                 if board[l].occupied:
                     break
-
-                    
+            
         for r in right:
             if r in range(len(board)):
                 if board[r].color == board[ind].color or board[r].place[1] != board[ind].place[1]:
