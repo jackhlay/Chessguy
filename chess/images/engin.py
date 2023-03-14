@@ -1,4 +1,3 @@
-import sys
 import pygame
 
 # ENGINE
@@ -46,7 +45,6 @@ class Space():
     place = None
     moved = False
 
-
 #Gamestate Variables block
 
 spots = [("a", 8), ("b", 8), ("c", 8), ("d", 8), ("e", 8), ("f", 8), ("g", 8), ("h", 8), ("a", 7), ("b", 7), ("c", 7),
@@ -61,7 +59,6 @@ for i in range(64):
     board[i].place = spots[i]
     if i > 48:
         board[i].color="Black"
-
 
 #Functions Block
 def parfen(String):
@@ -245,12 +242,14 @@ def go(screen):
 
             if event.type == pygame.QUIT:
                 running = False
-                sys.exit()
+                exit()
 
 def takein(x,y):
     square_x, square_y = x // 100, y // 100
     ind = (square_y * 8) + square_x
     spot = board[ind]
+    
+    {#previous print tests
     # print('Active: {}'.format(spot.active))
     # print(spot.color)
 
@@ -268,6 +267,7 @@ def takein(x,y):
     #     print("7 Spares")
     # else:
     #     print("empty")
+    }
     return spot
 
 def movegen(ind):
@@ -275,7 +275,6 @@ def movegen(ind):
     moves = []
 
     if spot.piece == "PAWN":
-
         if spot.color == "White":
             if not spot.moved:
                 moves = [board[ind-8].place, board[ind-16].place]
@@ -308,7 +307,6 @@ def movegen(ind):
                  moves.append(board[d].place)
                  if board[d].occupied:
                      break
-                 
         for u in up:
             if u in range(len(board)):
                  if board[u].color == board[ind].color or board[u].place[0] != board[ind].place[0]:
@@ -316,7 +314,6 @@ def movegen(ind):
                  moves.append(board[u].place)
                  if board[u].occupied:
                     break
-    
         for l in left:
             if l in range(len(board)):
                 if board[l].color == board[ind].color or board[l].place[1] != board[ind].place[1]:
@@ -324,7 +321,6 @@ def movegen(ind):
                 moves.append(board[l].place)
                 if board[l].occupied:
                     break
-            
         for r in right:
             if r in range(len(board)):
                 if board[r].color == board[ind].color or board[r].place[1] != board[ind].place[1]:
@@ -347,7 +343,6 @@ def movegen(ind):
                 moves.append(board[j].place)
                 if board[j].occupied or board[j].place[0] == 'a':
                     break
-        
         for k in upR:
             if k in range(len(board)):
                 if board[k].color == board[ind].color:
@@ -355,7 +350,6 @@ def movegen(ind):
                 moves.append(board[k].place)
                 if board[k].occupied or board[k].place[0] == 'h':
                     break
-
         for l in downR:
             if l in range(len(board)):    
                 if board[l].color == board[ind].color:
@@ -363,7 +357,6 @@ def movegen(ind):
                 moves.append(board[l].place)
                 if board[l].occupied or board[l].place[0] == 'h':
                     break
-
         for m in downL:
             if m in range(len(board)):
                 if board[m].color == board[ind].color:
@@ -373,24 +366,6 @@ def movegen(ind):
                     return moves
     
     return moves
-
-
-
-
-#
-# def rook(ind):
-#     moves=[]
-#     for i in range(-8,8):
-#         if board[i].occupied:
-#             if board[i].color==board[ind].color:
-#                 break
-#             else:
-#                 moves.append(i)
-#         else:
-#             moves.append(i)
-#     for i in range(moves.size()):
-#         moves[i]=board[moves[i].place]
-#     return moves
 
 def start(string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
     for i in board:
