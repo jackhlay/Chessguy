@@ -27,7 +27,6 @@ wPiecesDict = {'KING': pygame.transform.scale(wK, (int(60*1.03), int(60*1.03))),
                'KNIGHT': pygame.transform.scale(wN, (int(60*1.03), int(60*1.03))),
                'ROOK': pygame.transform.scale(wR, (int(60*1.03), int(60*1.03))),
                'PAWN': pygame.transform.scale(wp, (int(60*1.03), int(60*1.03)))}
-
 bPiecesDict = {'KING': pygame.transform.scale(bK, (int(60*1.03), int(60*1.03))),
                'QUEEN': pygame.transform.scale(bQ, (int(60*1.03), int(60*1.03))),
                'BISHOP': pygame.transform.scale(bB, (int(60*1.03), int(60*1.03))),
@@ -156,8 +155,8 @@ def drawit(screen):
     dark = (22,24,20)
     pos = 0
 
-    foreground = pygame.Surface(screen.get_size())
-    background = pygame.Surface(screen.get_size())
+    foreground = pygame.Surface((800,800))
+    background = pygame.Surface((800,800))
     background.blit(screen, (0, 0))
 
     for i in range(8):
@@ -330,12 +329,11 @@ def movegen(ind):
                     return moves
     
     if spot.piece == "BISHOP":
-        moves = []
         upL = [ind-9, ind-18, ind-27, ind-36, ind-45, ind-54, ind-63] 
-        upR=[ind-7, ind-14, ind-21, ind-28, ind-35, ind-42, ind-49] 
+        upR = [ind-7, ind-14, ind-21, ind-28, ind-35, ind-42, ind-49] 
         downR=[ind+9, ind+18, ind+27, ind+36, ind+45, ind+54, ind+63] 
         downL=[ind+7, ind+14, ind+21, ind+28, ind+35, ind+42, ind+49]
-        
+        moves = []
         for j in upL:
             if j in range(len(board)):
                 if board[j].color == board[ind].color:
