@@ -363,11 +363,88 @@ def movegen(ind):
                 if board[m].occupied or board[m].place[0] == 'a':
                     return moves
     
-    return moves
+    if spot.piece == "QUEEN":
+        moves = []
 
-def start(string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
+        down = [ind+8, ind+16, ind+24, ind+32, ind+40, ind+48, ind+56]
+        up = [ind-8, ind-16, ind-24, ind-32, ind-40, ind-48, ind-56]
+        right = [ind+1, ind+2, ind+3, ind+4, ind+5, ind+6, ind+7]
+        left = [ind-1, ind-2, ind-3, ind-4, ind-5, ind-6, ind-7]
+
+        upL = [ind-9, ind-18, ind-27, ind-36, ind-45, ind-54, ind-63] 
+        upR = [ind-7, ind-14, ind-21, ind-28, ind-35, ind-42, ind-49] 
+        downR=[ind+9, ind+18, ind+27, ind+36, ind+45, ind+54, ind+63] 
+        downL=[ind+7, ind+14, ind+21, ind+28, ind+35, ind+42, ind+49]
+        
+        for j in upL:
+            if j in range(len(board)):
+                if board[j].color == board[ind].color:
+                    break
+                moves.append(board[j].place)
+                if board[j].occupied or board[j].place[0] == 'a':
+                    break
+        for k in upR:
+            if k in range(len(board)):
+                if board[k].color == board[ind].color:
+                    break
+                moves.append(board[k].place)
+                if board[k].occupied or board[k].place[0] == 'h':
+                    break
+        for l in downR:
+            if l in range(len(board)):    
+                if board[l].color == board[ind].color:
+                    break
+                moves.append(board[l].place)
+                if board[l].occupied or board[l].place[0] == 'h':
+                    break
+        for m in downL:
+            if m in range(len(board)):
+                if board[m].color == board[ind].color:
+                    break
+                moves.append(board[m].place)
+                if board[m].occupied or board[m].place[0] == 'a':
+                    break
+        for d in down:
+            if d in range(len(board)):
+                 if board[d].color == board[ind].color or board[d].place[0] != board[ind].place[0]:
+                     break
+                 moves.append(board[d].place)
+                 if board[d].occupied:
+                     break
+        for u in up:
+            if u in range(len(board)):
+                 if board[u].color == board[ind].color or board[u].place[0] != board[ind].place[0]:
+                     break
+                 moves.append(board[u].place)
+                 if board[u].occupied:
+                    break
+        for l in left:
+            if l in range(len(board)):
+                if board[l].color == board[ind].color or board[l].place[1] != board[ind].place[1]:
+                     break
+                moves.append(board[l].place)
+                if board[l].occupied:
+                    break
+        for r in right:
+            if r in range(len(board)):
+                if board[r].color == board[ind].color or board[r].place[1] != board[ind].place[1]:
+                    return moves
+                moves.append(board[r].place)
+                if board[r].occupied:
+                    return moves
+
+    if spot.piece == "KING":
+        moves = [ind-9,ind-8,ind-7,ind-1,ind+1,ind+7,ind+8,ind+9]
+        nMoves = []
+        for m in moves:
+            if m in range(len(board)) and board[m].color != board[ind].color:
+                nMoves.append(board[m].place)
+        return nMoves
+
+    return moves
+    
+
+def start(string="rnbqkbnr/8/8/8/8/8/8/RNBQKBNR"):
     for i in board:
         i.piece=None
     parfen(string)
-
-start()
