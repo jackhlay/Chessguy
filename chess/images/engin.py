@@ -256,19 +256,36 @@ def movegen(ind):
         if spot.color == "White":
             if not spot.moved:
                 moves = [board[ind-8].place, board[ind-16].place]
+                if board[ind-7].color == "Black":
+                    moves.append(board[ind-7].place)
+                if board[ind-9].color == "Black":
+                    moves.append(board[ind-9].place)
                 
             else:
                 if not board[ind-8].color:
                     moves = [board[ind-8].place]
+                    if board[ind-7].color == "Black":
+                        moves.append(board[ind-7].place)
+                    if board[ind-9].color == "Black":
+                        moves.append(board[ind-9].place)
                 else:
                     return []
         elif spot.color == "Black":
             if not spot.moved:
                 moves = [board[ind+8].place, board[ind+16].place]
+                if board[ind+7].color == "White":
+                    moves.append(board[ind+7].place)
+                if board[ind+9].color == "White":
+                    moves.append(board[ind+9].place)
 
             else:
                 if not board[ind+8].color:
                     moves = [board[ind+8].place]
+                    if board[ind+7].color == "White":
+                        moves.append(board[ind+7].place)
+                    if board[ind+9].color == "White":
+                        moves.append(board[ind+9].place)
+
                 else:
                     return []
 
@@ -447,7 +464,5 @@ def start(string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
             board[i].color="Black"
     parfen(string)
     draw()
-    import sys
-    print(sys.getsizeof(Space()))
     go(screen)
     
