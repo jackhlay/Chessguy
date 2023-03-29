@@ -139,6 +139,7 @@ def go(screen):
     offset_x, offset_y = 0, 0
     clock = pygame.time.Clock()
 
+    #clean up this while loop
     while running:
 
         pygame.init()
@@ -148,14 +149,17 @@ def go(screen):
                 square_x, square_y = x // 100, y // 100
                 ind = (square_y * 8) + square_x
                 orig = takein(x,y)
-                moves = movegen(ind)
-                print(moves)
-                if orig.active:
-                    dragging=True
-                    if orig.color=="White":
-                        img = wPiecesDict[orig.piece]
-                    else:
-                        img = bPiecesDict[orig.piece]
+                moves = movegen(turn)
+
+                if kinggood(ind):
+                    if orig.active:
+                        dragging=True
+                        if orig.color=="White":
+                            img = wPiecesDict[orig.piece]
+                        else:
+                            img = bPiecesDict[orig.piece]
+                else:
+                    continue
 
             if event.type== pygame.MOUSEBUTTONUP:
                 dragging = False
@@ -194,6 +198,7 @@ def go(screen):
             if event.type == pygame.QUIT:
                 running = False
                 exit()
+
 def drawit(screen):
     light = (42, 34, 38)
     dark = (22,24,20)
@@ -223,6 +228,7 @@ def drawit(screen):
     background.blit(foreground, (0, 0))
     screen.blit(background, (0, 0))
     pygame.display.flip()
+
 def takein(x,y):
     square_x, square_y = x // 100, y // 100
     ind = (square_y * 8) + square_x
@@ -248,6 +254,7 @@ def takein(x,y):
     #     print("empty")
     }
     return spot
+
 def movegen(ind):
     spot = board[ind]
     moves = []
@@ -446,7 +453,24 @@ def movegen(ind):
         return nMoves
 
     return moves
-    
+
+def kinggood(color):
+    res = True
+    totMov = []
+
+    #if color == white, locate the king through a yield
+    if color == "White":
+        for i in range(len(board)):
+            if board[i].color == "White" and board[i].piece == "KING":
+                kingpl = yield board[i].place
+                for i in range(board):
+                    if board[i].color == "Black":
+                        totMov.append(movegen(i))
+                    if kingpl in totMov:
+                        return False
+    if color == "Black":
+        if board[i].color == "Black" and board[i].piece == "KING":
+                kingpl = yield board[i].place
 
 def start(string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
     global board
@@ -465,4 +489,6 @@ def start(string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
     parfen(string)
     draw()
     go(screen)
-    
+
+
+
