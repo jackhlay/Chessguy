@@ -175,7 +175,7 @@ def go(screen):
                 elif fin.place in moves:
                     fin.piece = orig.piece
                     fin.color=orig.color
-                    fin.active=True
+                    fin.occupied=True
                     fin.moved=True
                     orig.piece=None
                     orig.color=None
@@ -472,7 +472,7 @@ def check(color):
                         totMov.extend(movegen(j))
                         print(totMov)
                     if kingpl in totMov:
-                        print("IT'S OVER!! KING {kingpl}")
+                        print(f"IT's OVER!! KING {kingpl}")
                         return True   
                       
     if color == "Black":
@@ -486,7 +486,7 @@ def check(color):
                             totMov.extend(movegen(j))
                             print(totMov)
                         if kingpl in totMov:
-                            print(f"IT'S OVER!! KING {kingpl}")
+                            print(f"IT's OVER!! KING {kingpl}")
                             return True
     return False
 
