@@ -50,56 +50,69 @@ class Space():
 def parfen(String):
     sqr = 0
     for i in range(64):
+        board[i].occupied = False
         board[i].color = None
 
     for i, char in enumerate(String):
         if char == "K":
             board[sqr].piece = "KING"
             board[sqr].color = "White"
+            board[sqr].occupied = True
             sqr+=1
         elif char == "k":
             board[sqr].piece = "KING"
             board[sqr].color = "Black"
+            board[sqr].occupied = True
             sqr+=1
         elif char == "Q":
             board[sqr].piece = "QUEEN"
             board[sqr].color = "White"
+            board[sqr].occupied = True
             sqr+=1
         elif char == "q":
             board[sqr].piece = "QUEEN"
             board[sqr].color = "Black"
+            board[sqr].occupied = True
             sqr+=1
         elif char == "B":
             board[sqr].piece = "BISHOP"
             board[sqr].color = "White"
+            board[sqr].occupied = True
             sqr+=1
         elif char == "b":
             board[sqr].piece = "BISHOP"
             board[sqr].color = "Black"
+            board[sqr].occupied = True
             sqr+=1
         elif char == "N":
             board[sqr].piece = "KNIGHT"
             board[sqr].color = "White"
+            board[sqr].occupied = True
             sqr+=1
         elif char == "n":
             board[sqr].piece = "KNIGHT"
             board[sqr].color = "Black"
+            board[sqr].occupied = True
             sqr+=1
         elif char == "R":
             board[sqr].piece = "ROOK"
             board[sqr].color = "White"
+            board[sqr].occupied = True
             sqr+=1
         elif char == "r":
             board[sqr].piece = "ROOK"
             board[sqr].color = "Black"
+            board[sqr].occupied = True
             sqr+=1
         elif char == "P":
             board[sqr].piece = "PAWN"
             board[sqr].color = "White"
+            board[sqr].occupied = True
             sqr+=1
         elif char == "p":
             board[sqr].piece = "PAWN"
             board[sqr].color = "Black"
+            board[sqr].occupied = True
             sqr+=1
         elif char == "/":
             continue
@@ -142,21 +155,19 @@ def go(screen):
     dragging=False
     offset_x, offset_y = 0, 0
     clock = pygame.time.Clock()
-
+    pygame.init()
     #clean up this while loop
     while running:
-
-        pygame.init()
+        
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
-                chec = check(turn)
                 x, y = event.pos
                 square_x, square_y = x // 100, y // 100
                 ind = (square_y * 8) + square_x
                 orig = takein(x,y)
                 moves = movegen(ind)
 
-                if not chec:
+                if not check(turn):
                     print(f"Check? False!") 
                     if orig.active:
                         dragging=True
@@ -164,12 +175,12 @@ def go(screen):
                             img = wPiecesDict[orig.piece]
                         else:
                             img = bPiecesDict[orig.piece]
-                elif chec:
-                    print("Check!")
+                
 
             if event.type== pygame.MOUSEBUTTONUP:
                 dragging = False
                 x, y = event.pos
+                ind = (square_y * 8) + square_x
                 fin = takein(x,y)
                 if fin == orig or turn != orig.color:
                     drawit(screen)
@@ -178,7 +189,9 @@ def go(screen):
                     fin.color=orig.color
                     fin.occupied=True
                     fin.moved=True
+                    fin.active=True
                     orig.piece=None
+                    orig.occupied=False
                     orig.color=None
                     orig.active=False
                     orig.moved=None
@@ -187,6 +200,59 @@ def go(screen):
                         turn = "Black"
                     else:
                         turn="White"
+                # elif fin.place in castles:
+                #     if fin.place==board[ind+2].place:
+                #         fin.piece = orig.piece
+                #         fin.color=orig.color
+                #         fin.occupied=True
+                #         fin.moved=True
+                #         fin.active=True
+                #         orig.piece=None
+                #         orig.occupied=False
+                #         orig.color=None
+                #         orig.active=False
+                #         orig.moved=None
+                #         board[ind+1].piece = board[ind+3].piece
+                #         board[ind+1].color = board[ind+3].color
+                #         board[ind+1].occupied = board[ind+3].occupied
+                #         board[ind+1].moved = board[ind+3].moved
+                #         board[ind+1].active = board[ind+3].active
+                #         board[ind+3].piece = None
+                #         board[ind+3].occupied = False
+                #         board[ind+3].color = None
+                #         board[ind+3].moved = None
+                #         board[ind+3].active = False
+                #         drawit(screen)
+                #         if turn == "White":
+                #             turn = "Black"
+                #         else:
+                #             turn="White"
+                #     elif fin.place==board[ind-2].place:
+                #         fin.piece = orig.piece
+                #         fin.color=orig.color
+                #         fin.occupied=True
+                #         fin.moved=True
+                #         fin.active=True
+                #         orig.piece=None
+                #         orig.occupied=False
+                #         orig.color=None
+                #         orig.active=False
+                #         orig.moved=None
+                #         board[ind-1].piece = board[ind-4].piece
+                #         board[ind-1].color = board[ind-4].color
+                #         board[ind-1].occupied = board[ind-4].occupied
+                #         board[ind-1].moved = board[ind-4].moved
+                #         board[ind-1].active = board[ind-4].active
+                #         board[ind-4].piece = None
+                #         board[ind-4].occupied = False
+                #         board[ind-4].color = None
+                #         board[ind-4].moved = None
+                #         board[ind-4].active = False
+                #         drawit(screen)
+                #         if turn == "White":
+                #             turn = "Black"
+                #         else:
+                #             turn="White"
                 else:
                     drawit(screen)
 
@@ -267,7 +333,7 @@ def movegen(ind):
 
     if spot.piece == "PAWN":
         if spot.color == "White":
-            if not spot.moved:
+            if not spot.moved and not board[ind-16].occupied:
                 moves = [board[ind-8].place, board[ind-16].place]
                 if board[ind-7].color == "Black":
                     moves.append(board[ind-7].place)
@@ -275,7 +341,7 @@ def movegen(ind):
                     moves.append(board[ind-9].place)
                 
             else:
-                if not board[ind-8].color:
+                if not board[ind-8].occupied:
                     moves = [board[ind-8].place]
                     if board[ind-7].color == "Black":
                         moves.append(board[ind-7].place)
@@ -284,7 +350,7 @@ def movegen(ind):
                 else:
                     return []
         elif spot.color == "Black":
-            if not spot.moved:
+            if not spot.moved and not board[ind+16].occupied:
                 moves = [board[ind+8].place, board[ind+16].place]
                 if board[ind+7].color == "White":
                     moves.append(board[ind+7].place)
@@ -292,7 +358,7 @@ def movegen(ind):
                     moves.append(board[ind+9].place)
 
             else:
-                if not board[ind+8].color:
+                if not board[ind+8].occupied:
                     moves = [board[ind+8].place]
                     if board[ind+7].color == "White":
                         moves.append(board[ind+7].place)
@@ -456,6 +522,14 @@ def movegen(ind):
         for m in moves:
             if m in range(len(board)) and board[m].color != board[ind].color:
                 nMoves.append(board[m].place)
+        # if not board[ind].moved:
+        #     if not board[ind+3].moved and all(not board[i].occupied for i in (ind+1, ind+2)):
+        #         castles.append(ind+2)
+        #     if not board[ind-4].moved and all(not board[i].occupied for i in (ind-3, ind-2, ind-1)):
+        #        castles.append(ind-1)
+
+            
+
         return nMoves
 
     return moves
