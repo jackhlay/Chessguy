@@ -149,13 +149,14 @@ def go(screen):
         pygame.init()
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
+                chec = check(turn)
                 x, y = event.pos
                 square_x, square_y = x // 100, y // 100
                 ind = (square_y * 8) + square_x
                 orig = takein(x,y)
                 moves = movegen(ind)
 
-                if not check(turn):
+                if not chec:
                     print(f"Check? False!") 
                     if orig.active:
                         dragging=True
@@ -163,7 +164,7 @@ def go(screen):
                             img = wPiecesDict[orig.piece]
                         else:
                             img = bPiecesDict[orig.piece]
-                else:
+                elif chec:
                     print("Check!")
 
             if event.type== pygame.MOUSEBUTTONUP:
@@ -462,32 +463,31 @@ def movegen(ind):
 def check(color):
     
     if color == "White":
+        kingpw = next((i for i, square in enumerate(board) if square.piece == "KING" and square.color == "White"), None)
+        kingplw = board[kingpw].place
+        print(f"{color} KING ON {kingplw}")
+        totMov = []
         for i in range(len(board)):
-            if board[i].color == "White" and board[i].piece == "KING":
-                totMov = []
-                kingpl = board[i].place
-                print(f"{color} KING ON {kingpl}")
-                for j in range(len(board)):
-                    if board[j].color == "Black":
-                        totMov.extend(movegen(j))
-                        print(totMov)
-                    if kingpl in totMov:
-                        print(f"IT's OVER!! KING {kingpl}")
-                        return True   
-                      
-    if color == "Black":
+            if board[i].color == "Black":
+                totMov.extend(movegen(i))
+                if kingplw in totMov:
+                    print(f"IT's OVER!! KING {kingplw}")
+                    return True
+        print(totMov)
+                
+    
+    elif color == "Black":
+        kingpb = next((i for i, square in enumerate(board) if square.piece == "KING" and square.color == "Black"), None)
+        kingplb = board[kingpb].place
+        print(f"{color} KING ON {kingplb}")
+        totMov = []
         for i in range(len(board)):
-            if board[i].color == "Black" and board[i].piece == "KING":
-                    totMov = []
-                    kingpl = board[i].place
-                    print(f"{color} KING ON {kingpl}")
-                    for j in range(len(board)):
-                        if board[j].color == "White":
-                            totMov.extend(movegen(j))
-                            print(totMov)
-                        if kingpl in totMov:
-                            print(f"IT's OVER!! KING {kingpl}")
-                            return True
+            if board[i].color == "White":
+                totMov.extend(movegen(i))
+                if kingplb in totMov:
+                    print(f"IT's OVER!! KING {kingplb}")
+                    return True
+        print(totMov)
     return False
 
 #GO! GO! GO!                  
