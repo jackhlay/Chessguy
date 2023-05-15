@@ -11,13 +11,13 @@ Display and center pieces
 Write a function to parse the FEN
 Once parced translate the space's info to the space
 Be able to correctly output any FEN string
-Allow the ability to make moves
 Turn Ordering
 
 Working on now:
-Move Legality
+Move Generation
 
 Working on next:
+Move Legality
 Let the computer make moves
 Write rules for how each piece moves
 Write rules for move legality
