@@ -3,7 +3,7 @@ import pygame
 # ENGINE
 # Handles gamestate info, and valid moves, writes gamelog.
 pygame.init()
-pygame.display.set_caption('boby V0.22')
+pygame.display.set_caption('boby V0.221')
 turn ="White"
 
 #Black Pieces
