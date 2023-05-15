@@ -34,15 +34,21 @@ bPiecesDict = {'KING': pygame.transform.scale(bK, (int(60*1.03), int(60*1.03))),
                'ROOK': pygame.transform.scale(bR, (int(60*1.03), int(60*1.03))),
                'PAWN': pygame.transform.scale(bp, (int(60*1.03), int(60*1.03)))}
 
+piecearr = []
 
 #Game Classes
 class Space():
     occupied = False
     active = False
-    piece = None
-    color = "White"
     place = None
+
+class piece():
+    type = None
+    alive = True
+    color = None
     moved = False
+    boardInd = None
+    moves = []
 
 #Functions Block
 
@@ -51,68 +57,103 @@ def parfen(String):
     sqr = 0
     for i in range(64):
         board[i].occupied = False
-        board[i].color = None
 
     for i, char in enumerate(String):
         if char == "K":
-            board[sqr].piece = "KING"
-            board[sqr].color = "White"
+            WKing = piece()
+            WKing.color = "White"
+            WKing.type = "KING"
+            WKing.boardInd = sqr
             board[sqr].occupied = True
+            piecearr.append(WKing)
             sqr+=1
         elif char == "k":
-            board[sqr].piece = "KING"
-            board[sqr].color = "Black"
+            BKing = piece()
+            BKing.color = "Black"
+            BKing.type = "KING"
+            BKing.boardInd = sqr
             board[sqr].occupied = True
+            piecearr.append(BKing)
             sqr+=1
         elif char == "Q":
-            board[sqr].piece = "QUEEN"
-            board[sqr].color = "White"
+            WQueen = piece()
+            WQueen.color = "White"
+            WQueen.type = "QUEEN"
+            WQueen.boardInd = sqr
             board[sqr].occupied = True
+            piecearr.append(WQueen)
             sqr+=1
         elif char == "q":
-            board[sqr].piece = "QUEEN"
-            board[sqr].color = "Black"
+            BQueen = piece()
+            BQueen.color = "Black"
+            BQueen.type = "QUEEN"
+            BQueen.boardInd = sqr
             board[sqr].occupied = True
+            piecearr.append(BQueen)
             sqr+=1
         elif char == "B":
-            board[sqr].piece = "BISHOP"
-            board[sqr].color = "White"
+            WBishop = piece()
+            WBishop.color = "White"
+            WBishop.type = "BISHOP"
+            WBishop.boardInd = sqr
             board[sqr].occupied = True
+            piecearr.append(WBishop)
             sqr+=1
         elif char == "b":
-            board[sqr].piece = "BISHOP"
-            board[sqr].color = "Black"
+            BBishop = piece()
+            BBishop.color = "Black"
+            BBishop.type = "BISHOP"
+            BBishop.boardInd = sqr
             board[sqr].occupied = True
+            piecearr.append(BBishop)
             sqr+=1
         elif char == "N":
-            board[sqr].piece = "KNIGHT"
-            board[sqr].color = "White"
+            WKnight = piece()
+            WKnight.color = "White"
+            WKnight.type = "KNIGHT"
+            WKnight.boardInd = sqr
             board[sqr].occupied = True
+            piecearr.append(WKnight)
             sqr+=1
         elif char == "n":
-            board[sqr].piece = "KNIGHT"
-            board[sqr].color = "Black"
+            BKnight = piece()
+            BKnight.color = "Black"
+            BKnight.type = "KNIGHT"
+            BKnight.boardInd = sqr
             board[sqr].occupied = True
+            piecearr.append(BKnight)
             sqr+=1
         elif char == "R":
-            board[sqr].piece = "ROOK"
-            board[sqr].color = "White"
+            WRook = piece()
+            WRook.color = "White"
+            WRook.type = "ROOK"
+            WRook.boardInd = sqr
             board[sqr].occupied = True
+            piecearr.append(WRook)
             sqr+=1
         elif char == "r":
-            board[sqr].piece = "ROOK"
-            board[sqr].color = "Black"
+            BRook = piece()
+            BRook.color = "Black"
+            BRook.type = "ROOK"
+            BRook.boardInd = sqr
             board[sqr].occupied = True
+            piecearr.append(BRook)
             sqr+=1
         elif char == "P":
-            board[sqr].piece = "PAWN"
-            board[sqr].color = "White"
+            WPawn = piece()
+            WPawn.color = "White"
+            WPawn.type = "PAWN"
+            WPawn.boardInd = sqr
             board[sqr].occupied = True
+            piecearr.append(WPawn)
             sqr+=1
         elif char == "p":
-            board[sqr].piece = "PAWN"
-            board[sqr].color = "Black"
+            BPawn = piece()
+            BPawn.color = "Black"
+            BPawn.type = "PAWN"
+            BPawn.boardInd = sqr
             board[sqr].occupied = True
+            piecearr.append(BPawn)
             sqr+=1
         elif char == "/":
             continue
@@ -139,13 +180,13 @@ def draw():
             pos += 1
 
     for i in range(64):
-        if board[i].piece:
-            board[i].active=True
-            if board[i].color=="Black":
-                screen.blit(bPiecesDict[board[i].piece], ((i%8)*100+20, (i//8)*100+20))
+        if board[i].occupied:
+            piece = next((piece for piece in piecearr if piece.boardInd == i), None)
+            if piece.color=="Black":
+                screen.blit(bPiecesDict[piece.type], ((i%8)*100+20, (i//8)*100+20))
                 pygame.display.flip()
             else:
-                screen.blit(wPiecesDict[board[i].piece], ((i%8)*100+20, (i//8)*100+20))
+                screen.blit(wPiecesDict[piece.type], ((i%8)*100+20, (i//8)*100+20))
                 pygame.display.flip()
 
 #Game loop and maintainence functions
@@ -165,96 +206,25 @@ def go(screen):
                 square_x, square_y = x // 100, y // 100
                 ind = (square_y * 8) + square_x
                 orig = takein(x,y)
-                moves = movegen(ind)
-
-                if not check(turn):
-                    print(f"Check? False!") 
-                    if orig.active:
-                        dragging=True
-                        if orig.color=="White":
-                            img = wPiecesDict[orig.piece]
-                        else:
-                            img = bPiecesDict[orig.piece]
+                piece = next((piece for piece in piecearr if piece.boardInd == ind), None)
+                
+                if orig.occupied and piece.color == turn:
+                    dragging=True
+                    if piece.color=="White":
+                        img = wPiecesDict[piece.type]
+                    else:
+                        img = bPiecesDict[piece.type]
                 
 
             if event.type== pygame.MOUSEBUTTONUP:
                 dragging = False
                 x, y = event.pos
                 ind = (square_y * 8) + square_x
-                fin = takein(x,y)
-                if fin == orig or turn != orig.color:
-                    drawit(screen)
-                elif fin.place in moves:
-                    fin.piece = orig.piece
-                    fin.color=orig.color
-                    fin.occupied=True
-                    fin.moved=True
-                    fin.active=True
-                    orig.piece=None
-                    orig.occupied=False
-                    orig.color=None
-                    orig.active=False
-                    orig.moved=None
-                    drawit(screen)
-                    if turn == "White":
-                        turn = "Black"
-                    else:
-                        turn="White"
-                # elif fin.place in castles:
-                #     if fin.place==board[ind+2].place:
-                #         fin.piece = orig.piece
-                #         fin.color=orig.color
-                #         fin.occupied=True
-                #         fin.moved=True
-                #         fin.active=True
-                #         orig.piece=None
-                #         orig.occupied=False
-                #         orig.color=None
-                #         orig.active=False
-                #         orig.moved=None
-                #         board[ind+1].piece = board[ind+3].piece
-                #         board[ind+1].color = board[ind+3].color
-                #         board[ind+1].occupied = board[ind+3].occupied
-                #         board[ind+1].moved = board[ind+3].moved
-                #         board[ind+1].active = board[ind+3].active
-                #         board[ind+3].piece = None
-                #         board[ind+3].occupied = False
-                #         board[ind+3].color = None
-                #         board[ind+3].moved = None
-                #         board[ind+3].active = False
-                #         drawit(screen)
-                #         if turn == "White":
-                #             turn = "Black"
-                #         else:
-                #             turn="White"
-                #     elif fin.place==board[ind-2].place:
-                #         fin.piece = orig.piece
-                #         fin.color=orig.color
-                #         fin.occupied=True
-                #         fin.moved=True
-                #         fin.active=True
-                #         orig.piece=None
-                #         orig.occupied=False
-                #         orig.color=None
-                #         orig.active=False
-                #         orig.moved=None
-                #         board[ind-1].piece = board[ind-4].piece
-                #         board[ind-1].color = board[ind-4].color
-                #         board[ind-1].occupied = board[ind-4].occupied
-                #         board[ind-1].moved = board[ind-4].moved
-                #         board[ind-1].active = board[ind-4].active
-                #         board[ind-4].piece = None
-                #         board[ind-4].occupied = False
-                #         board[ind-4].color = None
-                #         board[ind-4].moved = None
-                #         board[ind-4].active = False
-                #         drawit(screen)
-                #         if turn == "White":
-                #             turn = "Black"
-                #         else:
-                #             turn="White"
-                else:
-                    drawit(screen)
+                # fin = takein(x,y)
+                # if fin == orig or turn != piece.color:
+                #     drawit(screen)
+                
+                drawit(screen)
 
 
             if event.type == pygame.MOUSEMOTION:
@@ -290,12 +260,12 @@ def drawit(screen):
             pos += 1
 
     for i in range(64):
-        if board[i].piece:
-            board[i].active=True
-            if board[i].color=="Black":
-                foreground.blit(bPiecesDict[board[i].piece], ((i%8)*100+20, (i//8)*100+20))
+        if board[i].occupied:
+            piece = next((piece for piece in piecearr if piece.boardInd == i), None)
+            if piece.color=="Black":
+                foreground.blit(bPiecesDict[piece.type], ((i%8)*100+20, (i//8)*100+20))
             else:
-                foreground.blit(wPiecesDict[board[i].piece], ((i%8)*100+20, (i//8)*100+20))
+                foreground.blit(wPiecesDict[piece.type], ((i%8)*100+20, (i//8)*100+20))
     
     background.blit(foreground, (0, 0))
     screen.blit(background, (0, 0))
@@ -305,26 +275,27 @@ def takein(x,y):
     square_x, square_y = x // 100, y // 100
     ind = (square_y * 8) + square_x
     spot = board[ind]
+    piece = next((piece for piece in piecearr if piece.boardInd == ind), None)
     
-    {#previous print tests
+    #previous print tests
     # print('Active: {}'.format(spot.active))
     # print(spot.color)
+    if spot.occupied:
+        if piece.type == "KING":
+            print(f"{piece.color} KING")
+        elif piece.type == "QUEEN":
+            print(f"{piece.color} QUEEN")
+        elif piece.type == "ROOK":
+            print(f"{piece.color} ROOK")
+        elif piece.type == "BISHOP":
+            print(f"{piece.color} BISHOP")
+        elif piece.type == "KNIGHT":
+            print("HORSEY")
+        elif piece.type == "PAWN":
+            print(f"{piece.color} PAWN")
+    else:
+        print("empty")
 
-    # if spot.piece == "KING":
-    #     print("you, sir")
-    # elif spot.piece == "QUEEN":
-    #     print("my freakin wife")
-    # elif spot.piece == "ROOK":
-    #     print("slide moves NESW")
-    # elif spot.piece == "BISHOP":
-    #     print("diags only")
-    # elif spot.piece == "KNIGHT":
-    #     print("HORSEY")
-    # elif spot.piece == "PAWN":
-    #     print("7 Spares")
-    # else:
-    #     print("empty")
-    }
     return spot
 
 def movegen(ind):
@@ -534,35 +505,7 @@ def movegen(ind):
 
     return moves
 
-def check(color):
-    
-    if color == "White":
-        kingpw = next((i for i, square in enumerate(board) if square.piece == "KING" and square.color == "White"), None)
-        kingplw = board[kingpw].place
-        print(f"{color} KING ON {kingplw}")
-        totMov = []
-        for i in range(len(board)):
-            if board[i].color == "Black":
-                totMov.extend(movegen(i))
-                if kingplw in totMov:
-                    print(f"IT's OVER!! KING {kingplw}")
-                    return True
-        print(totMov)
-                
-    
-    elif color == "Black":
-        kingpb = next((i for i, square in enumerate(board) if square.piece == "KING" and square.color == "Black"), None)
-        kingplb = board[kingpb].place
-        print(f"{color} KING ON {kingplb}")
-        totMov = []
-        for i in range(len(board)):
-            if board[i].color == "White":
-                totMov.extend(movegen(i))
-                if kingplb in totMov:
-                    print(f"IT's OVER!! KING {kingplb}")
-                    return True
-        print(totMov)
-    return False
+
 
 #GO! GO! GO!                  
 def start(string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
@@ -576,12 +519,9 @@ def start(string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
     for i in range(64):
         board.append(Space())
         board[i].place = spots[i]
-        board[i].piece=None
-        if i > 48:
-            board[i].color="Black"
+    
     parfen(string)
     draw()
     go(screen)
 
-
-
+start()
