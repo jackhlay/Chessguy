@@ -49,6 +49,30 @@ class piece():
     moved = False
     boardInd = None
     moves = []
+    def movegen(self, ind):
+        self.moves=[]
+        if self.type == "ROOK":
+            pass
+        elif self.type == "KNIGHT":
+            pass
+        elif self.type == "BISHOP":
+            pass
+        elif self.type == "QUEEN":
+            pass
+        elif self.type == "KING":
+            pass
+        elif self.type == "PAWN":
+            if self.color == "White":
+                if self.moved == False:
+                    self.moves.extend([ind-8,ind-16])
+                else:
+                    self.moves.append(ind-8)
+            else:
+                if self.moved == False:
+                    self.moves.extend([ind+8,ind+16])
+                else:
+                    self.moves.append(ind+8)
+        return self.moves
 
 #Functions Block
 
@@ -207,13 +231,14 @@ def go(screen):
                 ind = (square_y * 8) + square_x
                 orig = takein(x,y)
                 piece = next((piece for piece in piecearr if piece.boardInd == ind), None)
-                
+                piece.movegen(ind)
                 if orig.occupied and piece.color == turn:
                     dragging=True
                     if piece.color=="White":
                         img = wPiecesDict[piece.type]
                     else:
                         img = bPiecesDict[piece.type]
+                print(piece.moves)
                 
 
             if event.type== pygame.MOUSEBUTTONUP:
@@ -297,215 +322,6 @@ def takein(x,y):
         print("empty")
 
     return spot
-
-def movegen(ind):
-    spot = board[ind]
-    moves = []
-
-    if spot.piece == "PAWN":
-        if spot.color == "White":
-            if not spot.moved and not board[ind-16].occupied:
-                moves = [board[ind-8].place, board[ind-16].place]
-                if board[ind-7].color == "Black":
-                    moves.append(board[ind-7].place)
-                if board[ind-9].color == "Black":
-                    moves.append(board[ind-9].place)
-                
-            else:
-                if not board[ind-8].occupied:
-                    moves = [board[ind-8].place]
-                    if board[ind-7].color == "Black":
-                        moves.append(board[ind-7].place)
-                    if board[ind-9].color == "Black":
-                        moves.append(board[ind-9].place)
-                else:
-                    return []
-        elif spot.color == "Black":
-            if not spot.moved and not board[ind+16].occupied:
-                moves = [board[ind+8].place, board[ind+16].place]
-                if board[ind+7].color == "White":
-                    moves.append(board[ind+7].place)
-                if board[ind+9].color == "White":
-                    moves.append(board[ind+9].place)
-
-            else:
-                if not board[ind+8].occupied:
-                    moves = [board[ind+8].place]
-                    if board[ind+7].color == "White":
-                        moves.append(board[ind+7].place)
-                    if board[ind+9].color == "White":
-                        moves.append(board[ind+9].place)
-
-                else:
-                    return []
-
-    if spot.piece == "KNIGHT":
-        nMoves = []
-        moves = [ind-17, ind-15, ind-10, ind-6, ind+17, ind+15, ind+10, ind+6]
-        for m in moves:
-            if m in range(len(board)) and abs(ord(board[m].place[0]) - ord(board[ind].place[0])) <= 2 and board[m].color != board[ind].color:
-                nMoves.append(board[m].place)
-        return nMoves
-    
-    if spot.piece == "ROOK":
-        down = [ind+8, ind+16, ind+24, ind+32, ind+40, ind+48, ind+56]
-        up = [ind-8, ind-16, ind-24, ind-32, ind-40, ind-48, ind-56]
-        right = [ind+1, ind+2, ind+3, ind+4, ind+5, ind+6, ind+7]
-        left = [ind-1, ind-3, ind-4, ind-5, ind-6, ind-7]
-        moves = []
-        for d in down:
-            if d in range(len(board)):
-                 if board[d].color == board[ind].color or board[d].place[0] != board[ind].place[0]:
-                     break
-                 moves.append(board[d].place)
-                 if board[d].occupied:
-                     break
-        for u in up:
-            if u in range(len(board)):
-                 if board[u].color == board[ind].color or board[u].place[0] != board[ind].place[0]:
-                     break
-                 moves.append(board[u].place)
-                 if board[u].occupied:
-                    break
-        for l in left:
-            if l in range(len(board)):
-                if board[l].color == board[ind].color or board[l].place[1] != board[ind].place[1]:
-                     break
-                moves.append(board[l].place)
-                if board[l].occupied:
-                    break
-        for r in right:
-            if r in range(len(board)):
-                if board[r].color == board[ind].color or board[r].place[1] != board[ind].place[1]:
-                    return moves
-                moves.append(board[r].place)
-                if board[r].occupied:
-                    return moves
-    
-    if spot.piece == "BISHOP":
-        upL = [ind-9, ind-18, ind-27, ind-36, ind-45, ind-54, ind-63] 
-        upR = [ind-7, ind-14, ind-21, ind-28, ind-35, ind-42, ind-49] 
-        downR=[ind+9, ind+18, ind+27, ind+36, ind+45, ind+54, ind+63] 
-        downL=[ind+7, ind+14, ind+21, ind+28, ind+35, ind+42, ind+49]
-        moves = []
-        for j in upL:
-            if j in range(len(board)):
-                if board[j].color == board[ind].color:
-                    break
-                moves.append(board[j].place)
-                if board[j].occupied or board[j].place[0] == 'a':
-                    break
-        for k in upR:
-            if k in range(len(board)):
-                if board[k].color == board[ind].color:
-                    break
-                moves.append(board[k].place)
-                if board[k].occupied or board[k].place[0] == 'h':
-                    break
-        for l in downR:
-            if l in range(len(board)):    
-                if board[l].color == board[ind].color:
-                    break
-                moves.append(board[l].place)
-                if board[l].occupied or board[l].place[0] == 'h':
-                    break
-        for m in downL:
-            if m in range(len(board)):
-                if board[m].color == board[ind].color:
-                    return moves
-                moves.append(board[m].place)
-                if board[m].occupied or board[m].place[0] == 'a':
-                    return moves
-    
-    if spot.piece == "QUEEN":
-        moves = []
-
-        down = [ind+8, ind+16, ind+24, ind+32, ind+40, ind+48, ind+56]
-        up = [ind-8, ind-16, ind-24, ind-32, ind-40, ind-48, ind-56]
-        right = [ind+1, ind+2, ind+3, ind+4, ind+5, ind+6, ind+7]
-        left = [ind-1, ind-2, ind-3, ind-4, ind-5, ind-6, ind-7]
-
-        upL = [ind-9, ind-18, ind-27, ind-36, ind-45, ind-54, ind-63] 
-        upR = [ind-7, ind-14, ind-21, ind-28, ind-35, ind-42, ind-49] 
-        downR=[ind+9, ind+18, ind+27, ind+36, ind+45, ind+54, ind+63] 
-        downL=[ind+7, ind+14, ind+21, ind+28, ind+35, ind+42, ind+49]
-        
-        for j in upL:
-            if j in range(len(board)):
-                if board[j].color == board[ind].color:
-                    break
-                moves.append(board[j].place)
-                if board[j].occupied or board[j].place[0] == 'a':
-                    break
-        for k in upR:
-            if k in range(len(board)):
-                if board[k].color == board[ind].color:
-                    break
-                moves.append(board[k].place)
-                if board[k].occupied or board[k].place[0] == 'h':
-                    break
-        for l in downR:
-            if l in range(len(board)):    
-                if board[l].color == board[ind].color:
-                    break
-                moves.append(board[l].place)
-                if board[l].occupied or board[l].place[0] == 'h':
-                    break
-        for m in downL:
-            if m in range(len(board)):
-                if board[m].color == board[ind].color:
-                    break
-                moves.append(board[m].place)
-                if board[m].occupied or board[m].place[0] == 'a':
-                    break
-        for d in down:
-            if d in range(len(board)):
-                 if board[d].color == board[ind].color or board[d].place[0] != board[ind].place[0]:
-                     break
-                 moves.append(board[d].place)
-                 if board[d].occupied:
-                     break
-        for u in up:
-            if u in range(len(board)):
-                 if board[u].color == board[ind].color or board[u].place[0] != board[ind].place[0]:
-                     break
-                 moves.append(board[u].place)
-                 if board[u].occupied:
-                    break
-        for l in left:
-            if l in range(len(board)):
-                if board[l].color == board[ind].color or board[l].place[1] != board[ind].place[1]:
-                     break
-                moves.append(board[l].place)
-                if board[l].occupied:
-                    break
-        for r in right:
-            if r in range(len(board)):
-                if board[r].color == board[ind].color or board[r].place[1] != board[ind].place[1]:
-                    return moves
-                moves.append(board[r].place)
-                if board[r].occupied:
-                    return moves
-
-    if spot.piece == "KING":
-        moves = [ind-9,ind-8,ind-7,ind-1,ind+1,ind+7,ind+8,ind+9]
-        nMoves = []
-        for m in moves:
-            if m in range(len(board)) and board[m].color != board[ind].color:
-                nMoves.append(board[m].place)
-        # if not board[ind].moved:
-        #     if not board[ind+3].moved and all(not board[i].occupied for i in (ind+1, ind+2)):
-        #         castles.append(ind+2)
-        #     if not board[ind-4].moved and all(not board[i].occupied for i in (ind-3, ind-2, ind-1)):
-        #        castles.append(ind-1)
-
-            
-
-        return nMoves
-
-    return moves
-
-
 
 #GO! GO! GO!                  
 def start(string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
