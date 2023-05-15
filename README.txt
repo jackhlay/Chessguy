@@ -12,6 +12,7 @@ Write a function to parse the FEN
 Once parced translate the space's info to the space
 Be able to correctly output any FEN string
 Turn Ordering
+Double Buffering
 
 Working on now:
 Move Generation
