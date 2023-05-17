@@ -44,6 +44,7 @@ class Space():
 
 class piece():
     type = None
+    val = None
     alive = True
     color = None
     moved = False
@@ -52,28 +53,114 @@ class piece():
     def movegen(self, ind):
         self.moves=[]
         if self.type == "ROOK":
-            pass
+            self.moves.extend(self.slides(ind))
         elif self.type == "KNIGHT":
-            pass
+            if board[ind].place[0] == "h":
+                self.moves.extend([ind-17, ind-10, ind+6, ind+15])
+            elif board[ind].place[0] == "a":
+                self.moves.extend([ind-15, ind-6, ind+10, ind+17])
+            else:
+                self.moves.extend([ind-17, ind-15, ind-10, ind-6, ind+6, ind+10, ind+15, ind+17])
         elif self.type == "BISHOP":
             pass
         elif self.type == "QUEEN":
             pass
         elif self.type == "KING":
-            pass
+            self.moves = [ind-9, ind-8, ind-7, ind-1, ind+1, ind+7, ind+8, ind+9]
         elif self.type == "PAWN":
             if self.color == "White":
+                takes = [ind-7, ind-9]
                 if self.moved == False:
                     self.moves.extend([ind-8,ind-16])
                 else:
                     self.moves.append(ind-8)
+
+                for m in self.moves:
+                    piece = next((piece for piece in piecearr if piece.boardInd == m), None)
+                    if piece:
+                        self.moves.remove(m)
+                for t in takes:
+                    piece = next((piece for piece in piecearr if piece.boardInd == t), None)
+                    if piece and piece.color != self.color:
+                        self.moves.append(t)
+                    
             else:
+                takes = [ind+7, ind+9]
                 if self.moved == False:
                     self.moves.extend([ind+8,ind+16])
                 else:
                     self.moves.append(ind+8)
+                for m in self.moves:
+                    piece = next((piece for piece in piecearr if piece.boardInd == m), None)
+                    if piece:
+                        self.moves.remove(m)
+                for t in takes:
+                    piece = next((piece for piece in piecearr if piece.boardInd == t), None)
+                    if piece and piece.color != self.color:
+                        self.moves.append(t)
+    
         return self.moves
+    
+    def legals(self, arr):
+        moves = []
+        for m in arr:
+            piece = next((piece for piece in piecearr if piece.boardInd == m), None)
+            if m > 0 and m < 64:
+                if not board[m].occupied:
+                    moves.append(m)
 
+                elif board[m].occupied and piece.color != self.color:
+                    moves.append(m)
+        return moves
+    
+    def slides(self, ind):
+        moves = []
+        for dir in range(4):
+            print(dir)
+            for i in range (8):
+                if dir == 0:
+                    tp = ind - 8 * (i+1)
+                    print(f"up occupied: {board[tp].occupied}")
+                elif dir == 1:
+                    tp = ind + 8 * (i+1)
+                    print(f"down {tp}")
+                elif dir == 2: #left
+                    if tp % 8 == 0:
+                        break
+                    tp = ind - 1 * (i+1)
+                    print(f"left occupied: {board[tp].occupied}")
+                elif dir == 3: #right
+                    if tp % 8 == 7:
+                        break
+                    tp = ind + 1 * (i+1)
+                    print(f"right occupied: {board[tp].occupied}")
+
+                p2 = next((piece for piece in piecearr if piece.boardInd == tp), None)
+                if tp < 0 or tp > 63:
+                    break
+                if not p2:
+                    moves.append(tp) 
+                elif p2 and p2.color != self.color:
+                    moves.append(tp)
+                    break
+                elif p2 and p2.color == self.color:
+                    break
+        return moves
+    
+    def diags(self, ind):
+        for dir in range(4):
+            for i in range(8):
+                if dir == 0: #up left
+                    tp = ind - 9 * (i+1)
+                elif dir == 1: #up right
+                    tp = ind - 7 * (i+1)
+                elif dir == 2: #down left
+                    tp = ind + 7 * (i+1)
+                elif dir == 3: #down right
+                    tp = ind + 9 * (i+1)
+                    
+
+    
 #Functions Block
 
 #Parser
@@ -185,6 +272,20 @@ def parfen(String):
             sqr += int(char)
             i+=int(char)
 
+        for m in piecearr:
+            if m.type == "BISHOP":
+                m.val = 3.1
+            elif m.type == "KNIGHT":
+                m.val == 3.0
+            elif m.type == "ROOK":
+                m.val = 5.0
+            elif m.type == "QUEEN":
+                m.val = 9.0
+            elif m.type == "PAWN":
+                m.val = 1.0
+            elif m.type == "KING":
+                m.val = 0
+
 #Draws board
 def draw():
     global turn,screen
@@ -226,30 +327,56 @@ def go(screen):
         
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
+                moves = []
                 x, y = event.pos
-                square_x, square_y = x // 100, y // 100
-                ind = (square_y * 8) + square_x
+                ind = ((y//100) * 8) + (x//100)
                 orig = takein(x,y)
                 piece = next((piece for piece in piecearr if piece.boardInd == ind), None)
-                piece.movegen(ind)
-                if orig.occupied and piece.color == turn:
+                print(piece.type)
+                if orig.occupied == False or piece.color != turn:
+                    drawit(screen)
+                    continue
+
+                else:
                     dragging=True
+                    moves = piece.legals(piece.movegen(ind))
+                    print(moves)
                     if piece.color=="White":
                         img = wPiecesDict[piece.type]
                     else:
                         img = bPiecesDict[piece.type]
-                print(piece.moves)
                 
 
             if event.type== pygame.MOUSEBUTTONUP:
                 dragging = False
                 x, y = event.pos
-                ind = (square_y * 8) + square_x
-                # fin = takein(x,y)
-                # if fin == orig or turn != piece.color:
-                #     drawit(screen)
-                
-                drawit(screen)
+                ind2 = ((y//100) * 8) + (x//100)
+                piece2 = next((piece for piece in piecearr if piece.boardInd == ind2), None)
+                fin = takein(x,y)
+                if fin == orig or turn != piece.color:
+                    drawit(screen)
+                elif board[ind2].occupied and piece2.color == piece.color:
+                    drawit(screen)
+                elif ind2 in moves:
+                    orig.occupied = False
+                    orig.active = False
+                    piece.boardInd = ind2
+                    piece.moved = True
+                    fin.occupied = True
+                    fin.active = True
+
+                    if piece2:
+                        # print(f"Piece Array Length {len(piecearr)}")
+                        piece2.alive = False 
+                        piece2.boardInd = -1
+                        piecearr.remove(piece2)
+                        # print(f"Piece Array Length {len(piecearr)}")
+
+
+                    turn = "White" if turn == "Black" else "Black"
+                    drawit(screen)
+                else:
+                    drawit(screen)
 
 
             if event.type == pygame.MOUSEMOTION:
@@ -302,28 +429,29 @@ def takein(x,y):
     spot = board[ind]
     piece = next((piece for piece in piecearr if piece.boardInd == ind), None)
     
-    #previous print tests
+    [#previous print tests
     # print('Active: {}'.format(spot.active))
     # print(spot.color)
-    if spot.occupied:
-        if piece.type == "KING":
-            print(f"{piece.color} KING")
-        elif piece.type == "QUEEN":
-            print(f"{piece.color} QUEEN")
-        elif piece.type == "ROOK":
-            print(f"{piece.color} ROOK")
-        elif piece.type == "BISHOP":
-            print(f"{piece.color} BISHOP")
-        elif piece.type == "KNIGHT":
-            print("HORSEY")
-        elif piece.type == "PAWN":
-            print(f"{piece.color} PAWN")
-    else:
-        print("empty")
+    # if spot.occupied:
+    #     if piece.type == "KING":
+    #         print(f"{piece.color} KING")
+    #     elif piece.type == "QUEEN":
+    #         print(f"{piece.color} QUEEN")
+    #     elif piece.type == "ROOK":
+    #         print(f"{piece.color} ROOK")
+    #     elif piece.type == "BISHOP":
+    #         print(f"{piece.color} BISHOP")
+    #     elif piece.type == "KNIGHT":
+    #         print(f"{piece.color}HORSEY")
+    #     elif piece.type == "PAWN":
+    #         print(f"{piece.color} PAWN")
+    # else:
+    #     print("empty")
+    ]
 
     return spot
 
-#GO! GO! GO!                  
+#GO! GO! GO!             
 def start(string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
     global board
     board,spots = [],[("a", 8), ("b", 8), ("c", 8), ("d", 8), ("e", 8), ("f", 8), ("g", 8), ("h", 8), ("a", 7), ("b", 7), ("c", 7),
@@ -339,5 +467,6 @@ def start(string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
     parfen(string)
     draw()
     go(screen)
+
 
 start()
