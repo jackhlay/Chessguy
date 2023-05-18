@@ -62,9 +62,10 @@ class piece():
             else:
                 self.moves.extend([ind-17, ind-15, ind-10, ind-6, ind+6, ind+10, ind+15, ind+17])
         elif self.type == "BISHOP":
-            pass
+            self.moves.extend(self.diags(ind))
         elif self.type == "QUEEN":
-            pass
+            self.moves.extend(self.slides(ind))
+            self.moves.extend(self.diags(ind))
         elif self.type == "KING":
             self.moves = [ind-9, ind-8, ind-7, ind-1, ind+1, ind+7, ind+8, ind+9]
         elif self.type == "PAWN":
@@ -105,7 +106,7 @@ class piece():
         moves = []
         for m in arr:
             piece = next((piece for piece in piecearr if piece.boardInd == m), None)
-            if m > 0 and m < 64:
+            if m >= 0 and m < 64:
                 if not board[m].occupied:
                     moves.append(m)
 
@@ -118,23 +119,18 @@ class piece():
         for dir in range(4):
             print(dir)
             for i in range (8):
-                if dir == 0:
+                if dir == 0:#up
                     tp = ind - 8 * (i+1)
-                    print(f"up occupied: {board[tp].occupied}")
-                elif dir == 1:
+                elif dir == 1:#down
                     tp = ind + 8 * (i+1)
-                    print(f"down {tp}")
                 elif dir == 2: #left
                     if tp % 8 == 0:
                         break
                     tp = ind - 1 * (i+1)
-                    print(f"left occupied: {board[tp].occupied}")
                 elif dir == 3: #right
                     if tp % 8 == 7:
                         break
                     tp = ind + 1 * (i+1)
-                    print(f"right occupied: {board[tp].occupied}")
-
                 p2 = next((piece for piece in piecearr if piece.boardInd == tp), None)
                 if tp < 0 or tp > 63:
                     break
@@ -148,19 +144,46 @@ class piece():
         return moves
     
     def diags(self, ind):
+        moves = []
         for dir in range(4):
+            print(dir)
             for i in range(8):
-                if dir == 0: #up left
+                if dir == 0:  # up left
                     tp = ind - 9 * (i+1)
-                elif dir == 1: #up right
+                    print(tp, board[tp].occupied)
+                elif dir == 1:  # up right
                     tp = ind - 7 * (i+1)
-                elif dir == 2: #down left
+                    print(tp, board[tp].occupied)
+                elif dir == 2:  # down left
                     tp = ind + 7 * (i+1)
-                elif dir == 3: #down right
+                    # print(tp, board[tp].occupied)
+                elif dir == 3:  # down right
                     tp = ind + 9 * (i+1)
-                    
+                    # print(tp, board[tp].occupied)
 
-    
+                p2 = next((piece for piece in piecearr if piece.boardInd == tp), None)
+                if tp < 0 or tp > 63:
+                    break
+
+                if tp % 8 == 0 or tp % 8 == 7:
+                    if not board[tp].occupied:
+                        moves.append(tp)
+                        break 
+                    elif p2 and p2.color != self.color:
+                        moves.append(tp)
+                        break
+                    elif p2 and p2.color == self.color:
+                        break
+
+                elif not board[tp].occupied:
+                    moves.append(tp)
+                elif p2 and p2.color != self.color:
+                    moves.append(tp)
+                    break
+                elif p2 and p2.color == self.color:
+                    break
+        return moves
+
 #Functions Block
 
 #Parser
@@ -332,7 +355,7 @@ def go(screen):
                 ind = ((y//100) * 8) + (x//100)
                 orig = takein(x,y)
                 piece = next((piece for piece in piecearr if piece.boardInd == ind), None)
-                print(piece.type)
+                print(ind)
                 if orig.occupied == False or piece.color != turn:
                     drawit(screen)
                     continue
