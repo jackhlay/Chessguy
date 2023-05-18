@@ -1,6 +1,6 @@
 Hello!
 
-Thank you for your interest in my Chess Engine. This is the main branch so it will be more sparse than current, all progress is on the branch "Progress Tube". Have a look there for the most recent updates.
+Thank you for your interest in my Chess Engine. all progress is on this branch.
 This project is written in python.
 
 Here are the milestones:
@@ -11,11 +11,12 @@ Display and center pieces
 Write a function to parse the FEN
 Once parced translate the space's info to the space
 Be able to correctly output any FEN string
-Allow the ability to make moves
 Turn Ordering
+Double Buffering
 
 Working on now:
 Move Legality
+
 
 Working on next:
 Let the computer make moves
