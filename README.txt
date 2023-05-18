@@ -15,10 +15,10 @@ Turn Ordering
 Double Buffering
 
 Working on now:
-Move Generation
+Move Legality
+
 
 Working on next:
-Move Legality
 Let the computer make moves
 Write rules for how each piece moves
 Write rules for move legality
