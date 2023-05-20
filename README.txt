@@ -13,6 +13,9 @@ Once parced translate the space's info to the space
 Be able to correctly output any FEN string
 Turn Ordering
 Double Buffering
+En Passant
+Castling
+Pawn Promotion (no underpromotion yet)
 
 Working on now:
 Move Legality

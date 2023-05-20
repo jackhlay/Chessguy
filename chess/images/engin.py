@@ -3,7 +3,7 @@ import pygame
 # ENGINE
 # Handles gamestate info, and valid moves, writes gamelog.
 pygame.init()
-pygame.display.set_caption('boby V0.221')
+pygame.display.set_caption('boby V0.228')
 turn ="White"
 
 #Black Pieces
@@ -48,9 +48,8 @@ class piece():
     alive = True
     color = None
     moved = False
+    nummoves = 0
     boardInd = None
-    def set_val(self,val):
-        self.val = val
     moves = []
     def movegen(self, ind):
         self.moves=[]
@@ -86,6 +85,14 @@ class piece():
                     piece = next((piece for piece in piecearr if piece.boardInd == t), None)
                     if piece and piece.color != self.color:
                         self.moves.append(t)
+
+                if board[ind].place[1] == 5:
+                    Lpassant = next((piece for piece in piecearr if piece.boardInd == ind-1), None)
+                    Rpassant = next((piece for piece in piecearr if piece.boardInd == ind+1), None)
+                    if board[ind-1].occupied and Lpassant.type == "PAWN" and Lpassant.nummoves == 1:
+                        self.moves.append(ind-9)
+                    if board[ind+1].occupied and Rpassant.type == "PAWN" and Rpassant.nummoves == 1:
+                        self.moves.append(ind-7)
                     
             else:
                 takes = [ind+7, ind+9]
@@ -101,6 +108,13 @@ class piece():
                     piece = next((piece for piece in piecearr if piece.boardInd == t), None)
                     if piece and piece.color != self.color:
                         self.moves.append(t)
+                if board[ind].place[1] == 4:
+                    Lpassant = next((piece for piece in piecearr if piece.boardInd == ind-1), None)
+                    Rpassant = next((piece for piece in piecearr if piece.boardInd == ind+1), None)
+                    if board[ind-1].occupied and Lpassant.type == "PAWN" and Lpassant.nummoves == 1:
+                        self.moves.append(ind+7)
+                    if board[ind+1].occupied and Rpassant.type == "PAWN" and Rpassant.nummoves == 1:
+                        self.moves.append(ind+9)
     
         return self.moves
     
@@ -201,6 +215,12 @@ class piece():
         return False
             
     def isLegalMove(self, ind):
+        pass
+
+    def makeMove(self, ind):
+        pass
+
+    def undoMove(self, ind):
         pass
 
 #Functions Block
@@ -375,7 +395,7 @@ def go(screen):
                 orig = takein(x,y)
                 piece = next((piece for piece in piecearr if piece.boardInd == ind), None)
                 print(ind)
-                if orig.occupied == False or piece.color != turn:
+                if not orig.occupied or piece.color != turn:
                     drawit(screen)
                     continue
 
@@ -406,31 +426,155 @@ def go(screen):
                 ind2 = ((y//100) * 8) + (x//100)
                 piece2 = next((piece for piece in piecearr if piece.boardInd == ind2), None)
                 fin = takein(x,y)
-                if fin == orig or turn != piece.color:
+                if not piece or fin == orig or turn != piece.color:
                     drawit(screen)
                 elif board[ind2].occupied and piece2.color == piece.color:
                     drawit(screen)
+                elif piece.type == "KING" and 1 < abs(ind2-ind) < 5:
+                    if "KCastle" or "QCastle" in piece.moves:
+                        if ind2-ind > 0:
+                            rook = next((piece for piece in piecearr if piece.boardInd == ind+3), None)
+                            piece.boardInd += 2
+                            orig.occupied = False
+                            orig.active = False
+                            board[rook.boardInd].occupied = False
+                            board[rook.boardInd].active = False
+                            rook.boardInd -= 2
+                            board[piece.boardInd].occupied = True
+                            board[piece.boardInd].active = True
+                            board[rook.boardInd].occupied = True
+                            board[rook.boardInd].active = True
+                            piece.moved = True
+                            rook.moved = True
+                            piece.nummoves += 1
+                            rook.nummoves += 1
+                            
+                        elif ind2-ind < 0:
+                            rook = next((piece for piece in piecearr if piece.boardInd == ind-4), None)
+                            piece.boardInd -= 2
+                            orig.occupied = False
+                            orig.active = False
+                            board[rook.boardInd].occupied = False
+                            board[rook.boardInd].active = False
+                            rook.boardInd += 3
+                            board[piece.boardInd].occupied = True
+                            board[piece.boardInd].active = True
+                            board[rook.boardInd].occupied = True
+                            board[rook.boardInd].active = True
+                            piece.moved = True
+                            rook.moved = True
+                            piece.nummoves += 1
+                            rook.nummoves += 1
+                    
+                    turn = "White" if turn == "Black" else "Black"
+                    drawit(screen)
+
                 elif ind2 in moves:
-                    orig.occupied = False
-                    orig.active = False
-                    piece.boardInd = ind2
-                    piece.moved = True
-                    fin.occupied = True
-                    fin.active = True
+                    if piece.type == "PAWN" and (abs(ind2-ind) == 9):
+                        if turn == "White" and board[ind2+8].occupied and board[ind].place[1]==5: #En Passant block
+                            piece2 = next((piece for piece in piecearr if piece.boardInd == ind2+8), None)
+                            if piece2.color == "Black":
+                                orig.occupied = False
+                                orig.active = False
+                                piece.boardInd = ind2
+                                piece.moved = True
+                                piece.nummoves += 1
+                                fin.occupied = True
+                                fin.active = True
+                                board[ind2+8].occupied = False
+                        elif turn == "Black" and board[ind2-8].occupied and board[ind].place[1]==4: #En Passant block
+                            piece2 = next((piece for piece in piecearr if piece.boardInd == ind2-8), None)
+                            orig.occupied = False
+                            orig.active = False
+                            piece.boardInd = ind2
+                            piece.moved = True
+                            piece.nummoves += 1
+                            fin.occupied = True
+                            fin.active = True
+                            board[ind2-8].occupied = False
+                            
+                        else:
+                            orig.occupied = False
+                            orig.active = False
+                            piece.boardInd = ind2
+                            piece.moved = True
+                            piece.nummoves += 1
+                            fin.occupied = True
+                            fin.active = True
+
+                    elif piece.type == "PAWN" and (abs(ind2-ind) == 7):
+                        if turn == "White" and board[ind2+8].occupied and board[ind].place[1]==5: #En Passant block
+                            piece2 = next((piece for piece in piecearr if piece.boardInd == ind2+8), None)
+                            orig.occupied = False
+                            orig.active = False
+                            piece.boardInd = ind2
+                            piece.moved = True
+                            piece.nummoves += 1
+                            fin.occupied = True
+                            fin.active = True
+                            board[ind2+8].occupied = False
+                        elif turn == "Black" and board[ind2-8].occupied and board[ind].place[1]==4: #En Passant block
+                            piece2 = next((piece for piece in piecearr if piece.boardInd == ind2-8), None)
+                            orig.occupied = False
+                            orig.active = False
+                            piece.boardInd = ind2
+                            piece.moved = True
+                            piece.nummoves += 1
+                            fin.occupied = True
+                            fin.active = True
+                            board[ind2-8].occupied = False
+                        else:
+                            orig.occupied = False
+                            orig.active = False
+                            piece.boardInd = ind2
+                            piece.moved = True
+                            piece.nummoves += 1
+                            fin.occupied = True
+                            fin.active = True
+
+                    elif turn == "White" and piece.type == "PAWN" and board[ind2].place[1] == 8:
+                        orig.occupied = False
+                        orig.active = False
+                        piece.type = "QUEEN"
+                        piece.boardInd = ind2
+                        piece.moved = True
+                        piece.nummoves += 1
+                        fin.occupied = True
+                        fin.active = True
+
+                    elif turn == "Black" and piece.type == "PAWN" and board[ind2].place[1] == 1:
+                        orig.occupied = False
+                        orig.active = False
+                        piece.type = "QUEEN"
+                        piece.boardInd = ind2
+                        piece.moved = True
+                        piece.nummoves += 1
+                        fin.occupied = True
+                        fin.active = True    
+
+
+                    else:
+                        orig.occupied = False
+                        orig.active = False
+                        piece.boardInd = ind2
+                        piece.moved = True
+                        piece.nummoves += 1
+                        fin.occupied = True
+                        fin.active = True
 
                     if piece2:
-                        # print(f"Piece Array Length {len(piecearr)}")
+                        print(f"Piece Array Length {len(piecearr)}")
                         piece2.alive = False 
                         piece2.boardInd = -1
                         piecearr.remove(piece2)
-                        # print(f"Piece Array Length {len(piecearr)}")
+                        print(f"Piece Array Length {len(piecearr)}")
 
 
                     turn = "White" if turn == "Black" else "Black"
                     drawit(screen)
-                else:
-                    drawit(screen)
-
+                
+            else:
+                drawit(screen)
 
             if event.type == pygame.MOUSEMOTION:
                 if dragging:
@@ -521,5 +665,11 @@ def start(string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
     draw()
     go(screen)
 
-
 start()
+
+# #castle test
+# start("rnbqkbnr/3ppp2/8/8/8/8/3PPP2/RNBQKBNR")
+
+#default string: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
+#diagonal moves test string: rnbqkbnr/p6p/8/8/8/8/P6P/RNBQKBNR
+#Castle test string: r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R
