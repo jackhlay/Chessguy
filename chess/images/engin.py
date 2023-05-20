@@ -44,11 +44,13 @@ class Space():
 
 class piece():
     type = None
-    val = None
+    val = 0
     alive = True
     color = None
     moved = False
     boardInd = None
+    def set_val(self,val):
+        self.val = val
     moves = []
     def movegen(self, ind):
         self.moves=[]
@@ -67,7 +69,7 @@ class piece():
             self.moves.extend(self.slides(ind))
             self.moves.extend(self.diags(ind))
         elif self.type == "KING":
-            self.moves = [ind-9, ind-8, ind-7, ind-1, ind+1, ind+7, ind+8, ind+9]
+            self.moves = ["KCastle", "QCastle", ind-9, ind-8, ind-7, ind-1, ind+1, ind+7, ind+8, ind+9]
         elif self.type == "PAWN":
             if self.color == "White":
                 takes = [ind-7, ind-9]
@@ -106,7 +108,15 @@ class piece():
         moves = []
         for m in arr:
             piece = next((piece for piece in piecearr if piece.boardInd == m), None)
-            if m >= 0 and m < 64:
+            if m == "KCastle":
+                if not self.moved:
+                    if board[self.boardInd+1].occupied == False and board[self.boardInd+2].occupied == False:
+                        moves.append("Kcastle")
+            elif m == "QCastle":
+                if not self.moved:
+                    if board[self.boardInd-1].occupied == False and board[self.boardInd-2].occupied == False and board[self.boardInd-3].occupied == False:
+                        moves.append("Qcastle")
+            elif m >= 0 and m < 64:
                 if not board[m].occupied:
                     moves.append(m)
 
@@ -117,7 +127,6 @@ class piece():
     def slides(self, ind):
         moves = []
         for dir in range(4):
-            print(dir)
             for i in range (8):
                 if dir == 0:#up
                     tp = ind - 8 * (i+1)
@@ -146,14 +155,11 @@ class piece():
     def diags(self, ind):
         moves = []
         for dir in range(4):
-            print(dir)
             for i in range(8):
                 if dir == 0:  # up left
                     tp = ind - 9 * (i+1)
-                    print(tp, board[tp].occupied)
                 elif dir == 1:  # up right
                     tp = ind - 7 * (i+1)
-                    print(tp, board[tp].occupied)
                 elif dir == 2:  # down left
                     tp = ind + 7 * (i+1)
                     # print(tp, board[tp].occupied)
@@ -183,6 +189,19 @@ class piece():
                 elif p2 and p2.color == self.color:
                     break
         return moves
+
+    def check(self, ind):
+        OppMoves = []
+        king = next((piece for piece in piecearr if piece.type == "KING" and piece.color == turn), None)
+        for piece in piecearr:
+            if piece.color != turn:
+                OppMoves.extend(piece.movegen(piece.boardInd))
+            if king.boardInd in OppMoves:
+                return True
+        return False
+            
+    def isLegalMove(self, ind):
+        pass
 
 #Functions Block
 
@@ -359,6 +378,17 @@ def go(screen):
                 if orig.occupied == False or piece.color != turn:
                     drawit(screen)
                     continue
+
+                elif piece.check(ind):
+                    print("IN CHECK")
+                    allmoves = []
+                    legalmoves = []
+                    for p in piecearr:
+                        if p.color == turn:
+                            allmoves += piece.movegen(piece.boardInd)
+                    for move in allmoves:
+                        if piece.isLegalMove(move):
+                            legalmoves.append(move)
 
                 else:
                     dragging=True
