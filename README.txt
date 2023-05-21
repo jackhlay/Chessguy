@@ -1,6 +1,6 @@
 Hello!
 
-Thank you for your interest in my Chess Engine. all progress is on this branch.
+Thank you for your interest in my Chess Engine. all progress is on the "Progress-Tube" branch.
 This project is written in python.
 
 Here are the milestones:
