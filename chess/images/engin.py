@@ -34,6 +34,14 @@ bPiecesDict = {'KING': pygame.transform.scale(bK, (int(60*1.03), int(60*1.03))),
                'ROOK': pygame.transform.scale(bR, (int(60*1.03), int(60*1.03))),
                'PAWN': pygame.transform.scale(bp, (int(60*1.03), int(60*1.03)))}
 
+spots = [("a", 8), ("b", 8), ("c", 8), ("d", 8), ("e", 8), ("f", 8), ("g", 8), ("h", 8), ("a", 7), ("b", 7), ("c", 7),
+         ("d", 7), ("e", 7), ("f", 7), ("g", 7), ("h", 7), ("a", 6), ("b", 6), ("c", 6), ("d", 6), ("e", 6), ("f", 6),
+         ("g", 6), ("h", 6), ("a", 5), ("b", 5), ("c", 5), ("d", 5), ("e", 5), ("f", 5), ("g", 5), ("h", 5), ("a", 4),
+         ("b", 4), ("c", 4), ("d", 4), ("e", 4), ("f", 4), ("g", 4), ("h", 4), ("a", 3), ("b", 3), ("c", 3), ("d", 3),
+         ("e", 3), ("f", 3), ("g", 3), ("h", 3), ("a", 2), ("b", 2), ("c", 2), ("d", 2), ("e", 2), ("f", 2), ("g", 2),
+         ("h", 2), ("a", 1), ("b", 1), ("c", 1), ("d", 1), ("e", 1), ("f", 1), ("g", 1), ("h", 1)]
+         
+board = []
 piecearr = []
 
 #Game Classes
@@ -357,7 +365,7 @@ def draw():
     light = (42, 34, 38)
     dark = (22,24,20)
     pos = 0
-    for i in range(8):
+    for i in range(8): #draw board
         for j in range(8):
             if (i+j) % 2 == 0:
                 color = dark
@@ -366,7 +374,7 @@ def draw():
             pygame.draw.rect(screen, color, (i*100, j*100, 100, 100))
             pos += 1
 
-    for i in range(64):
+    for i in range(64): #draw pieces
         if board[i].occupied:
             piece = next((piece for piece in piecearr if piece.boardInd == i), None)
             if piece.color=="Black":
@@ -395,11 +403,11 @@ def go(screen):
                 orig = takein(x,y)
                 piece = next((piece for piece in piecearr if piece.boardInd == ind), None)
                 print(ind)
-                if not orig.occupied or piece.color != turn:
+                if not orig.occupied or piece.color != turn: #If you click on an empty square or the wrong color
                     drawit(screen)
                     continue
 
-                elif piece.check(ind):
+                elif piece.check(ind): #Check evaluation
                     print("IN CHECK")
                     allmoves = []
                     legalmoves = []
@@ -410,7 +418,7 @@ def go(screen):
                         if piece.isLegalMove(move):
                             legalmoves.append(move)
 
-                else:
+                else: #If piece is not in check
                     dragging=True
                     moves = piece.legals(piece.movegen(ind))
                     print(moves)
@@ -420,17 +428,19 @@ def go(screen):
                         img = bPiecesDict[piece.type]
                 
 
-            if event.type== pygame.MOUSEBUTTONUP:
+            if event.type== pygame.MOUSEBUTTONUP: 
                 dragging = False
                 x, y = event.pos
                 ind2 = ((y//100) * 8) + (x//100)
                 piece2 = next((piece for piece in piecearr if piece.boardInd == ind2), None)
                 fin = takein(x,y)
-                if not piece or fin == orig or turn != piece.color:
+                if not piece or fin == orig or turn != piece.color: #If no piece or same piece or wrong color
                     drawit(screen)
-                elif board[ind2].occupied and piece2.color == piece.color:
+                
+                elif board[ind2].occupied and piece2.color == piece.color: #If piece of same color
                     drawit(screen)
-                elif piece.type == "KING" and 1 < abs(ind2-ind) < 5:
+                
+                elif piece.type == "KING" and 1 < abs(ind2-ind) < 5: #Castline Block
                     if "KCastle" or "QCastle" in piece.moves:
                         if ind2-ind > 0:
                             rook = next((piece for piece in piecearr if piece.boardInd == ind+3), None)
@@ -469,7 +479,7 @@ def go(screen):
                     turn = "White" if turn == "Black" else "Black"
                     drawit(screen)
 
-                elif ind2 in moves:
+                elif ind2 in moves: #Check if move is legal
                     if piece.type == "PAWN" and (abs(ind2-ind) == 9):
                         if turn == "White" and board[ind2+8].occupied and board[ind].place[1]==5: #En Passant block
                             piece2 = next((piece for piece in piecearr if piece.boardInd == ind2+8), None)
@@ -502,7 +512,7 @@ def go(screen):
                             fin.occupied = True
                             fin.active = True
 
-                    elif piece.type == "PAWN" and (abs(ind2-ind) == 7):
+                    elif piece.type == "PAWN" and (abs(ind2-ind) == 7): #Grand En Passant block
                         if turn == "White" and board[ind2+8].occupied and board[ind].place[1]==5: #En Passant block
                             piece2 = next((piece for piece in piecearr if piece.boardInd == ind2+8), None)
                             orig.occupied = False
@@ -532,7 +542,7 @@ def go(screen):
                             fin.occupied = True
                             fin.active = True
 
-                    elif turn == "White" and piece.type == "PAWN" and board[ind2].place[1] == 8:
+                    elif turn == "White" and piece.type == "PAWN" and board[ind2].place[1] == 8: #Promotion block
                         orig.occupied = False
                         orig.active = False
                         piece.type = "QUEEN"
@@ -542,7 +552,7 @@ def go(screen):
                         fin.occupied = True
                         fin.active = True
 
-                    elif turn == "Black" and piece.type == "PAWN" and board[ind2].place[1] == 1:
+                    elif turn == "Black" and piece.type == "PAWN" and board[ind2].place[1] == 1: #Promotion block
                         orig.occupied = False
                         orig.active = False
                         piece.type = "QUEEN"
@@ -571,17 +581,12 @@ def go(screen):
 
 
                     turn = "White" if turn == "Black" else "Black"
-                    drawit(screen)
-                
-            else:
-                drawit(screen)
+                    drawit(screen)      
 
             if event.type == pygame.MOUSEMOTION:
                 if dragging:
                     clock.tick(60)
                     x, y = event.pos
-                    imgx = x + offset_x
-                    imgy = y + offset_y
                     drawit(screen)
                     screen.blit(img, (x,y))
                     pygame.display.update()
@@ -650,13 +655,6 @@ def takein(x,y):
 
 #GO! GO! GO!             
 def start(string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
-    global board
-    board,spots = [],[("a", 8), ("b", 8), ("c", 8), ("d", 8), ("e", 8), ("f", 8), ("g", 8), ("h", 8), ("a", 7), ("b", 7), ("c", 7),
-         ("d", 7), ("e", 7), ("f", 7), ("g", 7), ("h", 7), ("a", 6), ("b", 6), ("c", 6), ("d", 6), ("e", 6), ("f", 6),
-         ("g", 6), ("h", 6), ("a", 5), ("b", 5), ("c", 5), ("d", 5), ("e", 5), ("f", 5), ("g", 5), ("h", 5), ("a", 4),
-         ("b", 4), ("c", 4), ("d", 4), ("e", 4), ("f", 4), ("g", 4), ("h", 4), ("a", 3), ("b", 3), ("c", 3), ("d", 3),
-         ("e", 3), ("f", 3), ("g", 3), ("h", 3), ("a", 2), ("b", 2), ("c", 2), ("d", 2), ("e", 2), ("f", 2), ("g", 2),
-         ("h", 2), ("a", 1), ("b", 1), ("c", 1), ("d", 1), ("e", 1), ("f", 1), ("g", 1), ("h", 1)]
     for i in range(64):
         board.append(Space())
         board[i].place = spots[i]
@@ -666,10 +664,6 @@ def start(string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
     go(screen)
 
 start()
-
-# #castle test
-# start("rnbqkbnr/3ppp2/8/8/8/8/3PPP2/RNBQKBNR")
-
 #default string: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
 #diagonal moves test string: rnbqkbnr/p6p/8/8/8/8/P6P/RNBQKBNR
 #Castle test string: r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R
