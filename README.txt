@@ -23,8 +23,6 @@ Move Legality
 
 Working on next:
 Let the computer make moves
-Write rules for how each piece moves
-Write rules for move legality
 Allow the computer to explore depths without affecting the real board
 Using this, LET HIM (the computer) COOK and find the best move.
 Probably rewrite in C# after a while
