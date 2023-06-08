@@ -53,6 +53,7 @@ class Space():
 class piece():
     type = None
     val = 0
+    symbol = None
     alive = True
     color = None
     moved = False
@@ -217,13 +218,24 @@ class piece():
         king = next((piece for piece in piecearr if piece.type == "KING" and piece.color == turn), None)
         for piece in piecearr:
             if piece.color != turn:
-                OppMoves.extend(piece.movegen(piece.boardInd))
+                OppMoves.extend(piece.legals(piece.movegen(piece.boardInd)))
             if king.boardInd in OppMoves:
                 return True
         return False
             
     def isLegalMove(self, ind):
-        pass
+        boardcopy = board
+        piecearrcopy = piecearr
+        finalArr = []
+        pieces = [piece for piece in piecearrcopy if piece.color == turn]
+        for piece in pieces:
+            for move in piece.legals(piece.movegen(piece.boardInd)):
+                piece.makeMove(move)
+                if not piece.check(ind):
+                    finalArr.append(move)
+                piece.undoMove(move)
+        return finalArr
+                
 
     def makeMove(self, ind):
         pass
@@ -244,6 +256,7 @@ def parfen(String):
             WKing = piece()
             WKing.color = "White"
             WKing.type = "KING"
+            WKing.symbol = char
             WKing.boardInd = sqr
             board[sqr].occupied = True
             piecearr.append(WKing)
@@ -252,6 +265,7 @@ def parfen(String):
             BKing = piece()
             BKing.color = "Black"
             BKing.type = "KING"
+            BKing.symbol = char
             BKing.boardInd = sqr
             board[sqr].occupied = True
             piecearr.append(BKing)
@@ -260,6 +274,7 @@ def parfen(String):
             WQueen = piece()
             WQueen.color = "White"
             WQueen.type = "QUEEN"
+            WQueen.symbol = char
             WQueen.boardInd = sqr
             board[sqr].occupied = True
             piecearr.append(WQueen)
@@ -268,6 +283,7 @@ def parfen(String):
             BQueen = piece()
             BQueen.color = "Black"
             BQueen.type = "QUEEN"
+            BQueen.symbol = char
             BQueen.boardInd = sqr
             board[sqr].occupied = True
             piecearr.append(BQueen)
@@ -276,6 +292,7 @@ def parfen(String):
             WBishop = piece()
             WBishop.color = "White"
             WBishop.type = "BISHOP"
+            WBishop.symbol = char
             WBishop.boardInd = sqr
             board[sqr].occupied = True
             piecearr.append(WBishop)
@@ -284,6 +301,7 @@ def parfen(String):
             BBishop = piece()
             BBishop.color = "Black"
             BBishop.type = "BISHOP"
+            BBishop.symbol = char
             BBishop.boardInd = sqr
             board[sqr].occupied = True
             piecearr.append(BBishop)
@@ -292,6 +310,7 @@ def parfen(String):
             WKnight = piece()
             WKnight.color = "White"
             WKnight.type = "KNIGHT"
+            WKnight.symbol = char
             WKnight.boardInd = sqr
             board[sqr].occupied = True
             piecearr.append(WKnight)
@@ -300,6 +319,7 @@ def parfen(String):
             BKnight = piece()
             BKnight.color = "Black"
             BKnight.type = "KNIGHT"
+            BKnight.symbol = char
             BKnight.boardInd = sqr
             board[sqr].occupied = True
             piecearr.append(BKnight)
@@ -308,6 +328,7 @@ def parfen(String):
             WRook = piece()
             WRook.color = "White"
             WRook.type = "ROOK"
+            WRook.symbol = char
             WRook.boardInd = sqr
             board[sqr].occupied = True
             piecearr.append(WRook)
@@ -316,6 +337,7 @@ def parfen(String):
             BRook = piece()
             BRook.color = "Black"
             BRook.type = "ROOK"
+            BRook.symbol = char
             BRook.boardInd = sqr
             board[sqr].occupied = True
             piecearr.append(BRook)
@@ -324,6 +346,7 @@ def parfen(String):
             WPawn = piece()
             WPawn.color = "White"
             WPawn.type = "PAWN"
+            WPawn.symbol = char
             WPawn.boardInd = sqr
             board[sqr].occupied = True
             piecearr.append(WPawn)
@@ -332,6 +355,7 @@ def parfen(String):
             BPawn = piece()
             BPawn.color = "Black"
             BPawn.type = "PAWN"
+            BPawn.symbol = char
             BPawn.boardInd = sqr
             board[sqr].occupied = True
             piecearr.append(BPawn)
@@ -402,7 +426,6 @@ def go(screen):
                 ind = ((y//100) * 8) + (x//100)
                 orig = takein(x,y)
                 piece = next((piece for piece in piecearr if piece.boardInd == ind), None)
-                print(ind)
                 if not orig.occupied or piece.color != turn: #If you click on an empty square or the wrong color
                     drawit(screen)
                     continue
