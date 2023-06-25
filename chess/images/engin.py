@@ -245,6 +245,24 @@ class piece():
 
 #Functions Block
 
+#Eval
+"""
+Piece Activity;
+Mobility: Number of moves available to a piece
+Centraliztion: Either find the distance from middle rows and columns, or the distance from the current boardInd to inds 27, 28, 35, 36
+Attack Potential: Number of pieces attacked by a piece (This will likely involve implementing ray tracing)
+Pawn Attacks: Number of pawns attacked by a piece, more potential pawn attacks/captures is more active
+Coordination: (This is a stretch rn, but may be useful. Assesses how pieces support each other, and control key squares)
+"""
+def eval():
+    eval: int = 0
+    for i in range(len(piecearr)):
+        eval += piecearr[i].val
+        print(piecearr[i].type , piecearr[i].val, eval)
+    if 0 < abs(eval) < .0001:
+        eval -= eval
+    print(eval)
+
 #Parser
 def parfen(String):
     sqr = 0
@@ -368,15 +386,25 @@ def parfen(String):
 
         for m in piecearr:
             if m.type == "BISHOP":
-                m.val = 3.1
+                if m.color == "White":
+                    m.val = 3.1
+                else: m.val = -3.1
             elif m.type == "KNIGHT":
-                m.val == 3.0
+                if m.color == "White":
+                    m.val = 3.0
+                else: m.val = -3.0
             elif m.type == "ROOK":
-                m.val = 5.0
+                if m.color == "White":
+                    m.val = 5.0
+                else: m.val = -5.0
             elif m.type == "QUEEN":
-                m.val = 9.0
+                if m.color == "White":
+                    m.val = 9.0
+                else: m.val = -9.0
             elif m.type == "PAWN":
-                m.val = 1.0
+                if m.color == "White":
+                    m.val = 1.0
+                else:  m.val = -1.0
             elif m.type == "KING":
                 m.val = 0
 
@@ -604,6 +632,7 @@ def go(screen):
 
 
                     turn = "White" if turn == "Black" else "Black"
+                    eval()
                     drawit(screen)      
 
             if event.type == pygame.MOUSEMOTION:
