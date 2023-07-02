@@ -22,6 +22,7 @@ Move Legality
 
 
 Working on next:
+Threefold repetition draw
 Let the computer make moves
 Allow the computer to explore depths without affecting the real board
 Using this, LET HIM (the computer) COOK and find the best move.
