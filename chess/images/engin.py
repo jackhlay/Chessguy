@@ -608,8 +608,12 @@ def go(screen):
                                 gameLog.append("O-O-O")
                             else: gameLog[turnCount] = gameLog[turnCount] + " O-O-O"
                     
-                    if turn == "Black": turnCount += 1
-                    turn = "White" if turn == "Black" else "Black"
+                    if turn == "Black":
+                        turn = "White"
+                        Threefold(gameLog[turnCount])
+                        turnCount += 1
+                    else:
+                        turn = "Black"
                     drawit(screen)
                 
                 elif piece.type == "PAWN" and abs(ind2-ind) == 16: #En Passant Block
@@ -629,8 +633,12 @@ def go(screen):
                             else:
                                 gameLog[turnCount] = gameLog[turnCount] + f" {board[ind2].place[0]}{board[ind2].place[1]}"
                             print(gameLog[turnCount])
-                            if turn == "Black": turnCount += 1
-                            turn = "White" if turn == "Black" else "Black"
+                            if turn == "Black":
+                                turn = "White"
+                                Threefold(gameLog[turnCount])
+                                turnCount += 1
+                            else:
+                                turn = "Black"
                             eval()
                             drawit(screen)  
 
@@ -795,8 +803,12 @@ def go(screen):
                         print(f"Piece Array Length {len(piecearr)}")
 
 
-                    if turn == "Black": turnCount += 1
-                    turn = "White" if turn == "Black" else "Black"
+                    if turn == "Black":
+                        turn = "White"
+                        Threefold(gameLog[turnCount])
+                        turnCount += 1
+                    else:
+                        turn = "Black"
                     passantable = [piece for piece in piecearr if piece.passant == True]
                     # for piece in piecearr:
                     #     print(piece, piece.passant)
@@ -851,6 +863,18 @@ def drawit(screen):
     background.blit(foreground, (0, 0))
     screen.blit(background, (0, 0))
     pygame.display.flip()
+
+def Threefold(move):
+    global turn
+    occurences = 0
+    for element in gameLog:
+        if element == move:
+            occurences += 1
+    if occurences == 3:
+        print("Draw by Threefold Repetition")
+        turn = None
+        return True
+
 
 def takein(x,y):
     square_x, square_y = x // 100, y // 100
