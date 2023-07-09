@@ -677,8 +677,8 @@ def go(screen):
                             piece.nummoves += 1
                             fin.occupied = True
                             fin.active = True
-                            if turn == "white":
-                                gameLog.append(f" {board[ind].place[0]}x{board[ind2].place[0]}")
+                            if turn == "White":
+                                gameLog.append(f"{board[ind].place[0]}x{board[ind2].place[0]}")
                             else:
                                 gameLog[turnCount] = gameLog[turnCount] + f" {board[ind].place[0]}x{board[ind2].place[0]}"
                             print(gameLog[turnCount])
@@ -768,11 +768,24 @@ def go(screen):
                         piece.nummoves += 1
                         fin.occupied = True
                         fin.active = True
-                        if turn =="White":
-                            gameLog.append(f"{piece.symbol}{board[ind].place[0]}x{board[ind2].place[0]}")
-                        else: 
-                            gameLog[turnCount] = gameLog[turnCount] + f" {piece.symbol}{board[ind].place[0]}x{board[ind2].place[0]}"
-                        print(gameLog[turnCount])
+                        if piece.type == "PAWN":
+                            if turn =="White":
+                                gameLog.append(f"{board[ind2].place[0]}{board[ind2].place[1]}")
+                            else: 
+                                gameLog[turnCount] = gameLog[turnCount] + f" {board[ind2].place[0]}{board[ind2].place[1]}"
+                            print(gameLog[turnCount])
+                        elif piece2:
+                            if turn =="White":
+                                gameLog.append(f"{piece.symbol}x{board[ind2].place[0]}{board[ind2].place[1]}")
+                            else: 
+                                gameLog[turnCount] = gameLog[turnCount] + f" {piece.symbol}x{board[ind2].place[0]}{board[ind2].place[1]}"
+                            print(gameLog[turnCount])
+                        else:
+                            if turn =="White":
+                                gameLog.append(f"{piece.symbol}{board[ind2].place[0]}{board[ind2].place[1]}")
+                            else: 
+                                gameLog[turnCount] = gameLog[turnCount] + f" {piece.symbol}{board[ind2].place[0]}{board[ind2].place[1]}"
+                            print(gameLog[turnCount])
 
                     if piece2:
                         print(f"Piece Array Length {len(piecearr)}")
