@@ -4,8 +4,8 @@ Thank you for your interest in my Chess Engine. all progress is on this branch.
 This project is written in python.
 
 Here are the milestones:
-Surpassed:
 
+Surpassed:
 Display a board
 Display and center pieces
 Write a function to parse the FEN
@@ -15,14 +15,14 @@ Turn Ordering
 Double Buffering
 En Passant
 Castling
+Move Legality (90% confidence)
 Pawn Promotion (no underpromotion yet)
+Threefold repetition draw (Maybe)
 
 Working on now:
-Move Legality
-
+Ideal move calculation
 
 Working on next:
-Threefold repetition draw
 Let the computer make moves
 Allow the computer to explore depths without affecting the real board
 Using this, LET HIM (the computer) COOK and find the best move.
