@@ -43,6 +43,8 @@ spots = [("a", 8), ("b", 8), ("c", 8), ("d", 8), ("e", 8), ("f", 8), ("g", 8), (
          
 board = []
 piecearr = []
+turnCount = 0
+gameLog = []
 
 #Game Classes
 class Space():
@@ -273,7 +275,7 @@ def eval():
     AttPot = pieceattack()
     PawnAtt = pawncount()
     eval =( .55 * tot) + (.3 * AttPot) + (.1 * PawnAtt)
-    print(f"Eval: {eval: .3f}")
+    # print(f"Eval: {eval: .3f}")
 
 #EVAL HELPER FUNCTIONS
 
@@ -299,7 +301,6 @@ def EnemyTrace():
 
     Bfiltered = [piece for piece in piecearr if piece.color == "Black"]
     for piece in Bfiltered:
-        print(piece.type, piece.boardInd, piece.legals(piece.movegen(piece.boardInd)))
         BmoveArr.extend(piece.legals(piece.movegen(piece.boardInd)))
 
     for move in BmoveArr:
@@ -316,21 +317,21 @@ def pieceattack():
     Warr,Barr = EnemyTrace()
     white = len(Warr)
     black = -1 * len(Barr)
-    print(f"White Attacks: {white}, Black Attacks: {black}")
+    # print(f"White Attacks: {white}, Black Attacks: {black}")
     return white + black
 
 def pawncount():
     Warr,Barr = EnemyTrace()
-    print(f"White trace: {Warr}, Black trace: {Barr}")
+    # print(f"White trace: {Warr}, Black trace: {Barr}")
     Wpawncount, Bpawncount = 0, 0
     for item in Warr:
         if "PAWN" in item:
             Wpawncount += 1
-    print(f"White Pawn attacks:{Wpawncount}")
+    # print(f"White Pawn attacks:{Wpawncount}")
     for item in Barr:
         if "PAWN" in item:
             Bpawncount -= 1
-    print(f"Black Pawn attacks:{abs(Bpawncount)}")
+    # print(f"Black Pawn attacks:{abs(Bpawncount)}")
 
     fincount = Wpawncount + Bpawncount
 
@@ -512,7 +513,7 @@ def draw():
 #Game loop and maintainence functions
 def go(screen):
     eval()
-    global turn
+    global turn, turnCount, gameLog
     running = True
     dragging=False
     offset_x, offset_y = 0, 0
@@ -583,6 +584,9 @@ def go(screen):
                             rook.moved = True
                             piece.nummoves += 1
                             rook.nummoves += 1
+                            if turn == "White":
+                                gameLog.append("O-O")
+                            else: gameLog[turnCount] = gameLog[turnCount] + " O-O"
                             
                         elif ind2-ind < 0:
                             rook = next((piece for piece in piecearr if piece.boardInd == ind-4), None)
@@ -600,7 +604,11 @@ def go(screen):
                             rook.moved = True
                             piece.nummoves += 1
                             rook.nummoves += 1
+                            if turn == "White":
+                                gameLog.append("O-O-O")
+                            else: gameLog[turnCount] = gameLog[turnCount] + " O-O-O"
                     
+                    if turn == "Black": turnCount += 1
                     turn = "White" if turn == "Black" else "Black"
                     drawit(screen)
                 
@@ -616,6 +624,12 @@ def go(screen):
                             passantable = [piece for piece in piecearr if piece.passant and piece.color != turn]
                             for p in passantable:
                                 p.passant = False
+                            if turn == "White":
+                                gameLog.append(f"{board[ind2].place[0]}{board[ind2].place[1]}")
+                            else:
+                                gameLog[turnCount] = gameLog[turnCount] + f" {board[ind2].place[0]}{board[ind2].place[1]}"
+                            print(gameLog[turnCount])
+                            if turn == "Black": turnCount += 1
                             turn = "White" if turn == "Black" else "Black"
                             eval()
                             drawit(screen)  
@@ -633,6 +647,11 @@ def go(screen):
                                 fin.occupied = True
                                 fin.active = True
                                 board[ind2+8].occupied = False
+                                if turn == "White":
+                                    gameLog.append(f" {board[ind].place[0]}x{board[ind2].place[0]}")
+                                else:
+                                    gameLog[turnCount] = gameLog[turnCount] + f" {board[ind].place[0]}x{board[ind2].place[0]}"
+                                print(gameLog[turnCount])
                         elif turn == "Black" and board[ind2-8].occupied and board[ind].place[1]==4: #En Passant block
                             piece2 = next((piece for piece in piecearr if piece.boardInd == ind2-8), None)
                             if piece2.color == "White" and piece2.passant:
@@ -644,6 +663,11 @@ def go(screen):
                                 fin.occupied = True
                                 fin.active = True
                                 board[ind2-8].occupied = False
+                                if turn == "White":
+                                    gameLog.append(f"{board[ind].place[0]}x{board[ind2].place[0]}")
+                                else:
+                                    gameLog[turnCount] = gameLog[turnCount] + f" {board[ind].place[0]}x{board[ind2].place[0]}"
+                                print(gameLog[turnCount])
                             
                         else:
                             orig.occupied = False
@@ -653,6 +677,11 @@ def go(screen):
                             piece.nummoves += 1
                             fin.occupied = True
                             fin.active = True
+                            if turn == "white":
+                                gameLog.append(f" {board[ind].place[0]}x{board[ind2].place[0]}")
+                            else:
+                                gameLog[turnCount] = gameLog[turnCount] + f" {board[ind].place[0]}x{board[ind2].place[0]}"
+                            print(gameLog[turnCount])
 
                     elif piece.type == "PAWN" and (abs(ind2-ind) == 7): #Grand En Passant block
                         if turn == "White" and board[ind2+8].occupied and board[ind].place[1]==5: #En Passant block
@@ -666,6 +695,11 @@ def go(screen):
                                 fin.occupied = True
                                 fin.active = True
                                 board[ind2+8].occupied = False
+                                if turn == "White":
+                                    gameLog.append(f" {board[ind].place[0]}x{board[ind2].place[0]}")
+                                else:
+                                    gameLog[turnCount] = gameLog[turnCount] + f" {board[ind].place[0]}x{board[ind2].place[0]}"
+                                print(f" {board[ind].place[0]}x{board[ind2].place[0]}")
                         elif turn == "Black" and board[ind2-8].occupied and board[ind].place[1]==4: #En Passant block
                             piece2 = next((piece for piece in piecearr if piece.boardInd == ind2-8), None)
                             if piece2.color == "White" and piece2.passant:
@@ -677,6 +711,11 @@ def go(screen):
                                 fin.occupied = True
                                 fin.active = True
                                 board[ind2-8].occupied = False
+                                if turn == "White":
+                                    gameLog.append(f" {board[ind].place[0]}x{board[ind2].place[0]}")
+                                else:
+                                    gameLog[turnCount] = gameLog[turnCount] + f" {board[ind].place[0]}x{board[ind2].place[0]}"
+                                print(f" {board[ind].place[0]}x{board[ind2].place[0]}")
                         else:
                             orig.occupied = False
                             orig.active = False
@@ -685,6 +724,11 @@ def go(screen):
                             piece.nummoves += 1
                             fin.occupied = True
                             fin.active = True
+                            if turn == "White":
+                                gameLog.append(f"{board[ind].place[0]}x{board[ind2].place[0]}")
+                            else:
+                                gameLog[turnCount] = gameLog[turnCount] + f" {board[ind].place[0]}x{board[ind2].place[0]}"
+                            print(gameLog[turnCount])
 
                     elif turn == "White" and piece.type == "PAWN" and board[ind2].place[1] == 8: #Promotion block
                         orig.occupied = False
@@ -695,6 +739,11 @@ def go(screen):
                         piece.nummoves += 1
                         fin.occupied = True
                         fin.active = True
+                        if turn == "White":
+                            gameLog.append(f"{board[ind2].place[0]}=Q")
+                        else:
+                            gameLog[turnCount] = gameLog[turnCount] + f" {board[ind2].place[0]}=Q"
+                        print(gameLog[turnCount])
 
                     elif turn == "Black" and piece.type == "PAWN" and board[ind2].place[1] == 1: #Promotion block
                         orig.occupied = False
@@ -704,7 +753,12 @@ def go(screen):
                         piece.moved = True
                         piece.nummoves += 1
                         fin.occupied = True
-                        fin.active = True    
+                        fin.active = True
+                        if turn == "White":
+                            gameLog.append(f"{board[ind2].place[0]}=Q")
+                        else:
+                            gameLog[turnCount] = gameLog[turnCount] + f" {board[ind2].place[0]}=Q"
+                        print(f" {board[ind2].place[0]}=Q")    
 
                     else:
                         orig.occupied = False
@@ -714,6 +768,11 @@ def go(screen):
                         piece.nummoves += 1
                         fin.occupied = True
                         fin.active = True
+                        if turn =="White":
+                            gameLog.append(f"{piece.symbol}{board[ind].place[0]}x{board[ind2].place[0]}")
+                        else: 
+                            gameLog[turnCount] = gameLog[turnCount] + f" {piece.symbol}{board[ind].place[0]}x{board[ind2].place[0]}"
+                        print(gameLog[turnCount])
 
                     if piece2:
                         print(f"Piece Array Length {len(piecearr)}")
@@ -723,12 +782,13 @@ def go(screen):
                         print(f"Piece Array Length {len(piecearr)}")
 
 
+                    if turn == "Black": turnCount += 1
                     turn = "White" if turn == "Black" else "Black"
                     passantable = [piece for piece in piecearr if piece.passant == True]
-                    for piece in piecearr:
-                        print(piece, piece.passant)
+                    # for piece in piecearr:
+                    #     print(piece, piece.passant)
                     for piece in passantable:
-                        print(piece)
+                        # print(piece)
                         piece.passant = False
                     
                     eval()
