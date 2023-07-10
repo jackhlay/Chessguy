@@ -7,19 +7,19 @@ pygame.display.set_caption('boby V0.23')
 turn ="White"
 
 #Black Pieces
-bB = pygame.image.load("bB.png")
-bK = pygame.image.load("bK.png")
-bN = pygame.image.load("bN.png")
-bp = pygame.image.load("bp.png")
-bQ = pygame.image.load("bQ.png")
-bR = pygame.image.load("bR.png")
+bB = pygame.image.load("images/bB.png")
+bK = pygame.image.load("images/bK.png")
+bN = pygame.image.load("images/bN.png")
+bp = pygame.image.load("images/bp.png")
+bQ = pygame.image.load("images/bQ.png")
+bR = pygame.image.load("images/bR.png")
 #White Pieces
-wB = pygame.image.load("wB.png")
-wK = pygame.image.load("wK.png")
-wN = pygame.image.load("wN.png")
-wp = pygame.image.load("wp.png")
-wQ = pygame.image.load("wQ.png")
-wR = pygame.image.load("wR.png")
+wB = pygame.image.load("images/wB.png")
+wK = pygame.image.load("images/wK.png")
+wN = pygame.image.load("images/wN.png")
+wp = pygame.image.load("images/wp.png")
+wQ = pygame.image.load("images/wQ.png")
+wR = pygame.image.load("images/wR.png")
 
 wPiecesDict = {'KING': pygame.transform.scale(wK, (int(60*1.03), int(60*1.03))),
                'QUEEN': pygame.transform.scale(wQ, (int(60*1.03), int(60*1.03))),
@@ -917,7 +917,7 @@ def start(string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
     draw()
     go(screen)
 
-start()
+# start()
 #default string: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
 #diagonal moves test string: rnbqkbnr/p6p/8/8/8/8/P6P/RNBQKBNR
 #Castle test string: r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R
