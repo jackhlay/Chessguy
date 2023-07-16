@@ -74,6 +74,9 @@ class piece():
                 self.moves.extend([ind-15, ind-6, ind+10, ind+17])
             else:
                 self.moves.extend([ind-17, ind-15, ind-10, ind-6, ind+6, ind+10, ind+15, ind+17])
+            for move in self.moves:
+                if 0<=move<=63 and board[move].place[1] == board[ind].place[1]:
+                    self.moves.remove(move)
         elif self.type == "BISHOP":
             self.moves.extend(self.diags(ind))
         elif self.type == "QUEEN":
@@ -112,6 +115,7 @@ class piece():
                     if board[ind+1].occupied and Rpassant.type == "PAWN" and Rpassant.nummoves == 1 and Rpassant.passant == True:
                         self.moves.append(ind-7)
                     
+                    
             else:
                 if board[ind].place[1] < 7:
                     self.moved = True
@@ -128,13 +132,15 @@ class piece():
                     piece = next((piece for piece in piecearr if piece.boardInd == t), None)
                     if piece and piece.color != self.color:
                         self.moves.append(t)
+
                 if board[ind].place[1] == 4:
                     Lpassant = next((piece for piece in piecearr if piece.boardInd == ind-1), None)
                     Rpassant = next((piece for piece in piecearr if piece.boardInd == ind+1), None)
-                    if board[ind-1].occupied and Lpassant.type == "PAWN" and Lpassant.nummoves == 1:
+                    if board[ind-1].occupied and Lpassant.type == "PAWN" and Lpassant.passant:
                         self.moves.append(ind+7)
-                    if board[ind+1].occupied and Rpassant.type == "PAWN" and Rpassant.nummoves == 1:
+                    if board[ind+1].occupied and Rpassant.type == "PAWN" and Rpassant.passant:
                         self.moves.append(ind+9)
+                    
     
         return self.moves
     
@@ -154,7 +160,7 @@ class piece():
                 if not board[m].occupied:
                     moves.append(m)
 
-                elif board[m].occupied and piece.color != self.color:
+                elif piece and piece.color != self.color:
                     moves.append(m)
         return moves
     
@@ -224,7 +230,7 @@ class piece():
                     break
         return moves
 
-    def check(self, ind):
+    def check(self, turn):
         OppMoves = []
         king = next((piece for piece in piecearr if piece.type == "KING" and piece.color == turn), None)
         for piece in piecearr:
@@ -235,24 +241,37 @@ class piece():
         return False
             
     def isLegalMove(self, ind):
-        boardcopy = board
-        piecearrcopy = piecearr
-        finalArr = []
-        pieces = [piece for piece in piecearrcopy if piece.color == turn]
-        for piece in pieces:
-            for move in piece.legals(piece.movegen(piece.boardInd)):
-                piece.makeMove(move)
-                if not piece.check(ind):
-                    finalArr.append(move)
-                piece.undoMove(move)
-        return finalArr
+        pass
+        # boardcopy = board
+        # piecearrcopy = piecearr
+        # finalArr = []
+        # pieces = [piece for piece in piecearrcopy if piece.color == turn]
+        # for piece in pieces:
+        #     for move in piece.legals(piece.movegen(piece.boardInd)):
+        #         piece.makeMove(move)
+        #         if not piece.check(ind):
+        #             finalArr.append(move)
+        #         piece.undoMove(move)
+        # return finalArr
                 
 
-    def makeMove(self, ind):
-        pass
-
-    def undoMove(self, ind):
-        pass
+    def EvalMoves(self):
+        moves = []
+        pieces = [piece for piece in piecearr if piece.color == turn]
+        for piece in pieces:
+            for move in piece.legals(piece.movegen(piece.boardInd)):
+                ind = piece.boardInd
+                space = board[move]
+                piece.moved = True
+                piece.boardInd = move
+                if not piece.check(turn):
+                    key = f"{piece.symbol}{space.place[0]}{space.place[1]}"
+                    val = eval()
+                    moves.append((key, val))
+                    print((key, val))
+                piece.moved = False
+                piece.boardInd = ind
+        print(eval())
 
 #Functions Block
 
@@ -275,7 +294,8 @@ def eval():
     AttPot = pieceattack()
     PawnAtt = pawncount()
     eval =( .55 * tot) + (.3 * AttPot) + (.1 * PawnAtt)
-    print(f"Eval: {eval: .3f}") #Debugging
+    # print(f"Eval: {eval: .3f}") #Debugging
+    return "{:.3f}".format(eval)
 
 #EVAL HELPER FUNCTIONS
 
@@ -524,16 +544,14 @@ def go(screen):
         
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
-                moves = []
                 x, y = event.pos
                 ind = ((y//100) * 8) + (x//100)
-                orig = takein(x,y)
-                piece = next((piece for piece in piecearr if piece.boardInd == ind), None)
+                orig, piece = takein(x,y)
                 if not orig.occupied or piece.color != turn: #If you click on an empty square or the wrong color
                     drawit(screen)
                     continue
 
-                elif piece.check(ind): #Check evaluation
+                elif piece.check(turn): #Check evaluation
                     print("IN CHECK")
                     allmoves = []
                     legalmoves = []
@@ -559,8 +577,7 @@ def go(screen):
                 dragging = False
                 x, y = event.pos
                 ind2 = ((y//100) * 8) + (x//100)
-                piece2 = next((piece for piece in piecearr if piece.boardInd == ind2), None)
-                fin = takein(x,y)
+                fin,piece2 = takein(x,y)
                 if not piece or fin == orig or turn != piece.color: #If no piece or same piece or wrong color
                     drawit(screen)
                 
@@ -615,7 +632,9 @@ def go(screen):
                         turnCount += 1
                     else:
                         turn = "Black"
+                    eval()
                     drawit(screen)
+                    piece.EvalMoves()
                 
                 elif piece.type == "PAWN" and abs(ind2-ind) == 16: #En Passant Block
                             piece.passant = True
@@ -642,7 +661,9 @@ def go(screen):
                             else:
                                 turn = "Black"
                             eval()
-                            drawit(screen)  
+                            drawit(screen)
+                            piece.EvalMoves()
+
 
                 elif ind2 in moves: #Check if move is legal
                     if piece.type == "PAWN" and (abs(ind2-ind) == 9):
@@ -821,6 +842,7 @@ def go(screen):
                     
                     eval()
                     drawit(screen)
+                    piece.EvalMoves()
                     
                 
                     
@@ -905,7 +927,7 @@ def takein(x,y):
     #     print("empty")
     ]
 
-    return spot
+    return spot,piece
 
 #GO! GO! GO!             
 def start(string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
@@ -917,7 +939,7 @@ def start(string="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"):
     draw()
     go(screen)
 
-# start()
+start()
 #default string: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
 #diagonal moves test string: rnbqkbnr/p6p/8/8/8/8/P6P/RNBQKBNR
 #Castle test string: r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R
