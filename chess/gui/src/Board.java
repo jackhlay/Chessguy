@@ -26,6 +26,7 @@ public class Board {
             Board.add(b);
         }
         window.add(Board);
+        window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         window.setSize(800,800);
 
         window.setVisible(true);
