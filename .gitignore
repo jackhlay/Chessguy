@@ -3,3 +3,5 @@
 *.pyc
 *.pyc
 \.idea\
+\chess\gui\.idea\
+\chess\gui\out\
