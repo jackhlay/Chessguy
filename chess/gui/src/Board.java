@@ -7,11 +7,14 @@ import java.awt.event.ActionListener;
 public class Board {
 
     public static void go(){
+        JPanel leftPanel = new JPanel();
         JFrame window = new JFrame();
+        window.setLayout(new BorderLayout());
         JPanel Board = new JPanel(new GridLayout(8,8));
 
         for(int i=0; i<64; i++){
             JButton b = new JButton();
+            //Colors: https://www.color-hex.com/color-palette/64811
             if(i%2==1)b.setBackground(new Color(68,51,85));
             else{b.setBackground(new Color(153,153,153));}
             b.setBorder(new MatteBorder(1,1,1,1,new Color(85,85,85)));
@@ -25,9 +28,16 @@ public class Board {
             });
             Board.add(b);
         }
-        window.add(Board);
+        leftPanel.setPreferredSize(new Dimension(200, 800)); // Adjust size as needed
+        leftPanel.setBackground(Color.lightGray);
+
+        Board.setPreferredSize(new Dimension(800,800));
+
+        window.add(leftPanel,BorderLayout.WEST);
+        window.add(Board,BorderLayout.CENTER);
         window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        window.setSize(800,800);
+        window.setSize(1000,800);
+        window.setResizable(false);
 
         window.setVisible(true);
         Board.setVisible(true);
