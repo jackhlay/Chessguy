@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 public class Board {
 
     public static void go(){
+        char[][] BoardArr = Gamestate.Fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
         JPanel leftPanel = new JPanel();
         JFrame window = new JFrame();
         window.setLayout(new BorderLayout());
@@ -15,6 +16,10 @@ public class Board {
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
                 JButton b = new JButton();
+                b.setText(String.valueOf(BoardArr[row][col]));
+                b.setForeground(new Color(85, 85, 85));
+                b.setFocusPainted(false);
+                b.setBorderPainted(false);
                 //Colors: https://www.color-hex.com/color-palette/64811
                 if ((row+col) % 2 == 1) b.setBackground(new Color(42, 34, 38));
                 else {
