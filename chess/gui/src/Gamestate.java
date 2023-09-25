@@ -34,13 +34,4 @@ public class Gamestate {
         return Board;
     }
 
-    public static void main(String[] args) {
-        char[][] Board = Fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
-        for (int row = 0; row < Board.length; row++) {
-            for (int col = 0; col < Board[row].length; col++) {
-                System.out.print(Board[row][col] + " ");
-            }
-            System.out.println(); // Move to the next line after printing each row
-        }
-    }
 }

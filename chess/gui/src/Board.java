@@ -31,7 +31,7 @@ public class Board {
                 b.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        System.out.println("" + finalI);
+                        System.out.println(finalI);;
                     }
                 });
                 Board.add(b);
