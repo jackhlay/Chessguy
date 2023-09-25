@@ -12,23 +12,27 @@ public class Board {
         window.setLayout(new BorderLayout());
         JPanel Board = new JPanel(new GridLayout(8,8));
 
-        for(int i=0; i<64; i++){
-            JButton b = new JButton();
-            //Colors: https://www.color-hex.com/color-palette/64811
-            if(i%2==1)b.setBackground(new Color(68,51,85));
-            else{b.setBackground(new Color(153,153,153));}
-            b.setBorder(new MatteBorder(1,1,1,1,new Color(85,85,85)));
-            b.setVisible(true);
-            int finalI = i;
-            b.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    System.out.println(""+ finalI);
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                JButton b = new JButton();
+                //Colors: https://www.color-hex.com/color-palette/64811
+                if ((row+col) % 2 == 1) b.setBackground(new Color(42, 34, 38));
+                else {
+                    b.setBackground(new Color(22, 24, 20));
                 }
-            });
-            Board.add(b);
+                b.setBorder(new MatteBorder(1, 1, 1, 1, new Color(85, 85, 85)));
+                b.setVisible(true);
+                int finalI = (8*row + col);
+                b.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        System.out.println("" + finalI);
+                    }
+                });
+                Board.add(b);
+            }
         }
-        leftPanel.setPreferredSize(new Dimension(200, 800)); // Adjust size as needed
+        leftPanel.setPreferredSize(new Dimension(300, 800)); // Adjust size as needed
         leftPanel.setBackground(Color.lightGray);
 
         Board.setPreferredSize(new Dimension(800,800));
@@ -36,7 +40,7 @@ public class Board {
         window.add(leftPanel,BorderLayout.WEST);
         window.add(Board,BorderLayout.CENTER);
         window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        window.setSize(1000,800);
+        window.setSize(1100,800);
         window.setResizable(false);
 
         window.setVisible(true);

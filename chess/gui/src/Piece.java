@@ -13,6 +13,7 @@ public abstract class Piece {
     Character Notation;
     Double Value;
     Character Color;
+    int boardInd;
 
     public void Movegen() {}
 
