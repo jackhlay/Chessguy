@@ -4,9 +4,10 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class Board {
+public class Board{
 
     public static void go(){
+        String pieces ="chess/images";
         char[][] BoardArr = Gamestate.Fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
         JPanel leftPanel = new JPanel();
         JFrame window = new JFrame();
@@ -21,20 +22,63 @@ public class Board {
                 b.setFocusPainted(false);
                 b.setBorderPainted(false);
                 //Colors: https://www.color-hex.com/color-palette/64811
-                if ((row+col) % 2 == 1) b.setBackground(new Color(42, 34, 38));
+                if ((row + col) % 2 == 1) b.setBackground(new Color(42, 34, 38));
                 else {
                     b.setBackground(new Color(22, 24, 20));
                 }
                 b.setBorder(new MatteBorder(1, 1, 1, 1, new Color(85, 85, 85)));
                 b.setVisible(true);
-                int finalI = (8*row + col);
+                b.setForeground(b.getBackground());
+                int finalI = (8 * row + col);
                 b.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        System.out.println(finalI);;
+                        System.out.println(finalI);
+                        ;
                     }
                 });
                 Board.add(b);
+                String val = b.getText();
+                switch (b.getText()){
+                    case "P":
+                        b.setIcon(new ImageIcon("chess/images/wp.png"));
+                        break;
+                    case "K":
+                        b.setIcon(new ImageIcon("chess/images/wK.png"));
+                        break;
+                    case "N":
+                        b.setIcon(new ImageIcon("chess/images/wN.png"));
+                        break;
+                    case "Q":
+                        b.setIcon(new ImageIcon("chess/images/wQ.png"));
+                        break;
+                    case "B":
+                        b.setIcon(new ImageIcon("chess/images/wB.png"));
+                        break;
+                    case "R":
+                        b.setIcon(new ImageIcon("chess/images/wR.png"));
+                        break;
+                    case "p":
+                        b.setIcon(new ImageIcon("chess/images/bp.png"));
+                        break;
+                    case "k":
+                        b.setIcon(new ImageIcon("chess/images/bK.png"));
+                        break;
+                    case "n":
+                        b.setIcon(new ImageIcon("chess/images/bN.png"));
+                        break;
+                    case "q":
+                        b.setIcon(new ImageIcon("chess/images/bQ.png"));
+                        break;
+                    case "b":
+                        b.setIcon(new ImageIcon("chess/images/bB.png"));
+                        break;
+                    case "r":
+                        b.setIcon(new ImageIcon("chess/images/bR.png"));
+                        break;
+                    default:
+                }
+
             }
         }
         leftPanel.setPreferredSize(new Dimension(300, 800)); // Adjust size as needed
@@ -43,6 +87,7 @@ public class Board {
         Board.setPreferredSize(new Dimension(800,800));
 
         window.add(leftPanel,BorderLayout.WEST);
+        window.setTitle("boby v0.23");
         window.add(Board,BorderLayout.CENTER);
         window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         window.setSize(1100,800);
