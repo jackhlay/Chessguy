@@ -1,10 +1,12 @@
 Hello!
 
 Thank you for your interest in my Chess Engine. all progress is on the "Front-End-Era" branch.
-This project is written in python.
+This project is being reworked.
+Previously it was pure python, but now i'm moving to a Java front end with python back end.
 
 Here are the milestones:
 Surpassed:
+Working on now:
 
 Display a board
 Display and center pieces
@@ -13,11 +15,7 @@ Once parced translate the space's info to the space
 Be able to correctly output any FEN string
 Turn Ordering
 Double Buffering
-
-Working on now:
 Move Legality
-
-
 Working on next:
 Let the computer make moves
 Write rules for how each piece moves
