@@ -3,10 +3,11 @@ import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 public class Board{
-
     public static void go(){
+        ArrayList<Piece> PieceList = new ArrayList<>();
         String pieces ="chess/images";
         char[][] BoardArr = Gamestate.Fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
         JPanel leftPanel = new JPanel();
@@ -33,8 +34,23 @@ public class Board{
                 b.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        System.out.println(finalI);
-                        ;
+                        if (!b.isSelected()) {
+                            for(Component c : Board.getComponents()) {
+                                if(c instanceof JButton){
+                                    ((JButton) c).setSelected(false);
+                                }
+                            }
+                                b.setSelected(true);
+                            System.out.println(finalI);
+                            for (Piece p : PieceList) {
+                                if (p.boardInd == finalI) {
+                                    p.moveGen();
+                                    for (int i : p.moves) {
+                                        Board.getComponent(i).setBackground(Color.red);
+                                    }
+                                }
+                            }
+                        }
                     }
                 });
                 Board.add(b);
@@ -42,9 +58,17 @@ public class Board{
                 switch (b.getText()){
                     case "P":
                         b.setIcon(new ImageIcon("chess/images/wp.png"));
+                        Piece p = new pawn('P',1.0,'W');
+                        p.boardInd = 8*row + col;
+                        p.numMoves=0;
+                        PieceList.add(p);
                         break;
                     case "K":
                         b.setIcon(new ImageIcon("chess/images/wK.png"));
+                        Piece K = new king('K',0.0, 'W');
+                        K.boardInd = 8*row + col;
+                        K.numMoves = 0;
+                        PieceList.add(K);
                         break;
                     case "N":
                         b.setIcon(new ImageIcon("chess/images/wN.png"));

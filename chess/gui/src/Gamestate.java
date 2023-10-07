@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 
 public class Gamestate {
+    char turn = 'W';
     char[][] Board = new char[8][8];
 
     public static char[][] Fen(String x) {

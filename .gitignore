@@ -5,3 +5,4 @@
 \.idea\
 \chess\gui\.idea\
 \chess\gui\out\
+*.class
