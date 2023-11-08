@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 public class Board{
+    private static int selected=-1;
     public static void go(){
         ArrayList<Piece> PieceList = new ArrayList<>();
         String pieces ="chess/images";
@@ -34,22 +35,18 @@ public class Board{
                 b.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        if (!b.isSelected()) {
-                            for(Component c : Board.getComponents()) {
-                                if(c instanceof JButton){
-                                    ((JButton) c).setSelected(false);
-                                }
-                            }
-                                b.setSelected(true);
-                            System.out.println(finalI);
-                            for (Piece p : PieceList) {
-                                if (p.boardInd == finalI) {
-                                    p.moveGen();
-                                    for (int i : p.moves) {
-                                        Board.getComponent(i).setBackground(Color.red);
-                                    }
-                                }
-                            }
+                        System.out.println("Selected: " + selected);
+                        if(selected==-1){
+                            System.out.println("Setting selected to " + finalI);
+                            selected=finalI;
+                        }
+                        else if(selected==finalI){
+                            System.out.println("Resetting from " + finalI + " to -1");
+                            selected= -1;
+                        }
+                        else if(selected!=finalI){
+                            System.out.println("Resetting from " + selected + " to -1");
+                            selected=-1;
                         }
                     }
                 });
