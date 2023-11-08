@@ -1,7 +1,7 @@
 Hello!
 
-Thank you for your interest in my Chess Engine. all progress is on the "Progress-Tube" branch.
-This project is written in python.
+Thank you for your interest in my Chess Engine. It's a bit of a mess right now.
+Currently in the process of moving to a Java front end, from a former python front + back end.
 
 Here are the milestones:
 Surpassed:
@@ -12,7 +12,6 @@ Write a function to parse the FEN
 Once parced translate the space's info to the space
 Be able to correctly output any FEN string
 Turn Ordering
-Double Buffering
 
 Working on now:
 Move Legality
