@@ -10,7 +10,7 @@ public class Board{
     public static void go(){
         ArrayList<Piece> PieceList = new ArrayList<>();
         String pieces ="chess/images";
-        char[][] BoardArr = Gamestate.Fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+        char[][] BoardArr = Gamestate.Fen("1q6/1k1r2K1/1NP3pp/1P3N1Q/3Q2b1/nP6/4NR2/1P5B00");
         JPanel leftPanel = new JPanel();
         JFrame window = new JFrame();
         window.setLayout(new BorderLayout());
