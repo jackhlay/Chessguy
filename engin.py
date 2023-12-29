@@ -42,6 +42,7 @@ spots = [("a", 8), ("b", 8), ("c", 8), ("d", 8), ("e", 8), ("f", 8), ("g", 8), (
          ("h", 2), ("a", 1), ("b", 1), ("c", 1), ("d", 1), ("e", 1), ("f", 1), ("g", 1), ("h", 1)]
          
 board = []
+button_rects = []
 piecearr = []
 turnCount = 0
 gameLog = []
@@ -504,31 +505,35 @@ def parfen(String):
 
 #Draws board
 def draw():
-    global turn,screen
+    global turn, screen
     pygame.init()
     board_size = (800, 800)
     screen = pygame.display.set_mode(board_size)
     light = (42, 34, 38)
-    dark = (22,24,20)
-    pos = 0
-    for i in range(8): #draw board
-        for j in range(8):
-            if (i+j) % 2 == 0:
+    dark = (22, 24, 20)
+
+    for j in range(8):  # draw board
+        for i in range(8):
+            if (i + j) % 2 == 0:
                 color = dark
             else:
                 color = light
-            pygame.draw.rect(screen, color, (i*100, j*100, 100, 100))
-            pos += 1
+            button = pygame.draw.rect(screen, color, (i * 100, j * 100, 100, 100))
+            button_rects.append(button)
 
-    for i in range(64): #draw pieces
-        if board[i].occupied:
-            piece = next((piece for piece in piecearr if piece.boardInd == i), None)
-            if piece.color=="Black":
-                screen.blit(bPiecesDict[piece.type], ((i%8)*100+20, (i//8)*100+20))
-                pygame.display.flip()
-            else:
-                screen.blit(wPiecesDict[piece.type], ((i%8)*100+20, (i//8)*100+20))
-                pygame.display.flip()
+    for j in range(8):  # draw pieces
+        for i in range(8):
+            pos = i + j * 8  # Calculate the position correctly
+            if board[pos].occupied:
+                piece = next((piece for piece in piecearr if piece.boardInd == pos), None)
+                if piece.color == "Black":
+                    screen.blit(bPiecesDict[piece.type], (i * 100 + 20, j * 100 + 20))
+                else:
+                    screen.blit(wPiecesDict[piece.type], (i * 100 + 20, j * 100 + 20))
+
+    pygame.display.flip()
+
+
 
 #Game loop and maintainence functions
 def go(screen):
@@ -545,8 +550,11 @@ def go(screen):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
-                ind = ((y//100) * 8) + (x//100)
-                orig, piece = takein(x,y)
+                for ind, button in enumerate(button_rects):
+                    if button.collidepoint(x, y):
+                        print(f"Button {ind} pressed")
+                        orig,piece = takein(ind)
+                        if piece:(print(piece.type))
                 if not orig.occupied or piece.color != turn: #If you click on an empty square or the wrong color
                     drawit(screen)
                     continue
@@ -576,8 +584,10 @@ def go(screen):
             if event.type== pygame.MOUSEBUTTONUP: 
                 dragging = False
                 x, y = event.pos
-                ind2 = ((y//100) * 8) + (x//100)
-                fin,piece2 = takein(x,y)
+                for ind2, button in enumerate(button_rects):
+                    if button.collidepoint(x, y):
+                        print(f"Button {ind2} pressed")
+                        fin,piece2 = takein(ind2)
                 if not piece or fin == orig or turn != piece.color: #If no piece or same piece or wrong color
                     drawit(screen)
                 
@@ -901,11 +911,14 @@ def Threefold(move):
         return True
 
 
-def takein(x,y):
-    square_x, square_y = x // 100, y // 100
-    ind = (square_y * 8) + square_x
+def takein(ind): #unused, but good to show process.
     spot = board[ind]
     piece = next((piece for piece in piecearr if piece.boardInd == ind), None)
+    
+    # square_x, square_y = x // 100, y // 100
+    # ind = (square_y * 8) + square_x
+    # spot = board[ind]
+    # piece = next((piece for piece in piecearr if piece.boardInd == ind), None)
     
     [#previous print tests
     # print('Active: {}'.format(spot.active))
