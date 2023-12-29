@@ -554,7 +554,7 @@ def go(screen):
                     if button.collidepoint(x, y):
                         print(f"Button {ind} pressed")
                         orig,piece = takein(ind)
-                        if piece:(print(piece.type))
+                        if piece:(print(piece.type, piece.color))
                 if not orig.occupied or piece.color != turn: #If you click on an empty square or the wrong color
                     drawit(screen)
                     continue
@@ -573,7 +573,7 @@ def go(screen):
                 else: #If piece is not in check
                     dragging=True
                     moves = piece.legals(piece.movegen(ind))
-                    # print(moves) #Debugging
+                    print(moves) #Debugging
 
                     if piece.color=="White":
                         img = wPiecesDict[piece.type]
@@ -586,12 +586,12 @@ def go(screen):
                 x, y = event.pos
                 for ind2, button in enumerate(button_rects):
                     if button.collidepoint(x, y):
-                        print(f"Button {ind2} pressed")
+                        print(f"Button {ind2} pressed , occupied: {board[ind2].occupied}")
                         fin,piece2 = takein(ind2)
                 if not piece or fin == orig or turn != piece.color: #If no piece or same piece or wrong color
                     drawit(screen)
                 
-                elif board[ind2].occupied and piece2.color == piece.color: #If piece of same color
+                elif piece2 and (piece2.color == piece.color): #If piece of same color
                     drawit(screen)
                 
                 elif piece.type == "KING" and 1 < abs(ind2-ind) < 5: #Castline Block
