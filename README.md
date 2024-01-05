@@ -3,7 +3,6 @@
 ### Thank you for your interest in my Chess Engine. most current progress is held in this branch.
 
   
-# This branch is once again the maintained branch!
 ## After a short stint making a java gui, I've decided to continue with this branch, starting with cleaning up the gui and how it work. Next i have to rework the move generation, and check if I have the rules implemented correctly.  
 
 Here are the milestones:

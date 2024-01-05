@@ -64,8 +64,9 @@ class piece():
     boardInd = None
     passant = None
     moves = []
-    def movegen(self, ind):
+    def movegen(self):
         self.moves=[]
+        ind = self.boardInd
         if self.type == "ROOK":
             self.moves.extend(self.slides(ind))
         elif self.type == "KNIGHT":
@@ -236,7 +237,7 @@ class piece():
         king = next((piece for piece in piecearr if piece.type == "KING" and piece.color == turn), None)
         for piece in piecearr:
             if piece.color != turn:
-                OppMoves.extend(piece.legals(piece.movegen(piece.boardInd)))
+                OppMoves.extend(piece.legals(piece.movegen()))
             if king.boardInd in OppMoves:
                 return True
         return False
@@ -248,7 +249,7 @@ class piece():
         # finalArr = []
         # pieces = [piece for piece in piecearrcopy if piece.color == turn]
         # for piece in pieces:
-        #     for move in piece.legals(piece.movegen(piece.boardInd)):
+        #     for move in piece.legals(piece.movegen():
         #         piece.makeMove(move)
         #         if not piece.check(ind):
         #             finalArr.append(move)
@@ -260,7 +261,7 @@ class piece():
         moves = []
         pieces = [piece for piece in piecearr if piece.color == turn]
         for piece in pieces:
-            for move in piece.legals(piece.movegen(piece.boardInd)):
+            for move in piece.legals(piece.movegen()):
                 ind = piece.boardInd
                 space = board[move]
                 piece.moved = True
@@ -311,7 +312,7 @@ def EnemyTrace():
 
     Wfiltered = [piece for piece in piecearr if piece.color == "White"]
     for piece in Wfiltered:
-        Wmovearr.extend(piece.legals(piece.movegen(piece.boardInd)))
+        Wmovearr.extend(piece.legals(piece.movegen()))
 
     for move in Wmovearr:
         piece2 = next((piece for piece in piecearr if piece.boardInd == move), None)
@@ -322,7 +323,7 @@ def EnemyTrace():
 
     Bfiltered = [piece for piece in piecearr if piece.color == "Black"]
     for piece in Bfiltered:
-        BmoveArr.extend(piece.legals(piece.movegen(piece.boardInd)))
+        BmoveArr.extend(piece.legals(piece.movegen()))
 
     for move in BmoveArr:
         piece2 = next((piece for piece in piecearr if piece.boardInd == move), None)
@@ -558,22 +559,25 @@ def go(screen):
                 if not orig.occupied or piece.color != turn: #If you click on an empty square or the wrong color
                     drawit(screen)
                     continue
-
-                elif piece.check(turn): #Check evaluation
+                
+                #get king piece and use to check if in check
+                king = next((piece for piece in piecearr if piece.type == "KING" and piece.color == turn), None)
+                if king.check(turn): #Check evaluation
                     print("IN CHECK")
                     allmoves = []
                     legalmoves = []
                     for p in piecearr:
                         if p.color == turn:
-                            allmoves += piece.movegen(piece.boardInd)
+                            allmoves += piece.movegen()
                     for move in allmoves:
                         if piece.isLegalMove(move):
                             legalmoves.append(move)
 
-                else: #If piece is not in check
+                else: #If king is not in check
                     dragging=True
-                    moves = piece.legals(piece.movegen(ind))
-                    print(moves) #Debugging
+                    if piece:
+                        moves = piece.legals(piece.movegen())
+                        print(moves) #Debugging
 
                     if piece.color=="White":
                         img = wPiecesDict[piece.type]
@@ -584,10 +588,11 @@ def go(screen):
             if event.type== pygame.MOUSEBUTTONUP: 
                 dragging = False
                 x, y = event.pos
-                for ind2, button in enumerate(button_rects):
+                for ind, button in enumerate(button_rects):
                     if button.collidepoint(x, y):
-                        print(f"Button {ind2} pressed , occupied: {board[ind2].occupied}")
-                        fin,piece2 = takein(ind2)
+                        print(f"Button {ind} pressed , occupied: {board[ind].occupied}")
+                        fin,piece2 = takein(ind)
+                        ind2 = ind
                 if not piece or fin == orig or turn != piece.color: #If no piece or same piece or wrong color
                     drawit(screen)
                 
@@ -676,6 +681,7 @@ def go(screen):
 
 
                 elif ind2 in moves: #Check if move is legal
+                    print("IND2 IN MOVES")
                     if piece.type == "PAWN" and (abs(ind2-ind) == 9):
                         if turn == "White" and board[ind2+8].occupied and board[ind].place[1]==5: #En Passant block
                             piece2 = next((piece for piece in piecearr if piece.boardInd == ind2+8), None)
