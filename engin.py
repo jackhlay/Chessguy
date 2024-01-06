@@ -164,6 +164,7 @@ class piece():
 
                 elif piece and piece.color != self.color:
                     moves.append(m)
+
         return moves
     
     def slides(self, ind):
@@ -259,21 +260,23 @@ class piece():
 
     def EvalMoves(self):
         moves = []
-        pieces = [piece for piece in piecearr if piece.color == turn]
-        for piece in pieces:
-            for move in piece.legals(piece.movegen()):
-                ind = piece.boardInd
-                space = board[move]
-                piece.moved = True
-                piece.boardInd = move
-                if not piece.check(turn):
-                    key = f"{piece.symbol}{space.place[0]}{space.place[1]}"
-                    val = eval()
-                    moves.append((key, val))
-                    print((key, val))
-                piece.moved = False
-                piece.boardInd = ind
-        print(eval())
+        evals = []
+        piece = self
+        for move in piece.legals(piece.movegen()):
+            ind = piece.boardInd
+            space = board[move]
+            piece.moved = True
+            piece.boardInd = move
+            if not piece.check(turn):
+                moves.append(move)
+                key = f"{piece.symbol}{space.place[0]}{space.place[1]}"
+                val = eval()
+                evals.append((key, val))
+                # print((key, val))
+            piece.moved = False
+            piece.boardInd = ind
+        print(moves)
+        return moves,evals
 
 #Functions Block
 
@@ -576,7 +579,7 @@ def go(screen):
                 else: #If king is not in check
                     dragging=True
                     if piece:
-                        moves = piece.legals(piece.movegen())
+                        moves = piece.EvalMoves()
                         print(moves) #Debugging
 
                     if piece.color=="White":
