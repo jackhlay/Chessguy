@@ -262,7 +262,7 @@ class piece():
         moves = []
         evals = []
         piece = self
-        if turn == None:
+        if not turn:
             return moves
         for move in piece.legals(piece.movegen()):
             if move == ("Kcastle" or "Qcastle") and (not piece.moved):
