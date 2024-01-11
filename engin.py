@@ -262,6 +262,8 @@ class piece():
         moves = []
         evals = []
         piece = self
+        if turn == None:
+            return moves
         for move in piece.legals(piece.movegen()):
             if move == ("Kcastle" or "Qcastle") and (not piece.moved):
                 moves.append(move)
@@ -845,8 +847,9 @@ def go(screen):
                         turnCount += 1
                     else:
                         turn = "Black"
-                    for p in passantable:
-                        p.passantable = False
+                    if passantanble:
+                        for p in passantanble:
+                            p.passantable = False
                     
                     drawit(screen)
                     piece.EvalMoves()
@@ -897,7 +900,7 @@ def drawit(screen):
     pygame.display.flip()
 
 def Threefold(move):
-    global turn
+    global turn, screen
     occurences = 0
     for element in gameLog:
         if element == move:
@@ -905,7 +908,7 @@ def Threefold(move):
     if occurences == 3:
         print("Draw by Threefold Repetition")
         turn = None
-        return True
+        drawit(screen)
 
 
 def takein(ind): #unused, but good to show process.
