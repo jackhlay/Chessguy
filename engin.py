@@ -283,7 +283,7 @@ class piece():
                     # print((key, val))
                 piece.moved = moved
                 piece.boardInd = ind
-        print(moves)
+        # print(moves)
         return moves
 
 #Functions Block
@@ -576,11 +576,10 @@ def go(screen):
                 if king.check(turn): #Check evaluation
                     print("IN CHECK")
                     allmoves = []
-                    legalmoves = []
                     for p in piecearr:
                         if p.color == turn:
                             allmoves += piece.EvalMoves()
-                    if len(allmoves) > 0: print("NOT MATE")
+                    if allmoves: print("NOT MATE")
 
                 else: #If king is not in check
                     dragging=True
