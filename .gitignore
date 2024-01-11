@@ -1,53 +1,199 @@
-# Compiled class files
-*.class
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
-# Log files
-*.log
+# C extensions
+*.so
 
-# BlueJ files
-*.ctxt
+out/
 
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# JUnit
-/junit/
-
-# Package Files #
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
-# Maven
-target/
-pom.xml.tag
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-release.properties
-dependency-reduced-pom.xml
-buildNumber.properties
-.mvn/
-
-# Gradle
-.gradle/
+# Distribution / packaging
+.Python
 build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# IntelliJ
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask
+instance/
+.webassets-cache
+
+# Scrapy
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyInstaller
+dist/
+build/
+*.exe
+*.spec
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+Pipfile-2.5.lock
+
+# poetry
+poetry.lock
+
+# celery beat schedule file
+celerybeat-schedule
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+venv/
+ENV/
+env/
+venv.bak/
+env.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# VS Code settings
+.vscode/
+
+# JupyterLab workspace
+.jupyterlab/
+
+# SageMath metadata
+.metadata/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+fastlane/readme.md
+
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.vscode/
 .idea/
 *.iml
-*.iws
-*.ipr
 
-# Eclipse
-.classpath
-.project
-.settings/
-
-# NetBeans
-nbproject/private/
+# Android
 build/
+local.properties
+/.gradle
+/captures/
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+.pnp
+.pnp.js
+
+# TypeScript
+*.tsbuildinfo
+
+# Yarn
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.yarnrc
+.yarn-integrity
+
+# Rollup.js
+.rollup.cache/
+.rollup.pid
+.rollup.vim/
+
+# Svelte
+__svelte__/
+
+# FuseBox
+.fusebox/
+
+# Webpack
+node_modules/
+/dist/
+.cache/
+public/assets/
+
+# Parcel
+.cache/
+dist/
+.cache-loader/
+.cache/
+parcel-debug-*.log
+
+# Snowpack
+web_modules/
+snowpack.lock.json
+build-web/
