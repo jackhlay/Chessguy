@@ -76,9 +76,8 @@ class piece():
                 self.moves.extend([ind-15, ind-6, ind+10, ind+17])
             else:
                 self.moves.extend([ind-17, ind-15, ind-10, ind-6, ind+6, ind+10, ind+15, ind+17])
-            for move in self.moves:
-                if 0<=move<=63 and board[move].place[1] == board[ind].place[1]:
-                    self.moves.remove(move)
+            self.moves = [move for move in self.moves if 0 <= move <= 63]
+            self.moves = [move for move in self.moves if ((move%8)-(ind%8)<=2)]
         elif self.type == "BISHOP":
             self.moves.extend(self.diags(ind))
         elif self.type == "QUEEN":
@@ -264,18 +263,24 @@ class piece():
         evals = []
         piece = self
         for move in piece.legals(piece.movegen()):
-            ind = piece.boardInd
-            space = board[move]
-            piece.moved = True
-            piece.boardInd = move
-            if not piece.check(turn):
+            if move == ("Kcastle" or "Qcastle") and (not piece.moved):
                 moves.append(move)
-                # key = f"{piece.symbol}{space.place[0]}{space.place[1]}"
-                # val = eval()
-                # evals.append((key, val))
-                # print((key, val))
-            piece.moved = False
-            piece.boardInd = ind
+            elif move == ("Kcastle" or "Qcastle") and (not piece.moved):
+                continue
+            else:
+                ind = piece.boardInd
+                space = board[move]
+                moved = piece.moved
+                piece.moved = True
+                piece.boardInd = move
+                if not piece.check(turn):
+                    moves.append(move)
+                    # key = f"{piece.symbol}{space.place[0]}{space.place[1]}"
+                    # val = #eval()
+                    # evals.append((key, val))
+                    # print((key, val))
+                piece.moved = moved
+                piece.boardInd = ind
         print(moves)
         return moves
 
@@ -542,23 +547,23 @@ def draw():
 
 #Game loop and maintainence functions
 def go(screen):
-    eval()
     global turn, turnCount, gameLog
     running = True
     dragging=False
-    offset_x, offset_y = 0, 0
     clock = pygame.time.Clock()
     pygame.init()
     #clean up this while loop
     while running:
         
         for event in pygame.event.get():
+            passantanble = [piece for piece in piecearr if piece.passant == True]
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
-                for ind, button in enumerate(button_rects):
+                for inda, button in enumerate(button_rects):
                     if button.collidepoint(x, y):
-                        print(f"Button {ind} pressed")
-                        orig,piece = takein(ind)
+                        print(f"Button {inda} pressed")
+                        orig,piece = takein(inda)
+                        ind = inda
                         if piece:(print(piece.type, piece.color))
                 if not orig.occupied or piece.color != turn: #If you click on an empty square or the wrong color
                     drawit(screen)
@@ -572,10 +577,8 @@ def go(screen):
                     legalmoves = []
                     for p in piecearr:
                         if p.color == turn:
-                            allmoves += piece.movegen()
-                    for move in allmoves:
-                        if piece.isLegalMove(move):
-                            legalmoves.append(move)
+                            allmoves += piece.EvalMoves()
+                    if len(allmoves) > 0: print("NOT MATE")
 
                 else: #If king is not in check
                     dragging=True
@@ -589,14 +592,15 @@ def go(screen):
                         img = bPiecesDict[piece.type]
                 
 
-            if event.type== pygame.MOUSEBUTTONUP: 
+            if event.type== pygame.MOUSEBUTTONUP:
+                king = next((piece for piece in piecearr if piece.type == "KING" and piece.color == turn), None)
                 dragging = False
                 x, y = event.pos
-                for ind, button in enumerate(button_rects):
+                for indb, button in enumerate(button_rects):
                     if button.collidepoint(x, y):
-                        print(f"Button {ind} pressed , occupied: {board[ind].occupied}")
-                        fin,piece2 = takein(ind)
-                        ind2 = ind
+                        print(f"Button {indb} pressed , occupied: {board[indb].occupied}")
+                        fin,piece2 = takein(indb)
+                        ind2 = indb
                 if not piece or fin == orig or turn != piece.color: #If no piece or same piece or wrong color
                     drawit(screen)
                 
@@ -651,22 +655,7 @@ def go(screen):
                         turnCount += 1
                     else:
                         turn = "Black"
-                    eval()
                     drawit(screen)
-                    piece.EvalMoves()
-                
-            
-                    # print(gameLog[turnCount]) #Debugging
-
-                    if turn == "Black":
-                        turn = "White"
-                        Threefold(gameLog[turnCount])
-                        turnCount += 1
-                    else:
-                        turn = "Black"
-                    eval()
-                    drawit(screen)
-                    piece.EvalMoves()
 
 
                 elif ind2 in moves: #Check if move is legal
@@ -856,14 +845,9 @@ def go(screen):
                         turnCount += 1
                     else:
                         turn = "Black"
-                    passantable = [piece for piece in piecearr if piece.passant == True]
-                    # for piece in piecearr:
-                    #     print(piece, piece.passant) #Debugging
-                    for piece in passantable:
-                        # print(piece) #Debugging
-                        piece.passant = False
+                    for p in passantable:
+                        p.passantable = False
                     
-                    eval()
                     drawit(screen)
                     piece.EvalMoves()
                     
