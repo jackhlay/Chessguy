@@ -1,7 +1,5 @@
 import pygame
 
-# ENGINE
-# Handles gamestate info, and valid moves, writes gamelog.
 pygame.init()
 pygame.display.set_caption('boby V0.24')
 turn ="White"
@@ -243,20 +241,6 @@ class piece():
                 return True
         return False
             
-    def isLegalMove(self, ind):
-        pass
-        # boardcopy = board
-        # piecearrcopy = piecearr
-        # finalArr = []
-        # pieces = [piece for piece in piecearrcopy if piece.color == turn]
-        # for piece in pieces:
-        #     for move in piece.legals(piece.movegen():
-        #         piece.makeMove(move)
-        #         if not piece.check(ind):
-        #             finalArr.append(move)
-        #         piece.undoMove(move)
-        # return finalArr
-                
 
     def EvalMoves(self):
         moves = []
@@ -518,7 +502,6 @@ def parfen(String):
 #Draws board
 def draw():
     global turn, screen
-    pygame.init()
     board_size = (800, 800)
     screen = pygame.display.set_mode(board_size)
     light = (42, 34, 38)
@@ -545,15 +528,12 @@ def draw():
 
     pygame.display.flip()
 
-
-
 #Game loop and maintainence functions
 def go(screen):
     global turn, turnCount, gameLog
     running = True
     dragging=False
     clock = pygame.time.Clock()
-    pygame.init()
     #clean up this while loop
     while running:
         
@@ -563,10 +543,9 @@ def go(screen):
                 x, y = event.pos
                 for inda, button in enumerate(button_rects):
                     if button.collidepoint(x, y):
-                        print(f"Button {inda} pressed")
+                        # print(f"Button {inda} pressed")
                         orig,piece = takein(inda)
                         ind = inda
-                        if piece:(print(piece.type, piece.color))
                 if not orig.occupied or piece.color != turn: #If you click on an empty square or the wrong color
                     drawit(screen)
                     continue
@@ -580,13 +559,12 @@ def go(screen):
                     for p in piecearr:
                         if p.color == turn:
                             allmoves += piece.EvalMoves()
-                    if len(allmoves) > 0: print("NOT MATE")
+                    if allmoves: print("NOT MATE")
 
                 else: #If king is not in check
                     dragging=True
                     if piece:
                         moves = piece.EvalMoves()
-                        print(moves) #Debugging
 
                     if piece.color=="White":
                         img = wPiecesDict[piece.type]
@@ -600,7 +578,7 @@ def go(screen):
                 x, y = event.pos
                 for indb, button in enumerate(button_rects):
                     if button.collidepoint(x, y):
-                        print(f"Button {indb} pressed , occupied: {board[indb].occupied}")
+                        # print(f"Button {indb} pressed , occupied: {board[indb].occupied}")
                         fin,piece2 = takein(indb)
                         ind2 = indb
                 if not piece or fin == orig or turn != piece.color: #If no piece or same piece or wrong color
@@ -661,7 +639,6 @@ def go(screen):
 
 
                 elif ind2 in moves: #Check if move is legal
-                    print("IND2 IN MOVES")
                     if piece.type == "PAWN" and abs(ind2-ind) == 16: #En Passant Block
                         piece.passant = True
                         orig.occupied = False
@@ -671,9 +648,6 @@ def go(screen):
                         piece.nummoves += 1
                         fin.occupied = True
                         fin.active = True
-                        passantable = [piece for piece in piecearr if piece.passant and piece.color != turn]
-                        # for p in passantable:
-                        #     p.passant = False
                         if turn == "White":
                             gameLog.append(f"{board[ind2].place[0]}{board[ind2].place[1]}")
                         else:
@@ -914,31 +888,6 @@ def Threefold(move):
 def takein(ind): #unused, but good to show process.
     spot = board[ind]
     piece = next((piece for piece in piecearr if piece.boardInd == ind), None)
-    
-    # square_x, square_y = x // 100, y // 100
-    # ind = (square_y * 8) + square_x
-    # spot = board[ind]
-    # piece = next((piece for piece in piecearr if piece.boardInd == ind), None)
-    
-    [#previous print tests
-    # print('Active: {}'.format(spot.active))
-    # print(spot.color)
-    # if spot.occupied:
-    #     if piece.type == "KING":
-    #         print(f"{piece.color} KING")
-    #     elif piece.type == "QUEEN":
-    #         print(f"{piece.color} QUEEN")
-    #     elif piece.type == "ROOK":
-    #         print(f"{piece.color} ROOK")
-    #     elif piece.type == "BISHOP":
-    #         print(f"{piece.color} BISHOP")
-    #     elif piece.type == "KNIGHT":
-    #         print(f"{piece.color}HORSEY")
-    #     elif piece.type == "PAWN":
-    #         print(f"{piece.color} PAWN")
-    # else:
-    #     print("empty")
-    ]
 
     return spot,piece
 
