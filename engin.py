@@ -255,7 +255,6 @@ class piece():
                 continue
             else:
                 ind = piece.boardInd
-                space = board[move]
                 moved = piece.moved
                 piece.moved = True
                 piece.boardInd = move
@@ -573,9 +572,8 @@ def draw():
     global turn, screen
     board_size = (800, 800)
     screen = pygame.display.set_mode(board_size)
-    light = (42, 34, 38)
-    dark = (22, 24, 20)
-
+    dark = (42, 34, 38)
+    light = (22,24,20)
     for j in range(8):  # draw board
         for i in range(8):
             if (i + j) % 2 == 0:
@@ -713,9 +711,8 @@ def go(screen):
                         turn = "Black"
                         Threefold(gameLog[turnCount])
                         bestMove = minimax(2, initial_alpha, initial_beta, False)
-                        
                     drawit(screen)
-
+                    
 
                 elif ind2 in moves: #Check if move is legal
                     if piece.type == "PAWN" and abs(ind2-ind) == 16: #En Passant Block
@@ -899,13 +896,13 @@ def go(screen):
                         turn = "White"
                         Threefold(gameLog[turnCount])
                         turnCount += 1
-                        bestMove = minimax(2, initial_alpha, initial_beta, True)
+                        # bestMove = minimax(2, initial_alpha, initial_beta, True)
                         print(f"Best Move: {bestMove}")
                     else:
                         turn = "Black"
                         Threefold(gameLog[turnCount])
                         bestMove = minimax(2, initial_alpha, initial_beta, False)
-                        drawit(screen)
+                    drawit(screen)
                     
                 
                     
@@ -923,8 +920,8 @@ def go(screen):
                 exit()
 
 def drawit(screen):
-    light = (42, 34, 38)
-    dark = (22,24,20)
+    dark = (42, 34, 38)
+    light = (22,24,20)
     pos = 0
 
     foreground = pygame.Surface((800,800))
