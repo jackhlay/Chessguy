@@ -83,8 +83,10 @@ class piece():
             self.moves.extend(self.slides(ind))
             self.moves.extend(self.diags(ind))
         elif self.type == "KING":
-            if ind == "Kcastle" or ind == "Qcastle":
-                self.moves.append(ind)
+            if ind == "Kcastle":
+                self.moves.append(ind+2)
+            elif ind == "Qcastle":
+                self.moves.append(ind-2)
             if board[ind].place[0] == "h":
                 self.moves.extend([ind-9, ind-8, ind-1, ind+7, ind+8])
             elif board[ind].place[0] == "a":
