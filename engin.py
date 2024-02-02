@@ -47,22 +47,25 @@ gameLog = []
 
 #Game Classes
 class Space():
-    occupied = False
-    active = False
-    place = None
+    def __init__(self):
+        self.occupied = False
+        self.active = False
+        self.place = None
 
 class piece():
-    type = None
-    val = 0
-    symbol = None
-    alive = True
-    color = None
-    moved = False
-    nummoves = 0
-    boardInd = None
-    lastMove = None
-    passant = False
-    moves = []
+    def __init__(self):
+        self.type = None
+        self.val = 0
+        self.symbol = None
+        self.alive = True
+        self.color = None
+        self.moved = False
+        self.nummoves = 0
+        self.boardInd = None
+        self.lastMove = None
+        self.passant = False
+        self.moves = []
+
     def movegen(self):
         self.moves=[]
         ind = self.boardInd
@@ -83,10 +86,18 @@ class piece():
             self.moves.extend(self.slides(ind))
             self.moves.extend(self.diags(ind))
         elif self.type == "KING":
-            if ind == "Kcastle":
-                self.moves.append(ind+2)
-            elif ind == "Qcastle":
-                self.moves.append(ind-2)
+            if ind == "KCastle" or ind == "QCastle":
+                if turn == "White":
+                    if ind == "Kcastle":
+                        self.moves.append(62)
+                    elif ind == "Qcastle":
+                        self.moves.append(58)
+                else:
+                    if ind == "Kcastle":
+                        self.moves.append(6)
+                    elif ind == "Qcastle":
+                        self.moves.append(2)
+            
             if board[ind].place[0] == "h":
                 self.moves.extend([ind-9, ind-8, ind-1, ind+7, ind+8])
             elif board[ind].place[0] == "a":
@@ -617,7 +628,7 @@ def go(screen):
                 x, y = event.pos
                 for inda, button in enumerate(button_rects):
                     if button.collidepoint(x, y):
-                        # print(f"Button {inda} pressed")
+                        print(f"Button {inda} pressed")
                         orig,piece = takein(inda)
                         ind = inda
 
