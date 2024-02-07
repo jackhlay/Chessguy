@@ -16,7 +16,7 @@ Here are the milestones:
 - Move legality
 
 **Working on now:**
-- Iterative move calculation 
+- Vectorizing
 
 **Working on next:**
 - Let the computer make moves
