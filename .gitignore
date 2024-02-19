@@ -197,3 +197,5 @@ parcel-debug-*.log
 web_modules/
 snowpack.lock.json
 build-web/
+
+python/
