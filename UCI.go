@@ -38,6 +38,7 @@ func main() {
 		case "isready":
 			// Send confirmation that engine is ready
 			fmt.Println(nullmove)
+			startIt()
 			fmt.Println("readyok")
 		case "setoption":
 			fmt.Println("info string setoption not supported")
@@ -49,11 +50,18 @@ func main() {
 			// Additional setup can be done here if needed
 			fmt.Println("readyok")
 		case "position":
+			fs := ""
+			if parts[1] == "startpos" {
+				fs = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+			} else {
+				fs = parts[1]
+			}
+			fmt.Println(fs)
 			// Set up the position on the board
 			// Example: position startpos moves e2e4 e7e5
 			// Additional logic to parse and apply the moves can be added here
-			fmt.Println("fen/startpos:", parts[1])
-			fmt.Println("moves", parts[2])
+			// fmt.Println("fen/startpos:", parts[1])
+			// fmt.Println("moves", parts[2])
 		case "go":
 			// Start searching for the best move
 			// Additional logic for searching and sending the best move can be added here

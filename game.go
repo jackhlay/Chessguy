@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func start() {
+func startIt() {
 	// Create a new board
 	board := Board{}
 	fmt.Print(board)
