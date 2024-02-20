@@ -8,10 +8,12 @@ import (
 )
 
 func main() {
+	debugg := false
 	nullmove := "0000"
 	reader := bufio.NewReader(os.Stdin)
 	for {
-		// Read input from the UCI protocol
+		// Read input from the UCI protocol\
+
 		input, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "Error reading input:", err)
@@ -34,7 +36,15 @@ func main() {
 			fmt.Println("uciok")
 		case "debug":
 			// Enable or disable debug mode
-			fmt.Println("info string debug not supported")
+			if len(parts) > 1 {
+				if parts[1] == "on" {
+					debugg = true
+				} else {
+					debugg = false
+				}
+			} else {
+				fmt.Println("Debug:", debugg)
+			}
 		case "isready":
 			// Send confirmation that engine is ready
 			fmt.Println(nullmove)
@@ -51,11 +61,14 @@ func main() {
 			fmt.Println("readyok")
 		case "position":
 			fs := ""
-			if parts[1] == "startpos" {
-				fs = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
-			} else {
-				fs = parts[1]
+			if len(parts) > 1 {
+				if parts[1] == "startpos" {
+					fs = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+				} else {
+					fs = parts[1]
+				}
 			}
+
 			fmt.Println(fs)
 			// Set up the position on the board
 			// Example: position startpos moves e2e4 e7e5
