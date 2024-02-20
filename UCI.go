@@ -36,15 +36,8 @@ func main() {
 			fmt.Println("uciok")
 		case "debug":
 			// Enable or disable debug mode
-			if len(parts) > 1 {
-				if parts[1] == "on" {
-					debugg = true
-				} else {
-					debugg = false
-				}
-			} else {
-				fmt.Println("Debug:", debugg)
-			}
+			debugg = !debugg
+			fmt.Println("debug mode:", debugg)
 		case "isready":
 			// Send confirmation that engine is ready
 			fmt.Println(nullmove)

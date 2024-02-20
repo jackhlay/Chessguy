@@ -12,5 +12,6 @@ type Place struct {
 
 type Space struct {
 	Occupied bool
+	Piece    *Piece
 	Place    Place
 }

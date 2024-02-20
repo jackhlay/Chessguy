@@ -1,6 +1,6 @@
 # Hello!
 
-### Thank you for your interest in my Chess Engine. most current progress is held in the "Progress-Tube" branch.
+### Thank you for your interest in my Chess Engine. most current progress is held in this branch.
 
 ### This is an experimental branch, where I am trying to move the engine to Go. I think python worked well as a prototype but the way i wrote it is so messy and wrong that I think I should do it right now that there's a working concept.
 
