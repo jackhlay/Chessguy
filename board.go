@@ -135,6 +135,11 @@ func fenParsing(fen string) {
 				gameState.BQCastle = true
 			}
 		}
+	} else {
+		gameState.WKCastle = false
+		gameState.WQCastle = false
+		gameState.BKCastle = false
+		gameState.BQCastle = false
 	}
 
 	//En Passant Square Handling
