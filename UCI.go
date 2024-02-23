@@ -28,6 +28,7 @@ func main() {
 			continue
 		}
 		command := parts[0]
+		//Maybe use a map in future for optimization, but for now, this is fine
 		switch command {
 		case "uci":
 			// Send UCI identification
@@ -41,7 +42,6 @@ func main() {
 		case "isready":
 			// Send confirmation that engine is ready
 			fmt.Println(nullmove)
-			startIt()
 			fmt.Println("readyok")
 		case "setoption":
 			fmt.Println("info string setoption not supported")
@@ -53,16 +53,16 @@ func main() {
 			// Additional setup can be done here if needed
 			fmt.Println("readyok")
 		case "position":
-			fs := ""
 			if len(parts) > 1 {
 				if parts[1] == "startpos" {
-					fs = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+					fs := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+					fenParsing(fs)
+
 				} else {
-					fs = parts[1]
+					fs := parts[1]
+					fenParsing(fs)
 				}
 			}
-
-			fmt.Println(fs)
 			// Set up the position on the board
 			// Example: position startpos moves e2e4 e7e5
 			// Additional logic to parse and apply the moves can be added here

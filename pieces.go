@@ -18,9 +18,9 @@ const (
 )
 
 type Piece struct {
-	Type     PieceType
-	Symbol   rune
-	Color    PieceColor
-	BoardInd int
-	Moved    bool
+	Type   PieceType
+	Symbol rune
+	Color  PieceColor
+	Value  int
+	Moved  bool
 }
