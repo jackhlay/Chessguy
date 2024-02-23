@@ -63,18 +63,18 @@ func fenParsing(fen string) {
 
 	// create a map for the piece symbols
 	pieceMap := map[rune]Piece{
-		'p': {Pawn, 'p', Black, 0, false},
-		'P': {Pawn, 'P', White, 0, false},
-		'n': {Knight, 'n', Black, 0, false},
-		'N': {Knight, 'N', White, 0, false},
-		'b': {Bishop, 'b', Black, 0, false},
-		'B': {Bishop, 'B', White, 0, false},
-		'r': {Rook, 'r', Black, 0, false},
-		'R': {Rook, 'R', White, 0, false},
-		'q': {Queen, 'q', Black, 0, false},
-		'Q': {Queen, 'Q', White, 0, false},
-		'k': {King, 'k', Black, 0, false},
-		'K': {King, 'K', White, 0, false},
+		'p': {Pawn, 'p', Black, -1, false},
+		'P': {Pawn, 'P', White, 1, false},
+		'n': {Knight, 'n', Black, -3, false},
+		'N': {Knight, 'N', White, 3, false},
+		'b': {Bishop, 'b', Black, -3, false},
+		'B': {Bishop, 'B', White, 3, false},
+		'r': {Rook, 'r', Black, -5, false},
+		'R': {Rook, 'R', White, 5, false},
+		'q': {Queen, 'q', Black, -9, false},
+		'Q': {Queen, 'Q', White, 9, false},
+		'k': {King, 'k', Black, -10, false},
+		'K': {King, 'K', White, 10, false},
 	}
 
 	//Positional Parsing block
