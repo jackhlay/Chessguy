@@ -58,7 +58,7 @@ func main() {
 					fenParsing(StartingFen)
 
 				} else {
-					fenParsing(strings.Join(parts[1:], " "))
+					fenParsing(strings.Join(parts[1:6], " "))
 				}
 			}
 			// Set up the position on the board

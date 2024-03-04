@@ -163,3 +163,11 @@ func fenParsing(fen string) {
 	}
 	gameState.numMoves = numMoves
 }
+
+func (b *Board) getPieceAt(place Place) *Piece {
+	return b.Spaces[place.Rank][place.File-'a'].Piece
+}
+
+func (b *Board) setPieceAt(place Place, piece *Piece) {
+	b.Spaces[place.Rank][place.File-'a'].Piece = piece
+}
