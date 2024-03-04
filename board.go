@@ -9,7 +9,7 @@ import (
 
 type Board struct {
 	Spaces [8][8]Space
-	Pieces [16]Piece
+	Pieces [32]Piece
 }
 
 type Place struct {
@@ -41,7 +41,7 @@ func (b Board) String() string {
 
 // Confirmed working accurately with random string 3Q4/4Pb2/p4p1q/rk6/3P4/pB1PP3/p5K1/3R4 w - - 0 1
 func fenParsing(fen string) {
-	board, gameState := startIt()
+	board, gameState := newGame()
 	// Parts of a fen string
 	// 1. Piece Placement
 	// 2. Turn COlor (w or b)
@@ -116,9 +116,9 @@ func fenParsing(fen string) {
 
 	//Turn Handling
 	if turn == "w" {
-		gameState.turn = "white"
+		gameState.turn = White
 	} else if turn == "b" {
-		gameState.turn = "black"
+		gameState.turn = Black
 	}
 
 	//Castling
@@ -126,27 +126,27 @@ func fenParsing(fen string) {
 		for _, char := range castling {
 			switch char {
 			case 'K':
-				gameState.WKCastle = true
+				gameState.castlingVariables = gameState.castlingVariables | 1
 			case 'Q':
-				gameState.WQCastle = true
+				gameState.castlingVariables = gameState.castlingVariables | 2
 			case 'k':
-				gameState.BKCastle = true
+				gameState.castlingVariables = gameState.castlingVariables | 4
 			case 'q':
-				gameState.BQCastle = true
+				gameState.castlingVariables = gameState.castlingVariables | 8
 			}
 		}
 	} else {
-		gameState.WKCastle = false
-		gameState.WQCastle = false
-		gameState.BKCastle = false
-		gameState.BQCastle = false
+		gameState.castlingVariables = 0
 	}
 
 	//En Passant Square Handling
 	if epSquare == "-" {
-		gameState.epSquare = ""
+		gameState.epSquare = -1
 	} else {
-		gameState.epSquare = epSquare
+		num, err := strconv.Atoi(epSquare)
+		if err != nil {
+			gameState.epSquare = num
+		}
 	}
 
 	//Halfmove count (moves since pawn move or capture)

@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+	const StartingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 	debugg := false
 	nullmove := "0000"
 	reader := bufio.NewReader(os.Stdin)
@@ -22,12 +23,11 @@ func main() {
 
 		// Process the input
 		input = strings.TrimSpace(input)
-		input = strings.ToLower(input)
 		parts := strings.Fields(input)
 		if len(parts) == 0 {
 			continue
 		}
-		command := parts[0]
+		command := strings.ToLower(parts[0])
 		//Maybe use a map in future for optimization, but for now, this is fine
 		switch command {
 		case "uci":
@@ -55,12 +55,10 @@ func main() {
 		case "position":
 			if len(parts) > 1 {
 				if parts[1] == "startpos" {
-					fs := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-					fenParsing(fs)
+					fenParsing(StartingFen)
 
 				} else {
-					fs := parts[1]
-					fenParsing(fs)
+					fenParsing(strings.Join(parts[1:], " "))
 				}
 			}
 			// Set up the position on the board
