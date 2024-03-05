@@ -19,8 +19,7 @@ var placeToInd = map[string]int{
 }
 
 type Board struct {
-	Spaces [8][8]Space
-	Pieces [32]Piece
+	Board [8][8]Space
 }
 
 type Place struct {
@@ -37,7 +36,7 @@ type Space struct {
 
 func (b Board) String() string {
 	var str string
-	for _, row := range b.Spaces {
+	for _, row := range b.Board {
 		for _, space := range row {
 			if space.Occupied {
 				str += fmt.Sprintf("%v ", string(rune(space.Piece.Symbol))) // assuming Piece has a Symbol field
@@ -52,7 +51,7 @@ func (b Board) String() string {
 
 // Confirmed working accurately with random string 3Q4/4Pb2/p4p1q/rk6/3P4/pB1PP3/p5K1/3R4 w - - 0 1
 func fenParsing(fen string) {
-	board, gameState := newGame()
+	gameState := newGame()
 	// Parts of a fen string
 	// 1. Piece Placement
 	// 2. Turn COlor (w or b)
@@ -100,7 +99,7 @@ func fenParsing(fen string) {
 		if unicode.IsDigit(char) {
 			intVal := int(char - '0')
 			for j := 0; j < intVal; j++ {
-				board.Spaces[row][col+j] = Space{
+				gameState.board[row][col+j] = Space{
 					Occupied: false,
 					Piece:    nil,
 					Ind:      row*8 + col,
@@ -112,7 +111,7 @@ func fenParsing(fen string) {
 		} else {
 			newPiece, ok := pieceMap[char]
 			if ok {
-				board.Spaces[row][col] = Space{
+				gameState.board[row][col] = Space{
 					Occupied: true,
 					Piece:    &newPiece,
 					Ind:      row*8 + col,
@@ -122,8 +121,17 @@ func fenParsing(fen string) {
 			}
 		}
 	}
-
-	fmt.Println(board)
+	//print board for debugging
+	for _, row := range gameState.board {
+		for _, space := range row {
+			if space.Occupied {
+				fmt.Printf("%v ", string(space.Piece.Symbol))
+			} else {
+				fmt.Printf(". ")
+			}
+		}
+		fmt.Printf("\n")
+	}
 
 	//Turn Handling
 	if turn == "w" {
@@ -173,12 +181,16 @@ func fenParsing(fen string) {
 		return
 	}
 	gameState.numMoves = numMoves
+
+	gameState.getBitBoards()
+	// fmt.Printf("White Bitboard: %#v \n", gameState.pieceColorBitboards[White])
+	// fmt.Printf("Black Bitboard: %#v", gameState.pieceColorBitboards[Black])
 }
 
 func (b *Board) getPieceAt(place Place) (*Piece, int) {
-	return b.Spaces[place.Rank][place.File-'a'].Piece, placeToInd[string(place.Rank)+string(place.File)]
+	return b.Board[place.Rank][place.File-'a'].Piece, placeToInd[string(place.Rank)+string(place.File)]
 }
 
 func (b *Board) setPieceAt(place Place, piece *Piece) {
-	b.Spaces[place.Rank][place.File-'a'].Piece = piece
+	b.Board[place.Rank][place.File-'a'].Piece = piece
 }

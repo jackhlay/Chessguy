@@ -1,8 +1,9 @@
 package main
 
+import "fmt"
+
 type gameState struct {
-	board  [8][8]Space
-	pieces [32]Piece
+	board [8][8]Space
 
 	pieceColorBitboards [2]uint64
 	pieceTypeBitboards  [6]uint64
@@ -17,18 +18,13 @@ type gameState struct {
 	numMoves  int
 }
 
-func newGame() (Board, gameState) {
+func newGame() gameState {
 	// Create a new board
-	Board := Board{
-		Spaces: [8][8]Space{},
-		Pieces: [32]Piece{},
-	}
 	state := gameState{
-		board:  Board.Spaces,
-		pieces: Board.Pieces,
+		board: [8][8]Space{},
 
 		pieceColorBitboards: [2]uint64{},
-		pieceTypeBitboards:  [6]uint64{},
+		pieceTypeBitboards:  [6]uint64{}, // reference PieceType in pieces.go, but generally 0: pawns, 1: knights, 2: bishops, 3: rooks, 4: queens, 5: kings
 		kings:               [2]int{},
 		epSquare:            -1,
 
@@ -42,7 +38,7 @@ func newGame() (Board, gameState) {
 	state.pieceColorBitboards[White], state.pieceColorBitboards[Black] = 0, 0
 	state.pieceTypeBitboards[0], state.pieceTypeBitboards[1], state.pieceTypeBitboards[2], state.pieceTypeBitboards[3], state.pieceTypeBitboards[4], state.pieceTypeBitboards[5] = 0, 0, 0, 0, 0, 0
 
-	return Board, state
+	return state
 }
 
 func (g *gameState) allBB() uint64 {
@@ -50,20 +46,23 @@ func (g *gameState) allBB() uint64 {
 }
 
 func (g *gameState) getBitBoards() {
-	wBB, bBB := uint64(0), uint64(0)
-
+	var wBB, bBB uint64
 	for i := 0; i < 8; i++ {
 		for j := 0; j < 8; j++ {
 			if g.board[i][j].Occupied {
+				Ptype := g.board[i][j].Piece.Type
+				bit := uint64(1 << (i*8 + j))
+				fmt.Printf("bit value: %#v", bit)
 				if g.board[i][j].Piece.Color == White {
-					wBB |= 1 << (i*8 + j)
+
+					wBB = wBB | bit
 				} else {
-					bBB |= 1 << (i*8 + j)
+					bBB = bBB | bit
 				}
+				g.pieceTypeBitboards[Ptype] = g.pieceTypeBitboards[Ptype] | bit
 			}
 		}
 	}
 	g.pieceColorBitboards[White] = wBB
 	g.pieceColorBitboards[Black] = bBB
-
 }
