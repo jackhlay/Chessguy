@@ -8,14 +8,14 @@ import (
 )
 
 var placeToInd = map[string]int{
-	"a1": 0, "b1": 1, "c1": 2, "d1": 3, "e1": 4, "f1": 5, "g1": 6, "h1": 7,
-	"a2": 8, "b2": 9, "c2": 10, "d2": 11, "e2": 12, "f2": 13, "g2": 14, "h2": 15,
-	"a3": 16, "b3": 17, "c3": 18, "d3": 19, "e3": 20, "f3": 21, "g3": 22, "h3": 23,
-	"a4": 24, "b4": 25, "c4": 26, "d4": 27, "e4": 28, "f4": 29, "g4": 30, "h4": 31,
-	"a5": 32, "b5": 33, "c5": 34, "d5": 35, "e5": 36, "f5": 37, "g5": 38, "h5": 39,
-	"a6": 40, "b6": 41, "c6": 42, "d6": 43, "e6": 44, "f6": 45, "g6": 46, "h6": 47,
-	"a7": 48, "b7": 49, "c7": 50, "d7": 51, "e7": 52, "f7": 53, "g7": 54, "h7": 55,
-	"a8": 56, "b8": 57, "c8": 58, "d8": 59, "e8": 60, "f8": 61, "g8": 62, "h8": 63,
+	"a1": 63, "b1": 62, "c1": 61, "d1": 60, "e1": 59, "f1": 58, "g1": 57, "h1": 56,
+	"a2": 55, "b2": 54, "c2": 53, "d2": 52, "e2": 51, "f2": 50, "g2": 49, "h2": 48,
+	"a3": 47, "b3": 46, "c3": 45, "d3": 44, "e3": 43, "f3": 42, "g3": 41, "h3": 40,
+	"a4": 39, "b4": 38, "c4": 37, "d4": 36, "e4": 35, "f4": 34, "g4": 33, "h4": 32,
+	"a5": 31, "b5": 30, "c5": 29, "d5": 28, "e5": 27, "f5": 26, "g5": 25, "h5": 24,
+	"a6": 23, "b6": 22, "c6": 21, "d6": 20, "e6": 19, "f6": 18, "g6": 17, "h6": 16,
+	"a7": 15, "b7": 14, "c7": 13, "d7": 12, "e7": 11, "f7": 10, "g7": 9, "h7": 8,
+	"a8": 7, "b8": 6, "c8": 5, "d8": 4, "e8": 3, "f8": 2, "g8": 1, "h8": 0,
 }
 
 type Board struct {
@@ -34,23 +34,8 @@ type Space struct {
 	Place    Place
 }
 
-func (b Board) String() string {
-	var str string
-	for _, row := range b.Board {
-		for _, space := range row {
-			if space.Occupied {
-				str += fmt.Sprintf("%v ", string(rune(space.Piece.Symbol))) // assuming Piece has a Symbol field
-			} else {
-				str += ". "
-			}
-		}
-		str += "\n"
-	}
-	return str
-}
-
 // Confirmed working accurately with random string 3Q4/4Pb2/p4p1q/rk6/3P4/pB1PP3/p5K1/3R4 w - - 0 1
-func fenParsing(fen string) {
+func fenParsing(fen string) gameState {
 	gameState := newGame()
 	// Parts of a fen string
 	// 1. Piece Placement
@@ -122,16 +107,6 @@ func fenParsing(fen string) {
 		}
 	}
 	//print board for debugging
-	for _, row := range gameState.board {
-		for _, space := range row {
-			if space.Occupied {
-				fmt.Printf("%v ", string(space.Piece.Symbol))
-			} else {
-				fmt.Printf(". ")
-			}
-		}
-		fmt.Printf("\n")
-	}
 
 	//Turn Handling
 	if turn == "w" {
@@ -171,26 +146,19 @@ func fenParsing(fen string) {
 	//Halfmove count (moves since pawn move or capture)
 	pawnMoves, err := strconv.Atoi(halfmoves)
 	if err != nil {
-		return
+		fmt.Errorf("Error parsing halfmove count: %v", err)
 	}
 	gameState.halfmoves = pawnMoves
 
 	//Move Count
 	numMoves, err := strconv.Atoi(moves)
 	if err != nil {
-		return
+		fmt.Errorf("Error parsing move count: %v", err)
 	}
 	gameState.numMoves = numMoves
 
 	gameState.getBitBoards()
 	// fmt.Printf("White Bitboard: %#v \n", gameState.pieceColorBitboards[White])
 	// fmt.Printf("Black Bitboard: %#v", gameState.pieceColorBitboards[Black])
-}
-
-func (b *Board) getPieceAt(place Place) (*Piece, int) {
-	return b.Board[place.Rank][place.File-'a'].Piece, placeToInd[string(place.Rank)+string(place.File)]
-}
-
-func (b *Board) setPieceAt(place Place, piece *Piece) {
-	b.Board[place.Rank][place.File-'a'].Piece = piece
+	return gameState
 }

@@ -66,3 +66,54 @@ func (g *gameState) getBitBoards() {
 	g.pieceColorBitboards[White] = wBB
 	g.pieceColorBitboards[Black] = bBB
 }
+
+func getRowCol(s string) (int, int) {
+	ind := placeToInd[s]
+	col := ind % 8
+	row := ind / 8
+	return row, col
+
+}
+
+func (g *gameState) pieceAt(s string) bool {
+	return g.board[8-int(s[1]-'0')][int(s[0]-'a')].Piece != nil
+
+}
+
+func (g *gameState) clearOldSq(s string) {
+	row, col := getRowCol(s)
+	g.board[row][col].Piece = nil
+	g.board[row][col].Occupied = false
+
+	fmt.Println()
+	for _, row := range g.board {
+		for _, col := range row {
+			if col.Occupied {
+				fmt.Printf("%c ", col.Piece.Symbol)
+			} else {
+				fmt.Printf(". ")
+			}
+		}
+		fmt.Println()
+	}
+}
+
+func (g *gameState) getPieceAt(s string) *Piece {
+	row, col := getRowCol(s)
+	return g.board[row][col].Piece
+}
+
+func (g *gameState) setPieceAt(s string, piece *Piece) {
+	row, col := getRowCol(s)
+	g.board[row][col].Piece = piece
+	g.board[row][col].Occupied = true
+}
+
+func (g *gameState) makeMove(move string) {
+	// move := "e2e4"
+	from := move[:2]
+	to := move[2:]
+	piece := g.getPieceAt(from)
+	g.clearOldSq(from)
+	g.setPieceAt(to, piece)
+}

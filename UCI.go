@@ -53,14 +53,19 @@ func main() {
 			// Additional setup can be done here if needed
 			fmt.Println("readyok")
 		case "position":
+			var gamestate gameState
 			if len(parts) > 1 {
 				if parts[1] == "startpos" {
-					fenParsing(StartingFen)
-
+					gamestate = fenParsing(StartingFen)
 				} else {
-					fenParsing(strings.Join(parts[1:6], " "))
+					gamestate = fenParsing(strings.Join(parts[1:6], " "))
 				}
+				piece := gamestate.getPieceAt("e2")
+				gamestate.setPieceAt("e4", piece)
+				gamestate.clearOldSq("e2")
+
 			}
+
 			// Set up the position on the board
 			// Example: position startpos moves e2e4 e7e5
 			// Additional logic to parse and apply the moves can be added here
