@@ -60,9 +60,8 @@ func main() {
 				} else {
 					gamestate = fenParsing(strings.Join(parts[1:6], " "))
 				}
-				piece := gamestate.getPieceAt("e2")
-				gamestate.setPieceAt("e4", piece)
-				gamestate.clearOldSq("e2")
+				piece := gamestate.getPieceAt("a1")
+				piece.generateMoves("h1", gamestate)
 
 			}
 

@@ -52,7 +52,7 @@ func (g *gameState) getBitBoards() {
 			if g.board[i][j].Occupied {
 				Ptype := g.board[i][j].Piece.Type
 				bit := uint64(1 << (i*8 + j))
-				fmt.Printf("bit value: %#v", bit)
+				// fmt.Printf("bit value: %#v", bit)
 				if g.board[i][j].Piece.Color == White {
 
 					wBB = wBB | bit

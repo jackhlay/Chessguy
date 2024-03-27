@@ -17,7 +17,7 @@ var limits searchLimits
 func (s *searchLimits) init() {
 	s.depth = 64
 	s.nodes = math.MaxUint64
-	s.movetime = 0
+	s.movetime = 99999999999
 	s.infinite = false
 }
 
@@ -41,7 +41,7 @@ func engine() (toEngine chan string, fromEngine chan string) {
 			case "quit":
 				// Handle quit command
 			case "go":
-				// Implement your search algorithm here
+				fmt.Println("thinking...")
 			default:
 				fmt.Println("Unknown command:", cmd)
 			}

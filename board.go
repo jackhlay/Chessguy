@@ -111,7 +111,7 @@ func fenParsing(fen string) gameState {
 	//Turn Handling
 	if turn == "w" {
 		gameState.turn = White
-	} else if turn == "b" {
+	} else {
 		gameState.turn = Black
 	}
 
@@ -161,4 +161,18 @@ func fenParsing(fen string) gameState {
 	// fmt.Printf("White Bitboard: %#v \n", gameState.pieceColorBitboards[White])
 	// fmt.Printf("Black Bitboard: %#v", gameState.pieceColorBitboards[Black])
 	return gameState
+}
+
+func printBoard(bb uint64) {
+	for row := 0; row < 8; row++ {
+		for col := 0; col < 8; col++ {
+			square := uint64(1) << uint(8*row+col)
+			if (bb & square) != 0 {
+				fmt.Print("1 ")
+			} else {
+				fmt.Print("0 ")
+			}
+		}
+		fmt.Println()
+	}
 }

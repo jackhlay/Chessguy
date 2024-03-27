@@ -27,12 +27,10 @@ type Piece struct {
 	Moved  bool
 }
 
-func (p *Piece) generateMoves(place Place) []string {
-	moves := []string{}
-	fmt.Println(moves)
-	row := place.Rank - 1
-	// convert col to number
-	col := int(place.File - 'a')
+func (p *Piece) generateMoves(place string, g gameState) uint64 {
+	moves := uint64(0)
+	row := place[1] - 1
+	col := int(place[0] - 'a')
 	fmt.Println(row, col)
 
 	switch p.Type {
@@ -43,12 +41,91 @@ func (p *Piece) generateMoves(place Place) []string {
 	case Bishop:
 		// moves = p.bishopMoves()
 	case Rook:
-		// moves = p.rookMoves()
+		moves = p.rookMoves(g)
 	case Queen:
 		// moves = p.queenMoves()
 	case King:
 		// moves = p.kingMoves()
 	}
+	return moves
+}
 
-	return []string{}
+func (p *Piece) rookMoves(g gameState) uint64 {
+	board := g.board
+	g.getBitBoards()
+	occupancyBB := (g.pieceColorBitboards[White] | g.pieceColorBitboards[Black])
+	fmt.Println("Occupancy Board:")
+	printBoard(occupancyBB)
+	row, col := p.getPieceLocation(board)
+	ind := row*8 + col
+	moves := p.rookGen(ind, occupancyBB, g)
+	fmt.Println(moves)
+	printBoard(moves)
+	return moves
+
+}
+
+func (p *Piece) getPieceLocation(board [8][8]Space) (int, int) {
+	for i, row := range board {
+		for j, col := range row {
+			if p == col.Piece {
+				return i, j
+			}
+		}
+	}
+	return -1, -1
+}
+
+func (p *Piece) rookGen(square int, occupancyBB uint64, g gameState) uint64 {
+	attacksBB := uint64(0)
+	Rrow, Rcol := p.getPieceLocation(g.board)
+	fmt.Println(Rrow, " ", Rcol)
+
+	for col := Rcol + 1; col < 8; col++ {
+		fmt.Println("RIGHT")
+
+		inda := 8*col + Rrow
+		fmt.Println(inda)
+		if g.board[Rrow][col].Occupied {
+			attacksBB |= uint64(1) << inda
+			break
+		}
+		attacksBB |= uint64(1) << inda
+	}
+	for coll := Rcol - 1; coll >= 0; coll-- {
+		fmt.Println("LEFT")
+		indb := 8*coll + Rrow
+		fmt.Println(indb)
+		if g.board[Rrow][coll].Occupied {
+			attacksBB |= uint64(1) << indb
+			break
+		}
+		attacksBB |= uint64(1) << indb
+	}
+	for row := Rrow + 1; row < 8; row++ {
+		fmt.Println("UP")
+		indc := 8*Rcol + row
+		fmt.Println(indc)
+		if g.board[row][Rcol].Occupied {
+			attacksBB |= uint64(1) << indc
+			break
+		}
+		attacksBB |= uint64(1) << indc
+	}
+	for roww := Rrow - 1; roww >= 0; roww-- {
+		fmt.Println("DOWN")
+		indd := 8*Rcol + roww
+		fmt.Println(indd)
+		if g.board[roww][Rcol].Occupied {
+			attacksBB |= uint64(1) << indd
+			break
+		}
+		attacksBB |= uint64(1) << indd
+	}
+	return attacksBB
+}
+
+func squareOccupied(occupancyBB uint64, square int) bool {
+	sq := uint64(1) << uint(square)
+	return (occupancyBB & sq) != 0
 }
