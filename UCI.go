@@ -60,8 +60,8 @@ func main() {
 				} else {
 					gamestate = fenParsing(strings.Join(parts[1:6], " "))
 				}
-				piece := gamestate.getPieceAt("a8")
-				piece.generateMoves("a8", gamestate)
+				piece := gamestate.getPieceAt("h1")
+				piece.generateMoves("h1", gamestate)
 
 			}
 

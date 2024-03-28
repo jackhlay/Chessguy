@@ -106,7 +106,7 @@ func (p *Piece) rookGen(square int, occupancyBB uint64, g gameState) uint64 {
 		fmt.Println("LEFT")
 		indc := 8*Rcol + row
 		fmt.Println(indc)
-		if g.board[row][Rcol].Occupied {
+		if squareOccupied(occupancyBB, indc) {
 			attacksBB |= uint64(1) << indc
 			break
 		}
@@ -116,12 +116,15 @@ func (p *Piece) rookGen(square int, occupancyBB uint64, g gameState) uint64 {
 		fmt.Println("RIGHT")
 		indd := 8*Rcol + roww
 		fmt.Println(indd)
-		if g.board[roww][Rcol].Occupied {
+		if squareOccupied(occupancyBB, indd) {
+			fmt.Println("OCCUPIED")
 			attacksBB |= uint64(1) << indd
+			fmt.Println("Breaks here")
 			break
 		}
 		attacksBB |= uint64(1) << indd
 	}
+
 	return attacksBB
 }
 
