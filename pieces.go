@@ -78,11 +78,11 @@ func (p *Piece) getPieceLocation(board [8][8]Space) (int, int) {
 
 func (p *Piece) rookGen(square int, occupancyBB uint64, g gameState) uint64 {
 	attacksBB := uint64(0)
-	Rrow, Rcol := p.getPieceLocation(g.board)
+	Rcol, Rrow := p.getPieceLocation(g.board)
 	fmt.Println(Rrow, " ", Rcol)
 
 	for col := Rcol + 1; col < 8; col++ {
-		fmt.Println("RIGHT")
+		fmt.Println("DOWN")
 
 		inda := 8*col + Rrow
 		fmt.Println(inda)
@@ -93,7 +93,7 @@ func (p *Piece) rookGen(square int, occupancyBB uint64, g gameState) uint64 {
 		attacksBB |= uint64(1) << inda
 	}
 	for coll := Rcol - 1; coll >= 0; coll-- {
-		fmt.Println("LEFT")
+		fmt.Println("UP1")
 		indb := 8*coll + Rrow
 		fmt.Println(indb)
 		if g.board[Rrow][coll].Occupied {
@@ -103,7 +103,7 @@ func (p *Piece) rookGen(square int, occupancyBB uint64, g gameState) uint64 {
 		attacksBB |= uint64(1) << indb
 	}
 	for row := Rrow + 1; row < 8; row++ {
-		fmt.Println("UP")
+		fmt.Println("LEFT")
 		indc := 8*Rcol + row
 		fmt.Println(indc)
 		if g.board[row][Rcol].Occupied {
@@ -113,7 +113,7 @@ func (p *Piece) rookGen(square int, occupancyBB uint64, g gameState) uint64 {
 		attacksBB |= uint64(1) << indc
 	}
 	for roww := Rrow - 1; roww >= 0; roww-- {
-		fmt.Println("DOWN")
+		fmt.Println("RIGHT")
 		indd := 8*Rcol + roww
 		fmt.Println(indd)
 		if g.board[roww][Rcol].Occupied {

@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	const StartingFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+	const StartingFen = "rnbqkbnr/pppppppp/8/8/8/8/8/RNBQKBNR w KQkq - 0 1"
 	debugg := false
 	nullmove := "0000"
 	reader := bufio.NewReader(os.Stdin)
@@ -60,8 +60,8 @@ func main() {
 				} else {
 					gamestate = fenParsing(strings.Join(parts[1:6], " "))
 				}
-				piece := gamestate.getPieceAt("a1")
-				piece.generateMoves("h1", gamestate)
+				piece := gamestate.getPieceAt("a8")
+				piece.generateMoves("a8", gamestate)
 
 			}
 

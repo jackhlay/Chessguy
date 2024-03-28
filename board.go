@@ -163,11 +163,11 @@ func fenParsing(fen string) gameState {
 	return gameState
 }
 
-func printBoard(bb uint64) {
-	for row := 0; row < 8; row++ {
-		for col := 0; col < 8; col++ {
-			square := uint64(1) << uint(8*row+col)
-			if (bb & square) != 0 {
+func printBoard(num uint64) {
+	for i := 0; i < 8; i++ {
+		for j := 0; j < 8; j++ {
+			bit := num & (1 << uint(i*8+(7-j))) // Extract bit at position i*8+j
+			if bit != 0 {
 				fmt.Print("1 ")
 			} else {
 				fmt.Print("0 ")
