@@ -641,7 +641,6 @@ def go(screen):
                 if king.check(turn): #Check evaluation
                     print("IN CHECK")
                     allmoves = []
-                    legalmoves = []
                     for p in piecearr:
                         if p.color == turn:
                             allmoves += piece.EvalMoves()
