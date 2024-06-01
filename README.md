@@ -1,30 +1,32 @@
 # Hello!
 
-### Thank you for your interest in my Chess Engine. As it stande, the python file contained here only serves as a prototype or proof of concept. This project is on the back burner for a second, but once I come back to it, I am going to continue moving to a go backend style engine to interact with standard chess guis like Arena, etc.  
+### Thank you for your interest in my Chess Engine. As it stands, the Python file included here serves as a prototype or proof of concept. While the project is currently on hold, my plan is to transition to a Go backend-style engine for compatibility with standard chess GUIs like Arena once I return.
 
 -==========================================================================-  
-Here are the milestones:
 
-**Surpassed:**
+**Current Milestones:**
+
 - Display a board
-- Display and center pieces
-- Write a function to parse the FEN
-- Once parsed, translate the space's info to the space
-- Be able to correctly output any FEN string
-- Turn Ordering
-- Move Generation
-- Move legality
-- Allow the computer to explore depths without affecting the real board
-- Iterative move calculation 
+- Center pieces on the board
+- Parse FEN notation
+- Translate space information to the board
+- Output any FEN string accurately
+- Implement turn ordering
+- Generate legal moves
+- Enable the computer to explore depths without affecting the real board
+- Implement iterative move calculation 
 
-**Working on now:**
-- Translating to GoLang + UCI format
+**In Progress:**
 
-**Working on next:**
-- Let the computer make moves
+- Transitioning to GoLang + UCI format
+
+**Next Steps:**
+
+- Enable the engine to make moves (UCI solves this)
   
-**Stretch milestones:**
-- Build in network capabilities that allow for two people to play each other
-- Maybe integrate into my website.  
+**Stretch Milestones:**
 
-As always, contact info is at [jackhlay.com](https://jackhlay.com).
+- Incorporate network capabilities for two-player gameplay
+- Potentially integrate into my website  
+
+For updates and contact information, visit [jackhlay.com](https://jackhlay.com).
