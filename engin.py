@@ -1,7 +1,5 @@
 import pygame
 
-# ENGINE
-# Handles gamestate info, and valid moves, writes gamelog.
 pygame.init()
 pygame.display.set_caption('boby V0.24')
 turn ="White"
@@ -49,21 +47,25 @@ gameLog = []
 
 #Game Classes
 class Space():
-    occupied = False
-    active = False
-    place = None
+    def __init__(self):
+        self.occupied = False
+        self.active = False
+        self.place = None
 
 class piece():
-    type = None
-    val = 0
-    symbol = None
-    alive = True
-    color = None
-    moved = False
-    nummoves = 0
-    boardInd = None
-    passant = False
-    moves = []
+    def __init__(self):
+        self.type = None
+        self.val = 0
+        self.symbol = None
+        self.alive = True
+        self.color = None
+        self.moved = False
+        self.nummoves = 0
+        self.boardInd = None
+        self.lastMove = None
+        self.passant = False
+        self.moves = []
+
     def movegen(self):
         self.moves=[]
         ind = self.boardInd
@@ -84,6 +86,18 @@ class piece():
             self.moves.extend(self.slides(ind))
             self.moves.extend(self.diags(ind))
         elif self.type == "KING":
+            if ind == "KCastle" or ind == "QCastle":
+                if turn == "White":
+                    if ind == "Kcastle":
+                        self.moves.append(62)
+                    elif ind == "Qcastle":
+                        self.moves.append(58)
+                else:
+                    if ind == "Kcastle":
+                        self.moves.append(6)
+                    elif ind == "Qcastle":
+                        self.moves.append(2)
+            
             if board[ind].place[0] == "h":
                 self.moves.extend([ind-9, ind-8, ind-1, ind+7, ind+8])
             elif board[ind].place[0] == "a":
@@ -242,21 +256,6 @@ class piece():
             if king.boardInd in OppMoves:
                 return True
         return False
-            
-    def isLegalMove(self, ind):
-        pass
-        # boardcopy = board
-        # piecearrcopy = piecearr
-        # finalArr = []
-        # pieces = [piece for piece in piecearrcopy if piece.color == turn]
-        # for piece in pieces:
-        #     for move in piece.legals(piece.movegen():
-        #         piece.makeMove(move)
-        #         if not piece.check(ind):
-        #             finalArr.append(move)
-        #         piece.undoMove(move)
-        # return finalArr
-                
 
     def EvalMoves(self):
         moves = []
@@ -271,7 +270,6 @@ class piece():
                 continue
             else:
                 ind = piece.boardInd
-                space = board[move]
                 moved = piece.moved
                 piece.moved = True
                 piece.boardInd = move
@@ -297,18 +295,86 @@ Attack Potential: Number of pieces attacked by a piece (This will likely involve
 Pawn Attacks: Number of pawns attacked by a piece, more potential pawn attacks/captures is more active
 Coordination: (This is a stretch rn, but may be useful. Assesses how pieces support each other, and control key squares)
 """
-def eval():
-    tot: int = 0
-    for i in range(len(piecearr)):
-        tot += piecearr[i].val
-        # print(piecearr[i].type , piecearr[i].val, eval) #Debugging
+def evals():
+    tot = sum(piece.val for piece in piecearr)
     if 0 < abs(tot) < .0001:
         tot -= tot
     AttPot = pieceattack()
     PawnAtt = pawncount()
-    eval =( .55 * tot) + (.3 * AttPot) + (.1 * PawnAtt)
-    # print(f"Eval: {eval: .3f}") #Debugging
-    return "{:.3f}".format(eval)
+    Wleft, Bleft = fractionofpieces()
+    eval =( .55 * tot) + (.3 * AttPot) + (.1 * PawnAtt) + (.05 * Wleft) - (.05 * Bleft)
+    return eval
+
+def minimax(depth, alpha, beta, isMaximizingPlayer):
+    pieces = [piece for piece in piecearr if piece.color == turn]
+
+    if depth == 0 or any(piece.check(turn) for piece in pieces):
+        ev = evals()
+        return ev, None, None
+
+    if isMaximizingPlayer:
+        maxEval = float('-inf')
+        bestMove = None
+        bestPiece = None
+        for piece in pieces:
+            for move in piece.EvalMoves():
+                # Store the original state
+                ind = piece.boardInd
+                moved = piece.moved
+                # Try the move
+                piece.boardInd = move
+                piece.moved = True
+
+                eval, _, _ = minimax(depth - 1, alpha, beta, False)
+                # Restore the original state
+                piece.boardInd = ind
+                piece.moved = moved
+
+                if eval > maxEval:
+                    maxEval = eval
+                    bestMove = move
+                    bestPiece = piece
+
+                alpha = max(alpha, eval)
+                if beta <= alpha:
+                    break  # Beta cut-off
+        return maxEval, bestMove, board[bestMove].place
+
+    else:
+        minEval = float('inf')
+        bestMove = None
+        bestPiece = None
+        for piece in pieces:
+            for move in piece.EvalMoves():
+                # Store the original state
+                ind = piece.boardInd
+                moved = piece.moved
+                # Try the move
+                piece.boardInd = move
+                piece.moved = True
+
+                eval, _, _ = minimax(depth - 1, alpha, beta, True)
+                # Restore the original state
+                piece.boardInd = ind
+                piece.moved = moved
+
+                if eval < minEval:
+                    minEval = eval
+                    bestMove = move
+                    bestPiece = piece
+
+                beta = min(beta, eval)
+                if beta <= alpha:
+                    break  # Alpha cut-off
+        return minEval, bestMove, f"{bestPiece.type}, {board[bestMove].place}"
+
+
+def getAllMoves():
+    allMoves = []
+    for piece in piecearr:
+        if piece.color == turn:
+            allMoves.append(piece, piece.EvalMoves())
+    return allMoves
 
 #EVAL HELPER FUNCTIONS
 
@@ -316,14 +382,15 @@ def fractionofpieces():
     Wpieces = [piece for piece in piecearr if piece.color == "White"]
     Bpieces = [piece for piece in piecearr if piece.color == "Black"]
     Wleft = len(Wpieces)/16
-    Bleft = -1*len(Bpieces)/16
+    Bleft = len(Bpieces)/-16
+    return Wleft, Bleft
 
 def EnemyTrace():
     WtraceArr, BtraceArr, Wmovearr, BmoveArr = [], [], [], []
 
     Wfiltered = [piece for piece in piecearr if piece.color == "White"]
     for piece in Wfiltered:
-        Wmovearr.extend(piece.legals(piece.movegen()))
+        Wmovearr.extend(piece.EvalMoves())
 
     for move in Wmovearr:
         piece2 = next((piece for piece in piecearr if piece.boardInd == move), None)
@@ -334,7 +401,7 @@ def EnemyTrace():
 
     Bfiltered = [piece for piece in piecearr if piece.color == "Black"]
     for piece in Bfiltered:
-        BmoveArr.extend(piece.legals(piece.movegen()))
+        BmoveArr.extend(piece.EvalMoves())
 
     for move in BmoveArr:
         piece2 = next((piece for piece in piecearr if piece.boardInd == move), None)
@@ -518,12 +585,10 @@ def parfen(String):
 #Draws board
 def draw():
     global turn, screen
-    pygame.init()
     board_size = (800, 800)
     screen = pygame.display.set_mode(board_size)
-    light = (42, 34, 38)
-    dark = (22, 24, 20)
-
+    dark = (42, 34, 38)
+    light = (22,24,20)
     for j in range(8):  # draw board
         for i in range(8):
             if (i + j) % 2 == 0:
@@ -545,28 +610,28 @@ def draw():
 
     pygame.display.flip()
 
-
-
 #Game loop and maintainence functions
 def go(screen):
     global turn, turnCount, gameLog
     running = True
     dragging=False
+    bestMove = None
     clock = pygame.time.Clock()
-    pygame.init()
     #clean up this while loop
     while running:
-        
+        initial_alpha = float('-inf')
+        initial_beta = float('inf')
         for event in pygame.event.get():
             passantanble = [piece for piece in piecearr if piece.passant == True]
             if event.type == pygame.MOUSEBUTTONDOWN:
+                print(f"bestMove: {bestMove}")
                 x, y = event.pos
                 for inda, button in enumerate(button_rects):
                     if button.collidepoint(x, y):
                         print(f"Button {inda} pressed")
                         orig,piece = takein(inda)
                         ind = inda
-                        if piece:(print(piece.type, piece.color))
+
                 if not orig.occupied or piece.color != turn: #If you click on an empty square or the wrong color
                     drawit(screen)
                     continue
@@ -585,7 +650,6 @@ def go(screen):
                     dragging=True
                     if piece:
                         moves = piece.EvalMoves()
-                        print(moves) #Debugging
 
                     if piece.color=="White":
                         img = wPiecesDict[piece.type]
@@ -599,7 +663,7 @@ def go(screen):
                 x, y = event.pos
                 for indb, button in enumerate(button_rects):
                     if button.collidepoint(x, y):
-                        print(f"Button {indb} pressed , occupied: {board[indb].occupied}")
+                        # print(f"Button {indb} pressed , occupied: {board[indb].occupied}")
                         fin,piece2 = takein(indb)
                         ind2 = indb
                 if not piece or fin == orig or turn != piece.color: #If no piece or same piece or wrong color
@@ -650,17 +714,21 @@ def go(screen):
                                 gameLog.append("O-O-O")
                             else: gameLog[turnCount] = gameLog[turnCount] + " O-O-O"
                     
+                    bestMove = None
                     if turn == "Black":
                         turn = "White"
                         Threefold(gameLog[turnCount])
                         turnCount += 1
+                        bestMove = minimax(2, initial_alpha, initial_beta, True)
+                        print(f"Best Move: {bestMove}")
                     else:
                         turn = "Black"
+                        Threefold(gameLog[turnCount])
+                        bestMove = minimax(2, initial_alpha, initial_beta, False)
                     drawit(screen)
-
+                    
 
                 elif ind2 in moves: #Check if move is legal
-                    print("IND2 IN MOVES")
                     if piece.type == "PAWN" and abs(ind2-ind) == 16: #En Passant Block
                         piece.passant = True
                         orig.occupied = False
@@ -670,9 +738,6 @@ def go(screen):
                         piece.nummoves += 1
                         fin.occupied = True
                         fin.active = True
-                        passantable = [piece for piece in piecearr if piece.passant and piece.color != turn]
-                        # for p in passantable:
-                        #     p.passant = False
                         if turn == "White":
                             gameLog.append(f"{board[ind2].place[0]}{board[ind2].place[1]}")
                         else:
@@ -840,18 +905,18 @@ def go(screen):
                         # print(f"Piece Array Length {len(piecearr)}") #Debugging
 
 
+                    bestMove = None
                     if turn == "Black":
                         turn = "White"
                         Threefold(gameLog[turnCount])
                         turnCount += 1
+                        # bestMove = minimax(2, initial_alpha, initial_beta, True)
+                        print(f"Best Move: {bestMove}")
                     else:
                         turn = "Black"
-                    if passantanble:
-                        for p in passantanble:
-                            p.passantable = False
-                    
+                        Threefold(gameLog[turnCount])
+                        bestMove = minimax(2, initial_alpha, initial_beta, False)
                     drawit(screen)
-                    piece.EvalMoves()
                     
                 
                     
@@ -869,8 +934,8 @@ def go(screen):
                 exit()
 
 def drawit(screen):
-    light = (42, 34, 38)
-    dark = (22,24,20)
+    dark = (42, 34, 38)
+    light = (22,24,20)
     pos = 0
 
     foreground = pygame.Surface((800,800))
@@ -913,31 +978,6 @@ def Threefold(move):
 def takein(ind): #unused, but good to show process.
     spot = board[ind]
     piece = next((piece for piece in piecearr if piece.boardInd == ind), None)
-    
-    # square_x, square_y = x // 100, y // 100
-    # ind = (square_y * 8) + square_x
-    # spot = board[ind]
-    # piece = next((piece for piece in piecearr if piece.boardInd == ind), None)
-    
-    [#previous print tests
-    # print('Active: {}'.format(spot.active))
-    # print(spot.color)
-    # if spot.occupied:
-    #     if piece.type == "KING":
-    #         print(f"{piece.color} KING")
-    #     elif piece.type == "QUEEN":
-    #         print(f"{piece.color} QUEEN")
-    #     elif piece.type == "ROOK":
-    #         print(f"{piece.color} ROOK")
-    #     elif piece.type == "BISHOP":
-    #         print(f"{piece.color} BISHOP")
-    #     elif piece.type == "KNIGHT":
-    #         print(f"{piece.color}HORSEY")
-    #     elif piece.type == "PAWN":
-    #         print(f"{piece.color} PAWN")
-    # else:
-    #     print("empty")
-    ]
 
     return spot,piece
 
