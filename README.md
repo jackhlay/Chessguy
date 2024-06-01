@@ -2,7 +2,7 @@
 
 ### Thank you for your interest in my Chess Engine. As it stande, the python file contained here only serves as a prototype or proof of concept. This project is on the back burner for a second, but once I come back to it, I am going to continue moving to a go backend style engine to interact with standard chess guis like Arena, etc.  
 
--=============================================================================-  
+-==========================================================================-  
 Here are the milestones:
 
 **Surpassed:**
