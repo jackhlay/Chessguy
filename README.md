@@ -1,5 +1,3 @@
-# Hello! This project is on the back burner for a while, but i will return. 
-
 ### Thank you for your interest in my Chess Engine. most current progress is held in this branch.  
 ### This is an experimental branch, where I am trying to move the engine to Go. I think python worked well as a prototype but the way i wrote it is so messy and wrong that I think it makese sense to rewrite it according to existing conventions, now that there is a working Prototype / POC.  
 
