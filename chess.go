@@ -23,9 +23,10 @@ func game() {
 	games++
 	game := chess.NewGame() //new game for now, later will see if we can load from PGN
 	moves := game.ValidMoves()
+	println(game.Position().Board().Draw())
 	for move := range moves {
 		println(moves[move].String())
-	}
 
+	}
 	games--
 }
