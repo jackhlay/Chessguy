@@ -121,6 +121,12 @@ func mobility(position chess.Position) float64 {
 	return whiteMob - blackMob
 }
 
+//TODO: Write check for exposed king
+
+//TODO: Implement recursive search for live brute force eval.
+//TODO: Keep search as a dfs, and implement alpha beta pruning to help with optimization
+//Additionally, before running the ABP, run a "Plastic-Bag check" to see if any moves are obviously bad and shouldn't be considered
+
 func evalPos(position chess.Position, game chess.Game) float64 {
 	whitePieces := []chess.Piece{}
 	whiteTargeted := []chess.Square{}

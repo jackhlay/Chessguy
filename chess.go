@@ -5,23 +5,19 @@ import (
 )
 
 var games = 0
+var maxGames = 3
 
 func main() {
-	games := 0
-	game()
-	if games == 0 {
-
-		// play game against self
+	// This will be fairly boring, since it's mostly just an api for the engine
+	if games < maxGames {
+		// do a seek
+		// wait
 	}
-
 }
 
 func game() {
-	if games >= 3 {
-		return
-	}
 	games++
-	game := chess.NewGame() //new game for now, later will see if we can load from PGN
+	game := chess.NewGame()
 	moves := game.ValidMoves()
 	println(game.Position().Board().Draw())
 	for move := range moves {
