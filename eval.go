@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math"
 	"strings"
 
 	"github.com/notnil/chess"
@@ -102,9 +103,9 @@ func mobility(position chess.Position) float64 {
 	fen := position.String()
 
 	if strings.Contains(fen, "w") {
-		strings.Replace(fen, "w", "b", 1)
+		fen = strings.Replace(fen, "w", "b", 1)
 	} else {
-		strings.Replace(fen, "b", "w", 1)
+		fen = strings.Replace(fen, "b", "w", 1)
 	}
 	fenVal, _ := chess.FEN(fen)
 
@@ -121,11 +122,58 @@ func mobility(position chess.Position) float64 {
 	return whiteMob - blackMob
 }
 
+func getPiecePos(position chess.Position, piece chess.Piece) string {
+	return "not yet implemented"
+
+}
+
 //TODO: Write check for exposed king
+
+func kingCheck(position chess.Position, game chess.Game) float64 {
+	//Get King Square
+	//check for exposure, return net penalty, WhitePenalty - blackPenalty
+	return 0.0
+}
 
 //TODO: Implement recursive search for live brute force eval.
 //TODO: Keep search as a dfs, and implement alpha beta pruning to help with optimization
 //Additionally, before running the ABP, run a "Plastic-Bag check" to see if any moves are obviously bad and shouldn't be considered
+
+func bagTest(position chess.Position, game chess.Game) float64 {
+	//Checks for any egreious positions to not even consider
+	mvs := game.ValidMoves()
+	for i := range mvs {
+		checkPos := game.Position().Update(mvs[i])
+		println(checkPos.String())
+		//do surface checks
+	}
+	return 0.0
+}
+
+func alphaBetaPrune(position chess.Position, game chess.Game, depth int) float64 {
+	if depth == 0 {
+		return evalPos(position, game)
+	}
+
+	alpha, beta := math.Inf(-1), math.Inf(1)
+	mvs := game.ValidMoves()
+	bestEval := -math.Inf(-1)
+
+	for _, move := range mvs {
+		checkPos := game.Position().Update(move)
+		eval := -alphaBetaPrune(*checkPos, game, depth-1)
+
+		bestEval = math.Max(bestEval, eval)
+		alpha = math.Max(alpha, bestEval)
+
+		if beta <= alpha {
+			break
+		}
+	}
+
+	return bestEval
+
+}
 
 func evalPos(position chess.Position, game chess.Game) float64 {
 	whitePieces := []chess.Piece{}
@@ -169,7 +217,7 @@ func evalPos(position chess.Position, game chess.Game) float64 {
 
 	//fraction of total pieces
 	wLeft := len(whitePieces) / 16
-	bLeft := len(BlackPieces) / -16
+	bLeft := len(BlackPieces) / 16
 
 	//attacking pieces
 	for _, move := range position.ValidMoves() {
