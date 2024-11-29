@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"strconv"
 	"strings"
 
 	"github.com/notnil/chess"
@@ -122,41 +123,133 @@ func mobility(position chess.Position) float64 {
 	return whiteMob - blackMob
 }
 
-func getPiecePos(position chess.Position, piece chess.Piece) string {
-	return "not yet implemented"
-
+func getPiecePos(position chess.Position, piece chess.Piece) chess.Square {
+	var retSq chess.Square
+	for sq := chess.A1; sq <= chess.H8; sq++ {
+		if position.Board().Piece(sq) == piece {
+			retSq = sq
+		}
+	}
+	return retSq
 }
 
-//TODO: Write check for exposed king
+func euclideanDist(sq1 chess.Square, sq2 chess.Square) float64 {
+	xDiff := sq1.Rank() - sq2.Rank()
+	yDiff := sq1.File() - sq2.File()
+	//euclidean distance
+	xint, _ := strconv.Atoi(xDiff.String())
+	yint, _ := strconv.Atoi(yDiff.String())
+	dist := math.Sqrt(float64(xint*xint + yint*yint))
 
-func kingCheck(position chess.Position, game chess.Game) float64 {
+	return dist
+}
+
+func findKing(pos chess.Position, color chess.Color) chess.Square {
+	var king chess.Square
+	for sq := chess.A1; sq <= chess.H8; sq++ {
+		if pos.Board().Piece(sq).Type() == chess.King && pos.Board().Piece(sq).Color() == color {
+			king = sq
+		}
+	}
+	return king
+}
+
+//Check for exposed king
+
+func kingCheck(pos chess.Position, white []chess.Square, black []chess.Square) float64 {
 	//Get King Square
-	//check for exposure, return net penalty, WhitePenalty - blackPenalty
-	return 0.0
+	var whiteKing, blackKing chess.Square
+	enemySum, friendlySum, enemyCt, friendlyCt := 0.0, 0.0, 0.0, 0.0
+
+	enemyDistances := []float64{}
+	friendlyDistances := []float64{}
+
+	whiteKing = findKing(pos, chess.White)
+	blackKing = findKing(pos, chess.Black)
+
+	//calculate distance from king to all enemy pieces and friendly pieces
+	//subtract distance from enemy pieces from distance from friendly pieces
+
+	for _, sq := range white {
+		if pos.Turn() == chess.White {
+			enemyDistances = append(enemyDistances, euclideanDist(whiteKing, sq))
+		} else {
+			friendlyDistances = append(friendlyDistances, euclideanDist(whiteKing, sq))
+		}
+	}
+	for _, sq := range black {
+		if pos.Turn() == chess.White {
+			enemyDistances = append(friendlyDistances, euclideanDist(blackKing, sq))
+		} else {
+			friendlyDistances = append(enemyDistances, euclideanDist(blackKing, sq))
+		}
+
+		//sum the distances
+		//average the distances
+		for _, dist := range enemyDistances {
+			enemySum += dist
+			enemyCt++
+		}
+		for _, dist := range friendlyDistances {
+			friendlySum += dist
+			friendlyCt++
+		}
+
+	}
+	return (friendlySum/friendlyCt - enemySum/enemyCt)
+
 }
 
 //TODO: Implement recursive search for live brute force eval.
 //TODO: Keep search as a dfs, and implement alpha beta pruning to help with optimization
 //Additionally, before running the ABP, run a "Plastic-Bag check" to see if any moves are obviously bad and shouldn't be considered
 
-func bagTest(position chess.Position, game chess.Game) float64 {
+func bagTest(position chess.Position, game chess.Game) []*chess.Move {
 	//Checks for any egreious positions to not even consider
 	mvs := game.ValidMoves()
+	var turn chess.Color
+	goodMoves := []*chess.Move{}
 	for i := range mvs {
-		checkPos := game.Position().Update(mvs[i])
+		checkPos := position.Update(mvs[i])
+		if checkPos.Turn() == chess.White {
+			turn = chess.Black
+		} else {
+			turn = chess.White
+		}
 		println(checkPos.String())
 		//do surface checks
+
+		if checkPos.Status() == chess.NoMethod {
+			goodMoves = append(goodMoves, mvs[i])
+		}
+		king := findKing(*checkPos, turn)
+		if king == chess.A1 || king == chess.A8 || king == chess.H1 || king == chess.H8 || king.File() == chess.FileA && (king.Rank() > chess.Rank2 || king.Rank() < chess.Rank7) || king.File() == chess.FileH && (king.Rank() > chess.Rank2 || king.Rank() < chess.Rank7) {
+			continue
+		}
+		if king == chess.E4 || king == chess.D4 || king == chess.E5 || king == chess.D5 {
+			//If late enoug in the game, add
+			if len(game.MoveHistory()) > 26 {
+				goodMoves = append(goodMoves, mvs[i])
+			}
+		}
+
 	}
-	return 0.0
+	return goodMoves
 }
 
 func alphaBetaPrune(position chess.Position, game chess.Game, depth int) float64 {
 	if depth == 0 {
-		return evalPos(position, game)
+		return evalPos(position)
+	}
+	var mvs []*chess.Move
+	goodMoves := bagTest(position, game)
+	if len(goodMoves) > 0 {
+		mvs = goodMoves
+	} else {
+		mvs = game.ValidMoves()
 	}
 
 	alpha, beta := math.Inf(-1), math.Inf(1)
-	mvs := game.ValidMoves()
 	bestEval := -math.Inf(-1)
 
 	for _, move := range mvs {
@@ -175,7 +268,40 @@ func alphaBetaPrune(position chess.Position, game chess.Game, depth int) float64
 
 }
 
-func evalPos(position chess.Position, game chess.Game) float64 {
+func calcMaterial(position chess.Position) float64 {
+	pieceValue := map[chess.PieceType]float64{
+		chess.Pawn:   1.0,
+		chess.Knight: 3.0,
+		chess.Bishop: 3.1,
+		chess.Rook:   5,
+		chess.Queen:  9,
+		chess.King:   0,
+	}
+
+	pieceTot := 0.0
+	for sq := chess.A1; sq <= chess.H8; sq++ {
+		piece := position.Board().Piece(sq)
+		if piece != chess.NoPiece {
+			value := pieceValue[piece.Type()]
+			if piece.Color() == chess.White {
+				pieceTot += value
+			} else {
+				pieceTot -= value
+			}
+		}
+	}
+	return pieceTot
+}
+
+func resultsInMaterialLoss(before chess.Position, after chess.Position) bool {
+	//checks if a move results in a material loss
+	//if it does, don't consider it
+	beforeMaterial := calcMaterial(before)
+	afterMaterial := calcMaterial(after)
+	return afterMaterial < beforeMaterial
+}
+
+func evalPos(position chess.Position) float64 {
 	whitePieces := []chess.Piece{}
 	whiteTargeted := []chess.Square{}
 	whitePos := []chess.Square{}
@@ -197,6 +323,7 @@ func evalPos(position chess.Position, game chess.Game) float64 {
 	}
 
 	pieceTot := 0.0
+	rawTot := 0.0
 	for sq := chess.A1; sq <= chess.H8; sq++ {
 		piece := position.Board().Piece(sq)
 		if piece != chess.NoPiece {
@@ -205,10 +332,12 @@ func evalPos(position chess.Position, game chess.Game) float64 {
 			if piece.Color() == chess.White {
 				whitePieces = append(whitePieces, piece)
 				whitePos = append(whitePos, sq)
+				rawTot += value
 				pieceTot += .3 * (value + getPosModifier(piece, sq))
 			} else {
 				BlackPieces = append(BlackPieces, piece)
 				blackPos = append(blackPos, sq)
+				rawTot -= value
 				pieceTot -= .3 * (value + getPosModifier(piece, sq))
 			}
 		}
