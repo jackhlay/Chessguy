@@ -40,7 +40,7 @@ func main() {
 			fmt.Printf("Data: %v\n", data)
 			sendJSON(data)
 			// sendToFrontend(endFen)
-			time.Sleep(65 * time.Millisecond)
+			time.Sleep(150 * time.Millisecond)
 		}
 	}
 }
