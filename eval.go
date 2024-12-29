@@ -179,23 +179,23 @@ func kingCheck(pos chess.Position, white []chess.Square, black []chess.Square) f
 	}
 	for _, sq := range black {
 		if pos.Turn() == chess.White {
-			enemyDistances = append(friendlyDistances, euclideanDist(blackKing, sq))
+			friendlyDistances = append(friendlyDistances, euclideanDist(blackKing, sq))
 		} else {
-			friendlyDistances = append(enemyDistances, euclideanDist(blackKing, sq))
+			enemyDistances = append(enemyDistances, euclideanDist(blackKing, sq))
 		}
-
-		//sum the distances
-		//average the distances
-		for _, dist := range enemyDistances {
-			enemySum += dist
-			enemyCt++
-		}
-		for _, dist := range friendlyDistances {
-			friendlySum += dist
-			friendlyCt++
-		}
-
 	}
+
+	//sum the distances
+	//average the distances
+	for _, dist := range enemyDistances {
+		enemySum += dist
+		enemyCt++
+	}
+	for _, dist := range friendlyDistances {
+		friendlySum += dist
+		friendlyCt++
+	}
+
 	return (friendlySum/friendlyCt - enemySum/enemyCt)
 
 }
@@ -305,50 +305,44 @@ func evalPos(position chess.Position) float64 {
 	whitePieces := []chess.Piece{}
 	whiteTargeted := []chess.Square{}
 	whitePos := []chess.Square{}
-	BlackPieces := []chess.Piece{}
+	blackPieces := []chess.Piece{}
 	blackTargeted := []chess.Square{}
 	blackPos := []chess.Square{}
 
 	tempo := 0.0
 
-	//material eval
-
+	// material eval: Start with raw material balance
 	pieceValue := map[chess.PieceType]float64{
 		chess.Pawn:   1.0,
 		chess.Knight: 3.0,
 		chess.Bishop: 3.1,
-		chess.Rook:   5,
-		chess.Queen:  9,
-		chess.King:   0,
+		chess.Rook:   5.0,
+		chess.Queen:  9.0,
+		chess.King:   0.0,
 	}
 
 	pieceTot := 0.0
-	rawTot := 0.0
 	for sq := chess.A1; sq <= chess.H8; sq++ {
 		piece := position.Board().Piece(sq)
 		if piece != chess.NoPiece {
 			value := pieceValue[piece.Type()]
-
 			if piece.Color() == chess.White {
 				whitePieces = append(whitePieces, piece)
 				whitePos = append(whitePos, sq)
-				rawTot += value
-				pieceTot += .3 * (value + getPosModifier(piece, sq))
+				pieceTot += value + getPosModifier(piece, sq) // Positional value included here
 			} else {
-				BlackPieces = append(BlackPieces, piece)
+				blackPieces = append(blackPieces, piece)
 				blackPos = append(blackPos, sq)
-				rawTot -= value
-				pieceTot -= .3 * (value + getPosModifier(piece, sq))
+				pieceTot -= value + getPosModifier(piece, sq) // Positional value included here
 			}
 		}
-
 	}
 
-	//fraction of total pieces
-	wLeft := len(whitePieces) / 16
-	bLeft := len(BlackPieces) / 16
+	// Fraction of total pieces
+	wLeft := float64(len(whitePieces)) / 16.0
+	bLeft := float64(len(blackPieces)) / 16.0
 
-	//attacking pieces
+	// Attacking pieces: Count attacks by each side
 	for _, move := range position.ValidMoves() {
 		targetsq := move.S2()
 		for _, ws := range blackPos {
@@ -368,16 +362,26 @@ func evalPos(position chess.Position) float64 {
 		}
 	}
 	bAttacks := len(whiteTargeted)
-	attPot := .3 * float64(wAttacks+bAttacks)
+	attPot := float64(wAttacks + bAttacks)
 
+	// Adjust tempo based on whose turn it is
 	if position.Turn() == chess.Black {
 		tempo = -0.1
 	} else {
 		tempo = 0.1
 	}
 
-	mobility := mobility(position)
+	// Calculate mobility (how many legal moves each side has)
+	mobilityValue := mobility(position)
 
-	eval := (.55 * float64(pieceTot)) + (.3 * float64(attPot)) + (.05 * float64(wLeft)) - (.05*float64(bLeft) + tempo + (.6 * mobility))
-	return eval
+	// Now calculate the final evaluation:
+	// - Material weight (60%)
+	// - Attacking potential (20%)
+	// - Leftover material ratio (10%)
+	// - Tempo (5%)
+	// - Mobility (5%)
+	eval := (0.6 * pieceTot) + (0.2 * attPot) + (0.1 * (wLeft - bLeft)) + (0.05 * tempo) + (0.05 * mobilityValue)
+
+	// Return the final evaluation score
+	return float64(math.Round(eval*100) / 100)
 }

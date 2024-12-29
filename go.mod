@@ -1,4 +1,4 @@
-module boby
+module randomGames
 
 go 1.22.0
 
