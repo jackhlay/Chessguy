@@ -18,7 +18,7 @@ type PosData struct {
 func sendJSON(data PosData) {
 	//send to dqn
 	jsonData, _ := json.Marshal(data)
-	resp, err := http.Post("http://10.0.0.51:8000", "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.Post("http://localhost:8000", "application/json", bytes.NewBuffer(jsonData))
 	// resp, err := http.Post("chessdqn.default.svc.cluster.local:8000", "application/json", bytes.NewBuffer(jsonData))
 
 	if err != nil {

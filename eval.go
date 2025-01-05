@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -63,6 +64,11 @@ var queenTable = [64]float64{
 	-1.0, 0.0, 0.5, 0.5, 0.5, 0.5, 0.0, -1.0,
 	-1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0,
 	-2.0, -1.0, -1.0, -0.5, -0.5, -1.0, -1.0, -2.0,
+}
+
+type moveRating struct {
+	move chess.Move
+	eval float64
 }
 
 func getPosModifier(piece chess.Piece, sq chess.Square) float64 {
@@ -204,57 +210,59 @@ func kingCheck(pos chess.Position, white []chess.Square, black []chess.Square) f
 //TODO: Keep search as a dfs, and implement alpha beta pruning to help with optimization
 //Additionally, before running the ABP, run a "Plastic-Bag check" to see if any moves are obviously bad and shouldn't be considered
 
-func bagTest(position chess.Position, game chess.Game) []*chess.Move {
+func bagTest(position chess.Position, game chess.Game) []moveRating {
 	//Checks for any egreious positions to not even consider
 	mvs := game.ValidMoves()
+	initEval := evalPos(position)
 	var turn chess.Color
-	goodMoves := []*chess.Move{}
-	for i := range mvs {
-		checkPos := position.Update(mvs[i])
-		if checkPos.Turn() == chess.White {
-			turn = chess.Black
+	goodMoves := []moveRating{}
+	for _, move := range mvs {
+		pos := position.Update(move)
+		evalPos := evalPos(*pos)
+		if turn == chess.White {
+			if evalPos >= initEval {
+				mvr := moveRating{*move, evalPos}
+				goodMoves = append(goodMoves, mvr)
+			}
 		} else {
-			turn = chess.White
-		}
-		println(checkPos.String())
-		//do surface checks
-
-		if checkPos.Status() == chess.NoMethod {
-			goodMoves = append(goodMoves, mvs[i])
-		}
-		king := findKing(*checkPos, turn)
-		if king == chess.A1 || king == chess.A8 || king == chess.H1 || king == chess.H8 || king.File() == chess.FileA && (king.Rank() > chess.Rank2 || king.Rank() < chess.Rank7) || king.File() == chess.FileH && (king.Rank() > chess.Rank2 || king.Rank() < chess.Rank7) {
-			continue
-		}
-		if king == chess.E4 || king == chess.D4 || king == chess.E5 || king == chess.D5 {
-			//If late enoug in the game, add
-			if len(game.MoveHistory()) > 26 {
-				goodMoves = append(goodMoves, mvs[i])
+			if evalPos <= initEval {
+				mvr := moveRating{*move, evalPos}
+				goodMoves = append(goodMoves, mvr)
 			}
 		}
+
+	}
+	if turn == chess.White {
+		sort.Slice(goodMoves, func(i, j int) bool {
+			return goodMoves[i].eval > goodMoves[j].eval
+		})
+	} else {
+		sort.Slice(goodMoves, func(i, j int) bool {
+			return goodMoves[i].eval < goodMoves[j].eval
+		})
 
 	}
 	return goodMoves
 }
 
-func alphaBetaPrune(position chess.Position, game chess.Game, depth int) float64 {
+func alphaBetaPrune(position chess.Position, game chess.Game, depth int, alpha, beta float64, goodMoves []moveRating) float64 {
 	if depth == 0 {
 		return evalPos(position)
 	}
 	var mvs []*chess.Move
-	goodMoves := bagTest(position, game)
 	if len(goodMoves) > 0 {
-		mvs = goodMoves
+		for _, mv := range goodMoves {
+			mvs = append(mvs, &mv.move)
+		}
 	} else {
 		mvs = game.ValidMoves()
 	}
 
-	alpha, beta := math.Inf(-1), math.Inf(1)
-	bestEval := -math.Inf(-1)
+	bestEval := -math.Inf(1)
 
 	for _, move := range mvs {
 		checkPos := game.Position().Update(move)
-		eval := -alphaBetaPrune(*checkPos, game, depth-1)
+		eval := -alphaBetaPrune(*checkPos, game, depth-1, -beta, -alpha, goodMoves)
 
 		bestEval = math.Max(bestEval, eval)
 		alpha = math.Max(alpha, bestEval)
@@ -265,7 +273,6 @@ func alphaBetaPrune(position chess.Position, game chess.Game, depth int) float64
 	}
 
 	return bestEval
-
 }
 
 func calcMaterial(position chess.Position) float64 {
