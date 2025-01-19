@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/notnil/chess"
@@ -50,9 +52,12 @@ func main() {
 	for {
 		game := chess.NewGame()
 		for game.Outcome() == chess.NoOutcome {
+			fen := game.Position().String()
+			splitFen := strings.Split(fen, " ")
+			trn, _ := strconv.Atoi(splitFen[len(splitFen)-1])
 			pos := game.Position()
 			moves := pos.ValidMoves()
-			if len(moves) == 0 {
+			if len(moves) == 0 || trn > 113 {
 				break
 			}
 			bagTest(*pos, *game)
