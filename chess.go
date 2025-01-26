@@ -4,21 +4,23 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/notnil/chess"
 )
 
+var api_key = ""
+
 func sendToFrontend(pos chess.Position) {
-	url := "http://localhost:5000/api/update"
+	url := "http://127.0.0.1:5000/api/update"
 	payload := map[string]interface{}{
 		"fen":         pos.String(),
 		"evalSource1": evalPos(pos),
-		"evalSource2": "0",
+		"evalSource2": "N/A",
 	}
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
@@ -41,10 +43,35 @@ func sendToFrontend(pos chess.Position) {
 		fmt.Println("Error sending request:", err)
 		return
 	}
-	defer resp.Body.Close()
+	resp.Body.Close()
 
 	// Print the response status
 	fmt.Println("Response status:", resp.Status)
+}
+
+func liChessEval(fen string, apiTok string) string {
+	//format fen string for url use
+	fen = strings.ReplaceAll(fen, " ", "%20")
+	url := "http://127.0.0.1:7000/eval?fenStr=" + fen + "&api_tok=" + apiTok
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Println("Error making GET request:", err)
+		return "-9999"
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+		return "-9999"
+	}
+	bodyStr := string(body)
+
+	if strings.Contains(bodyStr, "404") {
+		return "-404"
+	}
+
+	return bodyStr
+
 }
 
 func main() {
@@ -52,49 +79,113 @@ func main() {
 	for {
 		game := chess.NewGame()
 		for game.Outcome() == chess.NoOutcome {
-			fen := game.Position().String()
-			splitFen := strings.Split(fen, " ")
-			trn, _ := strconv.Atoi(splitFen[len(splitFen)-1])
 			pos := game.Position()
 			moves := pos.ValidMoves()
+
+			startFen := game.Position().String()
+
+			splitFen := strings.Split(startFen, " ")
+
+			trn, _ := strconv.Atoi(splitFen[len(splitFen)-1])
 			if len(moves) == 0 || trn > 113 {
 				break
 			}
-			bagTest(*pos, *game)
+			var move *chess.Move
+			if pos.Turn() == chess.White {
 
-			move := moves[rand.Intn(len(moves))]
+				testRes := bagTest(*pos, *game)
+				deepen(*pos, 8, 99999, -99999)
+				fmt.Printf("Bag Test Result: %v\n", testRes)
+				if len(testRes) == 0 {
+					move = moves[rand.Intn(len(moves))]
+				} else {
+					if pos.Turn() == chess.White {
+						move, _ = chess.UCINotation{}.Decode(game.Position(), testRes[len(testRes)-1].move)
+
+					} else {
+						move, _ = chess.UCINotation{}.Decode(game.Position(), testRes[0].move)
+
+					}
+
+				}
+			} else {
+				//wait for user input, convert string to move ex Nf3
+				fmt.Println("Enter move:")
+				var moveStr string
+				fmt.Scanln(&moveStr)
+				move, _ = chess.UCINotation{}.Decode(game.Position(), moveStr)
+			}
 			game.Move(move)
-			sendToFrontend(*pos)
-			sleepTime := time.Duration(rand.Intn(700)) * time.Millisecond
-			time.Sleep(sleepTime)
+			fmt.Printf("Move: %v\n", move)
+			sendToFrontend(*game.Position())
 		}
 	}
 }
 
 // func main() {
-// 	//main func for training / forawrd pass of the model
-// 			move := moves[rand.Intn(len(moves))]
-// 			usePos := pos.Update(move)
-// 			startFen := usePos.String()
-// 			startRating := evalPos(*usePos)
+// 	//main func for real time streaming the games to the frontend
+// 	for {
+// 		game := chess.NewGame()
+// 		for game.Outcome() == chess.NoOutcome {
+// 			pos := game.Position()
+// 			moves := pos.ValidMoves()
 
-// 			game.Move(move)
-// 			fmt.Printf("Move: %s\n", move.String())
-// 			endFen := game.Position().String()
-// 			endRating := evalPos(*pos)
+// 			startFen := game.Position().String()
 
-// 			data := PosData{
-// 				StartFen:    startFen,
-// 				StartRating: startRating,
-// 				Action:      move.String(),
-// 				EndFen:      endFen,
-// 				EndRating:   endRating,
+// 			splitFen := strings.Split(startFen, " ")
+
+// 			trn, _ := strconv.Atoi(splitFen[len(splitFen)-1])
+// 			if len(moves) == 0 || trn > 113 {
+// 				break
 // 			}
-// 			fmt.Printf("Data: %v\n", data)
-// 			// sendJSON(data)
-// 			sendToFrontend(*usePos)
-// 			sleepTime := 1*time.Second + time.Duration(rand.Intn(700))*time.Millisecond
+// 			var move *chess.Move
+// 			if trn < 11 {
+// 				move = moves[rand.Intn(len(moves))]
+// 			} else {
+
+// 				testRes := bagTest(*pos, *game)
+// 				fmt.Printf("Bag Test Result: %v\n", testRes)
+// 				if len(testRes) == 0 {
+// 					move = moves[rand.Intn(len(moves))]
+// 				} else {
+// 					if pos.Turn() == chess.White {
+// 						move, _ = chess.UCINotation{}.Decode(game.Position(), testRes[len(testRes)-1].move)
+
+// 					} else {
+// 						move, _ = chess.UCINotation{}.Decode(game.Position(), testRes[0].move)
+
+// 					}
+
+// 				}
+// 			}
+// 			game.Move(move)
+// 			sendToFrontend(*pos)
+// 			sleepTime := time.Duration(rand.Intn(873)) * time.Millisecond
+
 // 			time.Sleep(sleepTime)
+
 // 		}
 // 	}
 // }
+
+// startRating := evalPos(*pos)
+// startRating, _ := strconv.ParseFloat(liChessEval(startFen, api_key), 64)
+// if startRating == -404 || startRating == -9999 || startRating == 9999 {
+// 	startRating = evalPos(*pos)
+// }
+// endFen := game.Position().String()
+// endRating := evalPos(*pos)
+// endRating, _ := strconv.ParseFloat(liChessEval(endFen, api_key), 64)
+// fmt.Printf("Lichess Eval: %v\n", endRating)
+// if endRating == -404 || endRating == -9999 || endRating == 9999 {
+// 	endRating = evalPos(*pos)
+// }
+// data := PosData{
+// 	StartFen:    startFen,
+// 	StartRating: startRating,
+// 	Action:      move.String(),
+// 	EndFen:      endFen,
+// 	EndRating:   endRating,
+// }
+// fmt.Printf("Data: %v\n", data)
+// sendJSON(data)

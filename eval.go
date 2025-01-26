@@ -3,7 +3,6 @@ package main
 import (
 	"math"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/notnil/chess"
@@ -67,28 +66,33 @@ var queenTable = [64]float64{
 }
 
 type moveRating struct {
-	move chess.Move
+	move string
 	eval float64
 }
 
 func getPosModifier(piece chess.Piece, sq chess.Square) float64 {
 	value := 0.0
+	index := int(sq)
+
+	if piece.Color() == chess.Black {
+		index = 63 - index
+	}
 
 	switch piece.Type() {
 	case chess.Pawn:
-		value += pawnTable[int(sq)]
+		value += pawnTable[index]
 
 	case chess.Knight:
-		value += knightTable[int(sq)]
+		value += knightTable[index]
 
 	case chess.Bishop:
-		value += bishopTable[int(sq)]
+		value += bishopTable[index]
 
 	case chess.Rook:
-		value += rookTable[int(sq)]
+		value += rookTable[index]
 
 	case chess.Queen:
-		value += queenTable[int(sq)]
+		value += queenTable[index]
 	}
 	if piece.Color() == chess.Black {
 		return -1 * value
@@ -129,86 +133,8 @@ func mobility(position chess.Position) float64 {
 	return whiteMob - blackMob
 }
 
-func getPiecePos(position chess.Position, piece chess.Piece) chess.Square {
-	var retSq chess.Square
-	for sq := chess.A1; sq <= chess.H8; sq++ {
-		if position.Board().Piece(sq) == piece {
-			retSq = sq
-		}
-	}
-	return retSq
-}
-
-func euclideanDist(sq1 chess.Square, sq2 chess.Square) float64 {
-	xDiff := sq1.Rank() - sq2.Rank()
-	yDiff := sq1.File() - sq2.File()
-	//euclidean distance
-	xint, _ := strconv.Atoi(xDiff.String())
-	yint, _ := strconv.Atoi(yDiff.String())
-	dist := math.Sqrt(float64(xint*xint + yint*yint))
-
-	return dist
-}
-
-func findKing(pos chess.Position, color chess.Color) chess.Square {
-	var king chess.Square
-	for sq := chess.A1; sq <= chess.H8; sq++ {
-		if pos.Board().Piece(sq).Type() == chess.King && pos.Board().Piece(sq).Color() == color {
-			king = sq
-		}
-	}
-	return king
-}
-
-//Check for exposed king
-
-func kingCheck(pos chess.Position, white []chess.Square, black []chess.Square) float64 {
-	//Get King Square
-	var whiteKing, blackKing chess.Square
-	enemySum, friendlySum, enemyCt, friendlyCt := 0.0, 0.0, 0.0, 0.0
-
-	enemyDistances := []float64{}
-	friendlyDistances := []float64{}
-
-	whiteKing = findKing(pos, chess.White)
-	blackKing = findKing(pos, chess.Black)
-
-	//calculate distance from king to all enemy pieces and friendly pieces
-	//subtract distance from enemy pieces from distance from friendly pieces
-
-	for _, sq := range white {
-		if pos.Turn() == chess.White {
-			enemyDistances = append(enemyDistances, euclideanDist(whiteKing, sq))
-		} else {
-			friendlyDistances = append(friendlyDistances, euclideanDist(whiteKing, sq))
-		}
-	}
-	for _, sq := range black {
-		if pos.Turn() == chess.White {
-			friendlyDistances = append(friendlyDistances, euclideanDist(blackKing, sq))
-		} else {
-			enemyDistances = append(enemyDistances, euclideanDist(blackKing, sq))
-		}
-	}
-
-	//sum the distances
-	//average the distances
-	for _, dist := range enemyDistances {
-		enemySum += dist
-		enemyCt++
-	}
-	for _, dist := range friendlyDistances {
-		friendlySum += dist
-		friendlyCt++
-	}
-
-	return (friendlySum/friendlyCt - enemySum/enemyCt)
-
-}
-
 //TODO: Implement recursive search for live brute force eval.
 //TODO: Keep search as a dfs, and implement alpha beta pruning to help with optimization
-//Additionally, before running the ABP, run a "Plastic-Bag check" to see if any moves are obviously bad and shouldn't be considered
 
 func bagTest(position chess.Position, game chess.Game) []moveRating {
 	//Checks for any egreious positions to not even consider
@@ -218,15 +144,32 @@ func bagTest(position chess.Position, game chess.Game) []moveRating {
 	goodMoves := []moveRating{}
 	for _, move := range mvs {
 		pos := position.Update(move)
+		if potentialMaterialLoss(position, *pos) {
+			continue
+		}
+		if potentialMaterialGain(position, *pos) {
+			goodMoves = append(goodMoves, moveRating{move.String(), evalPos(*pos)})
+			continue
+		}
 		evalPos := evalPos(*pos)
 		if turn == chess.White {
+			if canTakeQueen(position) {
+				mvr := moveRating{move.String(), 999}
+				goodMoves = append(goodMoves, mvr)
+				continue
+			}
 			if evalPos >= initEval {
-				mvr := moveRating{*move, evalPos}
+				mvr := moveRating{move.String(), evalPos}
 				goodMoves = append(goodMoves, mvr)
 			}
 		} else {
+			if canTakeQueen(position) {
+				mvr := moveRating{move.String(), 999}
+				goodMoves = append(goodMoves, mvr)
+				continue
+			}
 			if evalPos <= initEval {
-				mvr := moveRating{*move, evalPos}
+				mvr := moveRating{move.String(), evalPos}
 				goodMoves = append(goodMoves, mvr)
 			}
 		}
@@ -245,34 +188,21 @@ func bagTest(position chess.Position, game chess.Game) []moveRating {
 	return goodMoves
 }
 
-func alphaBetaPrune(position chess.Position, game chess.Game, depth int, alpha, beta float64, goodMoves []moveRating) float64 {
-	if depth == 0 {
-		return evalPos(position)
-	}
-	var mvs []*chess.Move
-	if len(goodMoves) > 0 {
-		for _, mv := range goodMoves {
-			mvs = append(mvs, &mv.move)
+func centerControl(position chess.Position) float64 {
+	centerSquares := []chess.Square{chess.D4, chess.D5, chess.E4, chess.E5}
+	centerControl := 0.0
+	for _, sq := range position.ValidMoves() {
+		if sq.S2() == centerSquares[0] || sq.S2() == centerSquares[1] || sq.S2() == centerSquares[2] || sq.S2() == centerSquares[3] {
+			centerControl += 0.1
 		}
-	} else {
-		mvs = game.ValidMoves()
-	}
-
-	bestEval := -math.Inf(1)
-
-	for _, move := range mvs {
-		checkPos := game.Position().Update(move)
-		eval := -alphaBetaPrune(*checkPos, game, depth-1, -beta, -alpha, goodMoves)
-
-		bestEval = math.Max(bestEval, eval)
-		alpha = math.Max(alpha, bestEval)
-
-		if beta <= alpha {
-			break
+		if sq.S1() == centerSquares[0] || sq.S1() == centerSquares[1] || sq.S1() == centerSquares[2] || sq.S1() == centerSquares[3] {
+			centerControl += 0.1
 		}
 	}
-
-	return bestEval
+	if position.Turn() == chess.Black {
+		centerControl = -1 * centerControl
+	}
+	return centerControl
 }
 
 func calcMaterial(position chess.Position) float64 {
@@ -300,12 +230,93 @@ func calcMaterial(position chess.Position) float64 {
 	return pieceTot
 }
 
-func resultsInMaterialLoss(before chess.Position, after chess.Position) bool {
+func potentialMaterialLoss(before chess.Position, after chess.Position) bool {
 	//checks if a move results in a material loss
 	//if it does, don't consider it
-	beforeMaterial := calcMaterial(before)
-	afterMaterial := calcMaterial(after)
-	return afterMaterial < beforeMaterial
+	oppMoves := after.ValidMoves()
+	for _, move := range oppMoves {
+		piece := after.Board().Piece(move.S2())
+		if piece != chess.NoPiece {
+			if piece.Color() != before.Turn() {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func potentialMaterialGain(before chess.Position, after chess.Position) bool {
+	//checks if a move results in a material loss
+	//if it does, don't consider it
+	oppMoves := after.ValidMoves()
+	for _, move := range oppMoves {
+		piece := after.Board().Piece(move.S2())
+		if piece != chess.NoPiece {
+			if piece.Color() != before.Turn() {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func pieceCoordination(before chess.Position) float64 {
+	coordination := 0.0
+	//evaluates how well pieces are coordinated
+	for _, move := range before.ValidMoves() {
+		if before.Board().Piece(move.S1()) != chess.NoPiece && before.Board().Piece(move.S2()).Color() == before.Turn() {
+			coordination += .01
+		}
+	}
+	if before.Turn() == chess.Black {
+		coordination = -1 * coordination
+	}
+	return coordination
+}
+
+func canTakeQueen(position chess.Position) bool {
+	for _, move := range position.ValidMoves() {
+		if position.Board().Piece(move.S2()).Type() == chess.Queen && position.Board().Piece(move.S2()).Color() != position.Turn() {
+			return true
+		}
+	}
+	return false
+
+}
+
+func deepen(position chess.Position, depth int, alpha, beta float64) float64 {
+	if depth == 0 {
+		return evalPos(position)
+	}
+	moves := position.ValidMoves()
+	if len(moves) == 0 {
+		return evalPos(position)
+	}
+	if position.Turn() == chess.White {
+		maxEval := -math.MaxFloat64
+		for _, move := range moves {
+			pos := position.Update(move)
+			eval := deepen(*pos, depth-1, alpha, beta)
+			maxEval = math.Max(maxEval, eval)
+			alpha = math.Max(alpha, eval)
+			if beta <= alpha {
+				break
+			}
+		}
+		return maxEval
+	} else {
+		minEval := math.MaxFloat64
+		for _, move := range moves {
+			pos := position.Update(move)
+			eval := deepen(*pos, depth-1, alpha, beta)
+			minEval = math.Min(minEval, eval)
+			beta = math.Min(beta, eval)
+			if beta <= alpha {
+				break
+			}
+		}
+		return minEval
+	}
 }
 
 func evalPos(position chess.Position) float64 {
@@ -325,7 +336,7 @@ func evalPos(position chess.Position) float64 {
 		chess.Bishop: 3.1,
 		chess.Rook:   5.0,
 		chess.Queen:  9.0,
-		chess.King:   0.0,
+		chess.King:   4.0,
 	}
 
 	pieceTot := 0.0
@@ -387,7 +398,7 @@ func evalPos(position chess.Position) float64 {
 	// - Leftover material ratio (10%)
 	// - Tempo (5%)
 	// - Mobility (5%)
-	eval := (0.6 * pieceTot) + (0.2 * attPot) + (0.1 * (wLeft - bLeft)) + (0.05 * tempo) + (0.05 * mobilityValue)
+	eval := (0.5 * pieceTot) + (0.2 * attPot) + (0.15 * (wLeft - bLeft)) + (0.1 * mobilityValue) + (0.05 * tempo) + pieceCoordination(position) + (0.1 * centerControl(position))
 
 	// Return the final evaluation score
 	return float64(math.Round(eval*100) / 100)

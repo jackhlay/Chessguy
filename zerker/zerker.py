@@ -19,7 +19,7 @@ async def tableBase(fenStr, api_tok):
     return "NOT IMPLEMENTED"
 
 @app.get("/eval")
-async def eval(fenStr, api_tok)->float|tuple[float,str]:
+async def eval(fenStr, api_tok)->str:
     try:
         print(fenStr)
         session = berserk.TokenSession(api_tok)
@@ -28,22 +28,19 @@ async def eval(fenStr, api_tok)->float|tuple[float,str]:
         res = client.get_cloud_evaluation(fen=fenStr, num_variations=0)
         score = float(res["pvs"][0]["cp"])
         pprint.pprint(f"score: {score}")
-        return score    
+        return str(score)    
     except Exception:
-        return (404.0 , f"No cloud evaluation available for position {fenStr}")
+        return (f"404. No cloud evaluation available for position {fenStr}")
 
-def seekGames(api_tok):
-    games = {internal: 0,
-             seek: 0,
-             challenge: 0}
-    while games < 3:
-        session = berserk.TokenSession(api_tok)
-        board = berserk.clients.Board(session=session, base_url="https://lichess.org")
-        board.stream_incoming_events()
-        games += 1
-
-
-# app.on_event("startup")(seekGames)
+# def seekGames(api_tok):
+#     games = {internal: 0,
+#              seek: 0,
+#              challenge: 0}
+#     while games < 3:
+#         session = berserk.TokenSession(api_tok)
+#         board = berserk.clients.Board(session=session, base_url="https://lichess.org")
+#         board.stream_incoming_events()
+#         games += 1
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=7000)
