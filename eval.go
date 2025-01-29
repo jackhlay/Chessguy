@@ -3,9 +3,8 @@ package main
 import (
 	"math"
 	"sort"
-	"strings"
 
-	"github.com/notnil/chess"
+	"github.com/corentings/chess"
 )
 
 //Piece Square Tables:
@@ -100,39 +99,6 @@ func getPosModifier(piece chess.Piece, sq chess.Square) float64 {
 	return value
 }
 
-func mobility(position chess.Position) float64 {
-	wFirstMoves := map[chess.Square]bool{}
-	bFirstMoves := map[chess.Square]bool{}
-	moves := position.ValidMoves()
-	for _, move := range moves {
-		if !wFirstMoves[move.S1()] {
-			wFirstMoves[move.S1()] = true
-		}
-	}
-	whiteMob := float64(len(wFirstMoves) + len(moves))
-
-	fen := position.String()
-
-	if strings.Contains(fen, "w") {
-		fen = strings.Replace(fen, "w", "b", 1)
-	} else {
-		fen = strings.Replace(fen, "b", "w", 1)
-	}
-	fenVal, _ := chess.FEN(fen)
-
-	otherside := chess.NewGame(fenVal)
-	otherMoves := otherside.Position().ValidMoves()
-	for _, move := range otherMoves {
-		if !bFirstMoves[move.S1()] {
-			bFirstMoves[move.S1()] = true
-		}
-
-	}
-	blackMob := float64(len(bFirstMoves) + len(otherMoves))
-
-	return whiteMob - blackMob
-}
-
 //TODO: Implement recursive search for live brute force eval.
 //TODO: Keep search as a dfs, and implement alpha beta pruning to help with optimization
 
@@ -190,19 +156,20 @@ func bagTest(position chess.Position, game chess.Game) []moveRating {
 
 func centerControl(position chess.Position) float64 {
 	centerSquares := []chess.Square{chess.D4, chess.D5, chess.E4, chess.E5}
-	centerControl := 0.0
-	for _, sq := range position.ValidMoves() {
-		if sq.S2() == centerSquares[0] || sq.S2() == centerSquares[1] || sq.S2() == centerSquares[2] || sq.S2() == centerSquares[3] {
-			centerControl += 0.1
-		}
-		if sq.S1() == centerSquares[0] || sq.S1() == centerSquares[1] || sq.S1() == centerSquares[2] || sq.S1() == centerSquares[3] {
-			centerControl += 0.1
+	control := 0.0
+
+	for _, sq := range centerSquares {
+		piece := position.Board().Piece(sq)
+		if piece != chess.NoPiece {
+			if piece.Color() == chess.White {
+				control += 0.25
+			} else {
+				control -= 0.25
+			}
 		}
 	}
-	if position.Turn() == chess.Black {
-		centerControl = -1 * centerControl
-	}
-	return centerControl
+
+	return control
 }
 
 func calcMaterial(position chess.Position) float64 {
@@ -319,16 +286,7 @@ func deepen(position chess.Position, depth int, alpha, beta float64) float64 {
 	}
 }
 
-func evalPos(position chess.Position) float64 {
-	whitePieces := []chess.Piece{}
-	whiteTargeted := []chess.Square{}
-	whitePos := []chess.Square{}
-	blackPieces := []chess.Piece{}
-	blackTargeted := []chess.Square{}
-	blackPos := []chess.Square{}
-
-	tempo := 0.0
-
+func material(position chess.Position) float64 {
 	// material eval: Start with raw material balance
 	pieceValue := map[chess.PieceType]float64{
 		chess.Pawn:   1.0,
@@ -336,7 +294,7 @@ func evalPos(position chess.Position) float64 {
 		chess.Bishop: 3.1,
 		chess.Rook:   5.0,
 		chess.Queen:  9.0,
-		chess.King:   4.0,
+		chess.King:   0.0,
 	}
 
 	pieceTot := 0.0
@@ -345,61 +303,84 @@ func evalPos(position chess.Position) float64 {
 		if piece != chess.NoPiece {
 			value := pieceValue[piece.Type()]
 			if piece.Color() == chess.White {
-				whitePieces = append(whitePieces, piece)
-				whitePos = append(whitePos, sq)
-				pieceTot += value + getPosModifier(piece, sq) // Positional value included here
+				pieceTot += value // Positional value included here
 			} else {
-				blackPieces = append(blackPieces, piece)
-				blackPos = append(blackPos, sq)
-				pieceTot -= value + getPosModifier(piece, sq) // Positional value included here
+				pieceTot -= value // Positional value included here
 			}
 		}
 	}
+	return pieceTot
 
-	// Fraction of total pieces
-	wLeft := float64(len(whitePieces)) / 16.0
-	bLeft := float64(len(blackPieces)) / 16.0
+}
 
-	// Attacking pieces: Count attacks by each side
-	for _, move := range position.ValidMoves() {
-		targetsq := move.S2()
-		for _, ws := range blackPos {
-			if targetsq == ws {
-				blackTargeted = append(blackTargeted, ws)
-			}
+func positional(position chess.Position) float64 {
+	positional := 0.0
+	for sq := chess.A1; sq <= chess.H8; sq++ {
+		piece := position.Board().Piece(sq)
+		if piece != chess.NoPiece {
+			positional += getPosModifier(piece, sq)
 		}
 	}
-	wAttacks := len(blackTargeted)
+	return positional
+}
 
-	for _, move := range position.ValidMoves() {
-		target := move.S2()
-		for _, bs := range whitePos {
-			if target == bs {
-				whiteTargeted = append(whiteTargeted, bs)
-			}
-		}
-	}
-	bAttacks := len(whiteTargeted)
-	attPot := float64(wAttacks + bAttacks)
+func mobility(position chess.Position) float64 {
+	var whiteMoves []*chess.Move
+	var blackMoves []*chess.Move
 
-	// Adjust tempo based on whose turn it is
-	if position.Turn() == chess.Black {
-		tempo = -0.1
+	if position.Turn() == chess.White {
+		whiteMoves = position.ValidMoves()
+		pos := position.ChangeTurn()
+		blackMoves = pos.ValidMoves()
 	} else {
-		tempo = 0.1
+		blackMoves = position.ValidMoves()
+		pos := position.ChangeTurn()
+		whiteMoves = pos.ValidMoves()
 	}
 
-	// Calculate mobility (how many legal moves each side has)
-	mobilityValue := mobility(position)
+	whiteMobility := 0.0
+	for _, move := range whiteMoves {
+		if isCentral(move.S2()) {
+			whiteMobility += .2
+		} else {
+			whiteMobility += .1
+		}
 
-	// Now calculate the final evaluation:
-	// - Material weight (60%)
-	// - Attacking potential (20%)
-	// - Leftover material ratio (10%)
-	// - Tempo (5%)
-	// - Mobility (5%)
-	eval := (0.5 * pieceTot) + (0.2 * attPot) + (0.15 * (wLeft - bLeft)) + (0.1 * mobilityValue) + (0.05 * tempo) + pieceCoordination(position) + (0.1 * centerControl(position))
+	}
+	blackMobility := 0.0
+	for _, move := range blackMoves {
+		if isCentral(move.S2()) {
+			blackMobility += .2
+		} else {
+			blackMobility += .1
+		}
 
-	// Return the final evaluation score
-	return float64(math.Round(eval*100) / 100)
+	}
+
+	return float64(whiteMobility - blackMobility)
+
+}
+
+func isCentral(sq chess.Square) bool {
+
+	centralSquares := []chess.Square{chess.D4, chess.D5, chess.E4, chess.E5}
+	for _, centralSq := range centralSquares {
+		if sq == centralSq {
+			return true
+		}
+	}
+	return false
+
+}
+
+func evalPos(position chess.Position) float64 {
+	material := material(position)
+	positional := positional(position)
+	mobility := mobility(position)
+	pawnStructure := 1.5 // for now
+	kingSafety := 20.0   // for now
+	centerControl := centerControl(position)
+
+	eval := 0.6*material + 0.2*positional + 0.1*mobility + 0.05*pawnStructure + 0.05*kingSafety + 0.1*centerControl
+	return eval
 }

@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/notnil/chess"
+	"github.com/corentings/chess"
 )
 
 var api_key = ""
