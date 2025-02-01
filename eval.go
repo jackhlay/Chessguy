@@ -3,13 +3,14 @@ package main
 import (
 	"math"
 	"sort"
+	"strings"
 
 	"github.com/corentings/chess"
 )
 
 //Piece Square Tables:
 
-var pawnTable = [64]float64{
+var pawnTable = [64]float32{
 	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	0.5, 1.0, 1.0, -2.0, -2.0, 1.0, 1.0, 0.5,
 	0.5, 0.5, 0.5, 1.5, 1.5, 0.5, 0.5, 0.5,
@@ -20,7 +21,7 @@ var pawnTable = [64]float64{
 	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 }
 
-var knightTable = [64]float64{
+var knightTable = [64]float32{
 	-5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0,
 	-4.0, -2.0, 0.0, 0.5, 0.5, 0.0, -2.0, -4.0,
 	-3.0, 0.5, 1.0, 1.5, 1.5, 1.0, 0.5, -3.0,
@@ -31,7 +32,7 @@ var knightTable = [64]float64{
 	-5.0, -4.0, -3.0, -3.0, -3.0, -3.0, -4.0, -5.0,
 }
 
-var bishopTable = [64]float64{
+var bishopTable = [64]float32{
 	-2.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -2.0,
 	-1.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.5, -1.0,
 	-1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0,
@@ -42,7 +43,7 @@ var bishopTable = [64]float64{
 	-2.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -2.0,
 }
 
-var rookTable = [64]float64{
+var rookTable = [64]float32{
 	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.5,
 	-0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.5,
@@ -53,7 +54,7 @@ var rookTable = [64]float64{
 	0.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0,
 }
 
-var queenTable = [64]float64{
+var queenTable = [64]float32{
 	-2.0, -1.0, -1.0, -0.5, -0.5, -1.0, -1.0, -2.0,
 	-1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0,
 	-1.0, 0.0, 0.5, 0.5, 0.5, 0.5, 0.0, -1.0,
@@ -66,11 +67,11 @@ var queenTable = [64]float64{
 
 type moveRating struct {
 	move string
-	eval float64
+	eval float32
 }
 
-func getPosModifier(piece chess.Piece, sq chess.Square) float64 {
-	value := 0.0
+func getPosModifier(piece chess.Piece, sq chess.Square) float32 {
+	value := float32(0)
 	index := int(sq)
 
 	if piece.Color() == chess.Black {
@@ -99,11 +100,8 @@ func getPosModifier(piece chess.Piece, sq chess.Square) float64 {
 	return value
 }
 
-//TODO: Implement recursive search for live brute force eval.
-//TODO: Keep search as a dfs, and implement alpha beta pruning to help with optimization
-
 func bagTest(position chess.Position, game chess.Game) []moveRating {
-	//Checks for any egreious positions to not even consider
+	//Checks for any egreious positions to not even consider0
 	mvs := game.ValidMoves()
 	initEval := evalPos(position)
 	var turn chess.Color
@@ -154,47 +152,43 @@ func bagTest(position chess.Position, game chess.Game) []moveRating {
 	return goodMoves
 }
 
-func centerControl(position chess.Position) float64 {
-	centerSquares := []chess.Square{chess.D4, chess.D5, chess.E4, chess.E5}
-	control := 0.0
+func calcMaterial(position chess.Position) float32 {
 
-	for _, sq := range centerSquares {
-		piece := position.Board().Piece(sq)
-		if piece != chess.NoPiece {
-			if piece.Color() == chess.White {
-				control += 0.25
-			} else {
-				control -= 0.25
-			}
-		}
+	fen := position.String()
+	whitePawns := strings.Count("P", fen)
+	blackPawns := strings.Count("p", fen)
+
+	whiteKnights := strings.Count("N", fen)
+	blackKnights := strings.Count("n", fen)
+
+	whiteBishops := strings.Count("B", fen)
+	blackBishops := strings.Count("b", fen)
+
+	whiteRooks := strings.Count("R", fen)
+	blackRooks := strings.Count("r", fen)
+
+	whiteQueens := strings.Count("Q", fen)
+	blackQueens := strings.Count("q", fen)
+
+	whiteMobility := 0
+	blackMobility := 0
+	if position.Turn() == chess.White {
+		whiteMobility = len(position.ValidMoves())
+		position.ChangeTurn()
+		blackMobility = len(position.ValidMoves())
+	} else {
+		blackMobility = len(position.ValidMoves())
+		position.ChangeTurn()
+		whiteMobility = len(position.ValidMoves())
 	}
 
-	return control
-}
+	//doubled pawns
+	//blocked pawns
+	//isolatedpawns
 
-func calcMaterial(position chess.Position) float64 {
-	pieceValue := map[chess.PieceType]float64{
-		chess.Pawn:   1.0,
-		chess.Knight: 3.0,
-		chess.Bishop: 3.1,
-		chess.Rook:   5,
-		chess.Queen:  9,
-		chess.King:   0,
-	}
+	material := float32(whitePawns-blackPawns) + 3.2*float32(whiteKnights-blackKnights) + 3.3*float32(whiteBishops-blackBishops) + 5*float32(whiteRooks-blackRooks) + 9*float32(whiteQueens-blackQueens) + .1*float32(whiteMobility-blackMobility)
 
-	pieceTot := 0.0
-	for sq := chess.A1; sq <= chess.H8; sq++ {
-		piece := position.Board().Piece(sq)
-		if piece != chess.NoPiece {
-			value := pieceValue[piece.Type()]
-			if piece.Color() == chess.White {
-				pieceTot += value
-			} else {
-				pieceTot -= value
-			}
-		}
-	}
-	return pieceTot
+	return material
 }
 
 func potentialMaterialLoss(before chess.Position, after chess.Position) bool {
@@ -227,20 +221,6 @@ func potentialMaterialGain(before chess.Position, after chess.Position) bool {
 	return false
 }
 
-func pieceCoordination(before chess.Position) float64 {
-	coordination := 0.0
-	//evaluates how well pieces are coordinated
-	for _, move := range before.ValidMoves() {
-		if before.Board().Piece(move.S1()) != chess.NoPiece && before.Board().Piece(move.S2()).Color() == before.Turn() {
-			coordination += .01
-		}
-	}
-	if before.Turn() == chess.Black {
-		coordination = -1 * coordination
-	}
-	return coordination
-}
-
 func canTakeQueen(position chess.Position) bool {
 	for _, move := range position.ValidMoves() {
 		if position.Board().Piece(move.S2()).Type() == chess.Queen && position.Board().Piece(move.S2()).Color() != position.Turn() {
@@ -251,7 +231,7 @@ func canTakeQueen(position chess.Position) bool {
 
 }
 
-func deepen(position chess.Position, depth int, alpha, beta float64) float64 {
+func deepen(position chess.Position, depth int, alpha, beta float32) float32 {
 	if depth == 0 {
 		return evalPos(position)
 	}
@@ -260,24 +240,30 @@ func deepen(position chess.Position, depth int, alpha, beta float64) float64 {
 		return evalPos(position)
 	}
 	if position.Turn() == chess.White {
-		maxEval := -math.MaxFloat64
+		maxEval := float32(math.Inf(-1))
 		for _, move := range moves {
 			pos := position.Update(move)
 			eval := deepen(*pos, depth-1, alpha, beta)
-			maxEval = math.Max(maxEval, eval)
-			alpha = math.Max(alpha, eval)
+			if eval > float32(maxEval) {
+				maxEval = eval
+			}
+
+			if eval > alpha {
+				alpha = eval
+			}
+
 			if beta <= alpha {
 				break
 			}
 		}
 		return maxEval
 	} else {
-		minEval := math.MaxFloat64
+		minEval := float32(math.Inf(1))
 		for _, move := range moves {
 			pos := position.Update(move)
 			eval := deepen(*pos, depth-1, alpha, beta)
-			minEval = math.Min(minEval, eval)
-			beta = math.Min(beta, eval)
+			minEval = float32(math.Min(float64(minEval), float64(eval)))
+			beta = float32(math.Min(float64(beta), float64(eval)))
 			if beta <= alpha {
 				break
 			}
@@ -285,102 +271,9 @@ func deepen(position chess.Position, depth int, alpha, beta float64) float64 {
 		return minEval
 	}
 }
-
-func material(position chess.Position) float64 {
-	// material eval: Start with raw material balance
-	pieceValue := map[chess.PieceType]float64{
-		chess.Pawn:   1.0,
-		chess.Knight: 3.0,
-		chess.Bishop: 3.1,
-		chess.Rook:   5.0,
-		chess.Queen:  9.0,
-		chess.King:   0.0,
-	}
-
-	pieceTot := 0.0
-	for sq := chess.A1; sq <= chess.H8; sq++ {
-		piece := position.Board().Piece(sq)
-		if piece != chess.NoPiece {
-			value := pieceValue[piece.Type()]
-			if piece.Color() == chess.White {
-				pieceTot += value // Positional value included here
-			} else {
-				pieceTot -= value // Positional value included here
-			}
-		}
-	}
-	return pieceTot
-
-}
-
-func positional(position chess.Position) float64 {
-	positional := 0.0
-	for sq := chess.A1; sq <= chess.H8; sq++ {
-		piece := position.Board().Piece(sq)
-		if piece != chess.NoPiece {
-			positional += getPosModifier(piece, sq)
-		}
-	}
-	return positional
-}
-
-func mobility(position chess.Position) float64 {
-	var whiteMoves []*chess.Move
-	var blackMoves []*chess.Move
-
-	if position.Turn() == chess.White {
-		whiteMoves = position.ValidMoves()
-		pos := position.ChangeTurn()
-		blackMoves = pos.ValidMoves()
-	} else {
-		blackMoves = position.ValidMoves()
-		pos := position.ChangeTurn()
-		whiteMoves = pos.ValidMoves()
-	}
-
-	whiteMobility := 0.0
-	for _, move := range whiteMoves {
-		if isCentral(move.S2()) {
-			whiteMobility += .2
-		} else {
-			whiteMobility += .1
-		}
-
-	}
-	blackMobility := 0.0
-	for _, move := range blackMoves {
-		if isCentral(move.S2()) {
-			blackMobility += .2
-		} else {
-			blackMobility += .1
-		}
-
-	}
-
-	return float64(whiteMobility - blackMobility)
-
-}
-
-func isCentral(sq chess.Square) bool {
-
-	centralSquares := []chess.Square{chess.D4, chess.D5, chess.E4, chess.E5}
-	for _, centralSq := range centralSquares {
-		if sq == centralSq {
-			return true
-		}
-	}
-	return false
-
-}
-
-func evalPos(position chess.Position) float64 {
-	material := material(position)
-	positional := positional(position)
-	mobility := mobility(position)
-	pawnStructure := 1.5 // for now
-	kingSafety := 20.0   // for now
-	centerControl := centerControl(position)
-
-	eval := 0.6*material + 0.2*positional + 0.1*mobility + 0.05*pawnStructure + 0.05*kingSafety + 0.1*centerControl
+func evalPos(position chess.Position) float32 {
+	material := calcMaterial(position)
+	// positional := positional(position)
+	eval := material
 	return eval
 }
