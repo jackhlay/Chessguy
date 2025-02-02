@@ -2,13 +2,14 @@ package main
 
 import (
 	"math"
-	"sort"
 	"strings"
 
 	"github.com/corentings/chess"
 )
 
 //Piece Square Tables:
+
+var transposeTable map[string]float32
 
 var pawnTable = [64]float32{
 	0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -100,58 +101,6 @@ func getPosModifier(piece chess.Piece, sq chess.Square) float32 {
 	return value
 }
 
-func bagTest(position chess.Position, game chess.Game) []moveRating {
-	//Checks for any egreious positions to not even consider0
-	mvs := game.ValidMoves()
-	initEval := evalPos(position)
-	var turn chess.Color
-	goodMoves := []moveRating{}
-	for _, move := range mvs {
-		pos := position.Update(move)
-		if potentialMaterialLoss(position, *pos) {
-			continue
-		}
-		if potentialMaterialGain(position, *pos) {
-			goodMoves = append(goodMoves, moveRating{move.String(), evalPos(*pos)})
-			continue
-		}
-		evalPos := evalPos(*pos)
-		if turn == chess.White {
-			if canTakeQueen(position) {
-				mvr := moveRating{move.String(), 999}
-				goodMoves = append(goodMoves, mvr)
-				continue
-			}
-			if evalPos >= initEval {
-				mvr := moveRating{move.String(), evalPos}
-				goodMoves = append(goodMoves, mvr)
-			}
-		} else {
-			if canTakeQueen(position) {
-				mvr := moveRating{move.String(), 999}
-				goodMoves = append(goodMoves, mvr)
-				continue
-			}
-			if evalPos <= initEval {
-				mvr := moveRating{move.String(), evalPos}
-				goodMoves = append(goodMoves, mvr)
-			}
-		}
-
-	}
-	if turn == chess.White {
-		sort.Slice(goodMoves, func(i, j int) bool {
-			return goodMoves[i].eval > goodMoves[j].eval
-		})
-	} else {
-		sort.Slice(goodMoves, func(i, j int) bool {
-			return goodMoves[i].eval < goodMoves[j].eval
-		})
-
-	}
-	return goodMoves
-}
-
 func calcMaterial(position chess.Position) float32 {
 
 	fen := position.String()
@@ -182,96 +131,103 @@ func calcMaterial(position chess.Position) float32 {
 		whiteMobility = len(position.ValidMoves())
 	}
 
-	//doubled pawns
+	whiteDoubled, blackDoubled := doubledPawns(position)
 	//blocked pawns
 	//isolatedpawns
 
-	material := float32(whitePawns-blackPawns) + 3.2*float32(whiteKnights-blackKnights) + 3.3*float32(whiteBishops-blackBishops) + 5*float32(whiteRooks-blackRooks) + 9*float32(whiteQueens-blackQueens) + .1*float32(whiteMobility-blackMobility)
+	material := 9*float32(whiteQueens-blackQueens) +
+		5*float32(whiteRooks-blackRooks) +
+		3.2*float32(whiteKnights-blackKnights) +
+		3.3*float32(whiteBishops-blackBishops) +
+		float32(whitePawns-blackPawns) -
+		0.5*float32(whiteDoubled-blackDoubled) +
+		.1*float32(whiteMobility-blackMobility)
 
 	return material
 }
 
-func potentialMaterialLoss(before chess.Position, after chess.Position) bool {
-	//checks if a move results in a material loss
-	//if it does, don't consider it
-	oppMoves := after.ValidMoves()
-	for _, move := range oppMoves {
-		piece := after.Board().Piece(move.S2())
-		if piece != chess.NoPiece {
-			if piece.Color() != before.Turn() {
-				return true
+func doubledPawns(position chess.Position) (whiteDoubled, blackDoubled float32) {
+	for file := chess.FileA; file <= chess.FileH; file++ {
+		whitePawns := 0
+		blackPawns := 0
+		for rank := chess.Rank1; rank <= chess.Rank8; rank++ {
+			sq := chess.NewSquare(file, rank)
+			piece := position.Board().Piece(sq)
+			if piece.Type() == chess.Pawn {
+				if piece.Color() == chess.White {
+					whitePawns++
+				} else {
+					blackPawns++
+				}
 			}
 		}
-	}
-	return false
-}
-
-func potentialMaterialGain(before chess.Position, after chess.Position) bool {
-	//checks if a move results in a material loss
-	//if it does, don't consider it
-	oppMoves := after.ValidMoves()
-	for _, move := range oppMoves {
-		piece := after.Board().Piece(move.S2())
-		if piece != chess.NoPiece {
-			if piece.Color() != before.Turn() {
-				return true
-			}
+		if whitePawns > 1 {
+			whiteDoubled += 1
+		}
+		if blackPawns > 1 {
+			blackDoubled += 1
 		}
 	}
-	return false
-}
-
-func canTakeQueen(position chess.Position) bool {
-	for _, move := range position.ValidMoves() {
-		if position.Board().Piece(move.S2()).Type() == chess.Queen && position.Board().Piece(move.S2()).Color() != position.Turn() {
-			return true
-		}
-	}
-	return false
+	return whiteDoubled, blackDoubled
 
 }
 
-func deepen(position chess.Position, depth int, alpha, beta float32) float32 {
+func deepen(position chess.Position, depth int, alpha, beta float32, startTurn chess.Color) float32 {
 	if depth == 0 {
 		return evalPos(position)
 	}
+
 	moves := position.ValidMoves()
 	if len(moves) == 0 {
-		return evalPos(position)
+		return float32(math.NaN())
 	}
-	if position.Turn() == chess.White {
+	if startTurn == chess.White {
 		maxEval := float32(math.Inf(-1))
 		for _, move := range moves {
 			pos := position.Update(move)
-			eval := deepen(*pos, depth-1, alpha, beta)
-			if eval > float32(maxEval) {
+			eval, exists := transposeTable[move.String()]
+			if !exists {
+				eval := deepen(*pos, depth-1, alpha, beta, startTurn)
+				transposeTable[move.String()] = eval
+			}
+			if eval > maxEval {
 				maxEval = eval
+
+				if eval > alpha {
+					alpha = eval
+				}
 			}
 
-			if eval > alpha {
-				alpha = eval
-			}
-
-			if beta <= alpha {
+			if eval >= beta {
 				break
 			}
 		}
 		return maxEval
+
 	} else {
 		minEval := float32(math.Inf(1))
 		for _, move := range moves {
 			pos := position.Update(move)
-			eval := deepen(*pos, depth-1, alpha, beta)
-			minEval = float32(math.Min(float64(minEval), float64(eval)))
-			beta = float32(math.Min(float64(beta), float64(eval)))
-			if beta <= alpha {
-				break
+			eval, exists := transposeTable[move.String()]
+			if !exists {
+				eval := deepen(*pos, depth-1, alpha, beta, startTurn)
+				transposeTable[move.String()] = eval
+			}
+			if eval < minEval {
+				minEval = eval
+				if eval < beta {
+					beta = eval
+				}
+			}
+			if eval <= alpha {
+				return minEval
 			}
 		}
 		return minEval
 	}
 }
 func evalPos(position chess.Position) float32 {
+	// time allowed for search: remaining time/20 + increment/2
 	material := calcMaterial(position)
 	// positional := positional(position)
 	eval := material

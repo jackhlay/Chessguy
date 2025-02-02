@@ -1,12 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
-	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -74,7 +75,61 @@ func liChessEval(fen string, apiTok string) string {
 
 }
 
+func exitProc() {
+	//save the transposition table to a file
+	if len(transposeTable) > 0 {
+		file, err := os.Create("transpositionTable.txt")
+		if err != nil {
+			fmt.Println("Error creating file:", err)
+			return
+		}
+		defer file.Close()
+		for k, v := range transposeTable {
+			file.WriteString(k + ":" + strconv.FormatFloat(float64(v), 'f', -1, 32) + "\n")
+		}
+	}
+}
+
+func loadTranspositionTable() map[string]float32 {
+	file, err := os.Open("transpositionTable.txt")
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return nil
+	}
+	defer file.Close()
+
+	transposeTable := make(map[string]float32)
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.Split(line, ":")
+		if len(parts) != 2 {
+			fmt.Println("Invalid line:", line)
+			continue
+		}
+		key := parts[0]
+		value, err := strconv.ParseFloat(parts[1], 32)
+		if err != nil {
+			fmt.Println("Error parsing value:", err)
+			continue
+		}
+		transposeTable[key] = float32(value)
+	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Println("Error reading file:", err)
+	}
+
+	return transposeTable
+}
+
 func main() {
+	transposeTable = loadTranspositionTable()
+	if transposeTable == nil {
+		transposeTable = make(map[string]float32)
+	}
+	defer exitProc()
 	//main func for real time streaming the games to the frontend
 	for {
 		game := chess.NewGame()
@@ -93,28 +148,22 @@ func main() {
 			var move *chess.Move
 			if pos.Turn() == chess.White {
 
-				testRes := bagTest(*pos, *game)
-				deepen(*pos, 8, 99999, -99999)
-				fmt.Printf("Bag Test Result: %v\n", testRes)
-				if len(testRes) == 0 {
-					move = moves[rand.Intn(len(moves))]
-				} else {
-					if pos.Turn() == chess.White {
-						move, _ = chess.UCINotation{}.Decode(game.Position(), testRes[len(testRes)-1].move)
+				// if pos.Turn() == chess.White {
+				// 	move, _ = chess.UCINotation{}.Decode(game.Position(), testRes[len(testRes)-1].move)
 
-					} else {
-						move, _ = chess.UCINotation{}.Decode(game.Position(), testRes[0].move)
+				// } else {
+				// 	move, _ = chess.UCINotation{}.Decode(game.Position(), testRes[0].move)
 
-					}
+				// }
 
-				}
-			} else {
-				//wait for user input, convert string to move ex Nf3
-				fmt.Println("Enter move:")
-				var moveStr string
-				fmt.Scanln(&moveStr)
-				move, _ = chess.UCINotation{}.Decode(game.Position(), moveStr)
 			}
+			// } else {
+			// 	//wait for user input, convert string to move ex Nf3
+			// 	fmt.Println("Enter move:")
+			// 	var moveStr string
+			// 	fmt.Scanln(&moveStr)
+			// 	move, _ = chess.UCINotation{}.Decode(game.Position(), moveStr)
+			// }
 			game.Move(move)
 			fmt.Printf("Move: %v\n", move)
 			sendToFrontend(*game.Position())

@@ -17,7 +17,7 @@ var limits searchLimits
 func (s *searchLimits) init() {
 	s.depth = 64
 	s.nodes = math.MaxUint64
-	s.movetime = 99999999999
+	s.movetime = 999999999
 	s.infinite = false
 }
 
