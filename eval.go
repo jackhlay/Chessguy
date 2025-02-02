@@ -1,7 +1,6 @@
 package main
 
 import (
-	"strings"
 	"time"
 
 	"github.com/corentings/chess"
@@ -102,52 +101,95 @@ func getPosModifier(piece chess.Piece, sq chess.Square) float32 {
 }
 
 func calcMaterial(position chess.Position) float32 {
+	whitePawns, blackPawns := float32(0), float32(0)
+	whiteKnights, blackKnights := float32(0), float32(0)
+	whiteBishops, blackBishops := float32(0), float32(0)
+	whiteRooks, blackRooks := float32(0), float32(0)
+	whiteQueens, blackQueens := float32(0), float32(0)
+	whiteKings, blackKings := float32(0), float32(0)
+	var material float32
+	for sq := chess.A1; sq <= chess.H8; sq++ {
+		piece := position.Board().Piece(sq)
+		if piece != chess.NoPiece {
+			switch piece {
+			case chess.Piece(chess.Pawn):
+				if piece.Color() == chess.White {
+					val := getPosModifier(piece, sq)
+					whitePawns += val
+				} else {
+					val := getPosModifier(piece, sq)
+					blackPawns += val * -1
+				}
+			case chess.Piece(chess.Knight):
+				if piece.Color() == chess.White {
+					val := getPosModifier(piece, sq)
+					whiteKnights += val
+				} else {
+					val := getPosModifier(piece, sq)
+					blackKnights += val * -1
+				}
+			case chess.Piece(chess.Bishop):
+				if piece.Color() == chess.White {
+					val := getPosModifier(piece, sq)
+					whiteBishops += val
+				} else {
+					val := getPosModifier(piece, sq)
+					blackBishops += val * -1
+				}
+			case chess.Piece(chess.Rook):
+				if piece.Color() == chess.White {
+					val := getPosModifier(piece, sq)
+					whiteRooks += val
+				} else {
+					val := getPosModifier(piece, sq)
+					blackRooks += val * -1
+				}
+			case chess.Piece(chess.Queen):
+				if piece.Color() == chess.White {
+					val := getPosModifier(piece, sq)
+					whiteQueens += val
+				} else {
+					val := getPosModifier(piece, sq)
+					blackQueens += val * -1
+				}
+			case chess.Piece(chess.King):
+				if piece.Color() == chess.White {
+					whiteKings += float32(200)
+				} else {
+					blackKings += float32(200) * -1
+				}
+			}
+		}
 
-	fen := position.String()
-	whitePawns := strings.Count("P", fen)
-	blackPawns := strings.Count("p", fen)
+		whiteMobility := 0
+		blackMobility := 0
+		if position.Turn() == chess.White {
+			whiteMobility = len(position.ValidMoves())
+			position.ChangeTurn()
+			blackMobility = len(position.ValidMoves())
+		} else {
+			blackMobility = len(position.ValidMoves())
+			position.ChangeTurn()
+			whiteMobility = len(position.ValidMoves())
+		}
 
-	whiteKnights := strings.Count("N", fen)
-	blackKnights := strings.Count("n", fen)
+		whiteDoubled, blackDoubled := doubledPawns(position)
+		//blocked pawns
+		//isolatedpawns
 
-	whiteBishops := strings.Count("B", fen)
-	blackBishops := strings.Count("b", fen)
+		material = 9*float32(whiteQueens-blackQueens) +
+			5*float32(whiteRooks-blackRooks) +
+			3.2*float32(whiteKnights-blackKnights) +
+			3.3*float32(whiteBishops-blackBishops) +
+			float32(whitePawns-blackPawns) -
+			0.5*float32(whiteDoubled-blackDoubled) +
+			.1*float32(whiteMobility-blackMobility)
 
-	whiteRooks := strings.Count("R", fen)
-	blackRooks := strings.Count("r", fen)
-
-	whiteQueens := strings.Count("Q", fen)
-	blackQueens := strings.Count("q", fen)
-
-	whiteMobility := 0
-	blackMobility := 0
-	if position.Turn() == chess.White {
-		whiteMobility = len(position.ValidMoves())
-		position.ChangeTurn()
-		blackMobility = len(position.ValidMoves())
-	} else {
-		blackMobility = len(position.ValidMoves())
-		position.ChangeTurn()
-		whiteMobility = len(position.ValidMoves())
+		if position.Turn() == chess.Black {
+			material *= -1
+		}
 	}
-
-	whiteDoubled, blackDoubled := doubledPawns(position)
-	//blocked pawns
-	//isolatedpawns
-
-	material := 9*float32(whiteQueens-blackQueens) +
-		5*float32(whiteRooks-blackRooks) +
-		3.2*float32(whiteKnights-blackKnights) +
-		3.3*float32(whiteBishops-blackBishops) +
-		float32(whitePawns-blackPawns) -
-		0.5*float32(whiteDoubled-blackDoubled) +
-		.1*float32(whiteMobility-blackMobility)
-
-	if position.Turn() == chess.Black {
-		return material * -1
-	} else {
-		return material
-	}
+	return material
 }
 
 func doubledPawns(position chess.Position) (whiteDoubled, blackDoubled float32) {

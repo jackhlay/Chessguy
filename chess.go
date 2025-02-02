@@ -6,10 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/corentings/chess"
 )
@@ -145,27 +147,23 @@ func main() {
 			if len(moves) == 0 || trn > 113 {
 				break
 			}
-			var move *chess.Move
-			if pos.Turn() == chess.White {
 
-				// if pos.Turn() == chess.White {
-				// 	move, _ = chess.UCINotation{}.Decode(game.Position(), testRes[len(testRes)-1].move)
-
-				// } else {
-				// 	move, _ = chess.UCINotation{}.Decode(game.Position(), testRes[0].move)
-
-				// }
-
+			if trn < 11 {
+				move := moves[rand.Intn(len(moves))]
+				game.Move(move)
+				sendToFrontend(*game.Position())
+				continue
 			}
-			// } else {
-			// 	//wait for user input, convert string to move ex Nf3
-			// 	fmt.Println("Enter move:")
-			// 	var moveStr string
-			// 	fmt.Scanln(&moveStr)
-			// 	move, _ = chess.UCINotation{}.Decode(game.Position(), moveStr)
-			// }
-			game.Move(move)
-			fmt.Printf("Move: %v\n", move)
+			var move chess.Move
+			if pos.Turn() == chess.White {
+				move = deepen(*pos, 3)
+				time.Sleep(750 * time.Millisecond)
+			} else {
+				move = *moves[rand.Intn(len(moves))]
+				time.Sleep(750 * time.Millisecond)
+			}
+			game.Move(&move)
+			fmt.Printf("Move: %v\n", move.String())
 			sendToFrontend(*game.Position())
 		}
 	}
