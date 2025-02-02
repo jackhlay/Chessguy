@@ -173,6 +173,7 @@ func doubledPawns(position chess.Position) (whiteDoubled, blackDoubled float32) 
 }
 
 func deepen(position chess.Position, depth int, alpha, beta float32, startTurn chess.Color) float32 {
+
 	if depth == 0 {
 		return evalPos(position)
 	}
@@ -185,10 +186,10 @@ func deepen(position chess.Position, depth int, alpha, beta float32, startTurn c
 		maxEval := float32(math.Inf(-1))
 		for _, move := range moves {
 			pos := position.Update(move)
-			eval, exists := transposeTable[move.String()]
+			eval, exists := transposeTable[position.String()]
 			if !exists {
 				eval := deepen(*pos, depth-1, alpha, beta, startTurn)
-				transposeTable[move.String()] = eval
+				transposeTable[position.String()] = eval
 			}
 			if eval > maxEval {
 				maxEval = eval
@@ -208,10 +209,10 @@ func deepen(position chess.Position, depth int, alpha, beta float32, startTurn c
 		minEval := float32(math.Inf(1))
 		for _, move := range moves {
 			pos := position.Update(move)
-			eval, exists := transposeTable[move.String()]
+			eval, exists := transposeTable[position.String()]
 			if !exists {
 				eval := deepen(*pos, depth-1, alpha, beta, startTurn)
-				transposeTable[move.String()] = eval
+				transposeTable[position.String()] = eval
 			}
 			if eval < minEval {
 				minEval = eval
