@@ -20,7 +20,7 @@ func sendToFrontend(pos chess.Position) {
 	url := "http://127.0.0.1:5000/api/update"
 	payload := map[string]interface{}{
 		"fen":         pos.String(),
-		"evalSource1": evalPos(pos),
+		"evalSource1": "???",
 		"evalSource2": "N/A",
 	}
 	jsonPayload, err := json.Marshal(payload)

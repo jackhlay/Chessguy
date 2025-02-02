@@ -1,8 +1,8 @@
 package main
 
 import (
-	"math"
 	"strings"
+	"time"
 
 	"github.com/corentings/chess"
 )
@@ -67,7 +67,7 @@ var queenTable = [64]float32{
 }
 
 type moveRating struct {
-	move string
+	move chess.Move
 	eval float32
 }
 
@@ -143,7 +143,11 @@ func calcMaterial(position chess.Position) float32 {
 		0.5*float32(whiteDoubled-blackDoubled) +
 		.1*float32(whiteMobility-blackMobility)
 
-	return material
+	if position.Turn() == chess.Black {
+		return material * -1
+	} else {
+		return material
+	}
 }
 
 func doubledPawns(position chess.Position) (whiteDoubled, blackDoubled float32) {
@@ -172,61 +176,54 @@ func doubledPawns(position chess.Position) (whiteDoubled, blackDoubled float32) 
 
 }
 
-func deepen(position chess.Position, depth int, alpha, beta float32, startTurn chess.Color) float32 {
+func deepen(position chess.Position, timeLeft int) chess.Move {
+	startTime := time.Now()
+	moveChan := make(chan chess.Move)
 
-	if depth == 0 {
-		return evalPos(position)
-	}
-
-	moves := position.ValidMoves()
-	if len(moves) == 0 {
-		return float32(math.NaN())
-	}
-	if startTurn == chess.White {
-		maxEval := float32(math.Inf(-1))
-		for _, move := range moves {
-			pos := position.Update(move)
-			eval, exists := transposeTable[position.String()]
-			if !exists {
-				eval := deepen(*pos, depth-1, alpha, beta, startTurn)
-				transposeTable[position.String()] = eval
-			}
-			if eval > maxEval {
-				maxEval = eval
-
-				if eval > alpha {
-					alpha = eval
-				}
-			}
-
-			if eval >= beta {
+	go func() {
+		for depth := 1; ; depth++ {
+			negaMaxRoot(position, depth, moveChan)
+			if time.Since(startTime) > (time.Duration(timeLeft)/20 + 3*time.Second/2) {
 				break
 			}
 		}
-		return maxEval
+	}()
+	move := <-moveChan
+	return move
 
-	} else {
-		minEval := float32(math.Inf(1))
-		for _, move := range moves {
-			pos := position.Update(move)
-			eval, exists := transposeTable[position.String()]
-			if !exists {
-				eval := deepen(*pos, depth-1, alpha, beta, startTurn)
-				transposeTable[position.String()] = eval
-			}
-			if eval < minEval {
-				minEval = eval
-				if eval < beta {
-					beta = eval
-				}
-			}
-			if eval <= alpha {
-				return minEval
-			}
-		}
-		return minEval
-	}
 }
+
+func negaMax(remaining_depth int, position chess.Position) float32 {
+	if remaining_depth == 0 {
+		return evalPos(position)
+	}
+	maxeval := float32(-9999999999)
+	for _, move := range position.ValidMoves() {
+		pos := position.Update(move)
+		eval := -negaMax(remaining_depth-1, *pos)
+		if eval >= maxeval {
+			maxeval = eval
+		}
+	}
+	return maxeval
+}
+
+func negaMaxRoot(position chess.Position, depth int, movechan chan chess.Move) {
+	moveCache := make(map[float32]chess.Move)
+	maxeval := float32(-9999999999)
+	for _, move := range position.ValidMoves() {
+		pos := position.Update(move)
+		movechan <- *move
+		eval := -negaMax(3, *pos)
+		moveCache[eval] = *move
+		if eval >= maxeval {
+			maxeval = eval
+		}
+
+	}
+	movechan <- moveCache[maxeval]
+}
+
 func evalPos(position chess.Position) float32 {
 	// time allowed for search: remaining time/20 + increment/2
 	material := calcMaterial(position)
