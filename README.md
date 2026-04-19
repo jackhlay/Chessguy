@@ -1,5 +1,8 @@
-### Thank you for your interest in my Chess Engine. most current progress is held in this branch.  
-## This will be a fairly boring branch in retrospect This was the repo that started the chess engine project, and now it's moving towards distributed computing. This repo will just be responsible for connecting all the services. (LiChess -> Engine/Eval -> Reinforcement Learning Model -> Engine/Eval -> LiChess) Right now, machine learning for the backbone of the engine is the focus, progress can be found in [the Brute Force Project](https://github.com/jackhlay/BruteForce-Chess).  
+### Thank you for your interest in my Chess Engine. most current progress is NO LONGER in this repo. See below for details.
+---  
+## This was the repo that started the chess engine project, and now it's now a more formally structured engin. This repo is kinda just for posterity.
+### Feel free to look through the old commits at how preposterous this thing started out as.
+---
+## Current Progress can be found in [the bobyChess Project](https://github.com/jackhlay/bobyChess).  
   
-  
-As always, contact info is at [jackhlay.com](https://jackhlay.com).
+  - As always, contact info is at [jackhlay.com](https://jackhlay.com).
